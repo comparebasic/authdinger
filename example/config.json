@@ -1,0 +1,7 @@
+{
+    "template-dir": "examples/templates",
+    "routes": {
+        "/": ["head.html", "welcome.html", "footer.html"],
+        "/auth/login": ["head.html", "login-form.html", "footer.html"]
+    }
+}

@@ -1,0 +1,10 @@
+<form method="POST" action="{action}">
+    <label name="user">
+        <span>User:</span>
+        <input type="text" name="user" value="{user}" placeholder="user"></input>
+    </label>
+    <label name="password">
+        <span>Password:</span>
+        <input type="text" name="password" placeholder="password"></input>
+    </label>
+</form>
