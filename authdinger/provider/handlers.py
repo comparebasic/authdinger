@@ -1,3 +1,4 @@
+import socket
 from .. import DingerNotOk
 from ..utils import bstream
 
@@ -15,14 +16,28 @@ def Handle(req, config, ident, data):
 
 
 def pw_auth(req, config, data):
-    if req.user_server:
-        ident_s = "pw_auth@{}".format(data["user"])
-        b = bstream.add(b"", ident_s)
-        b = bstream.add(b"", data["password"])
-        print("Sending {}".format(b))
-        req.user_server.sendall(b)
-        resp = req.user_server.recv(1024)
-        print("Recieved {}".format(resp))
+    if config.get("auth-socket"): 
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(config["auth-socket"]) 
+
+        msg = bstream.from_array(
+            (
+                "pw_auth@{}".format(data["user"]),
+                data["password"], 
+                ""
+            )
+        )
+
+        sock.sendall(msg)
+
+        answer = bstream.read_next(sock) 
+        if answer != "ok":
+            reason = bstream.read_next(sock)
+            sock.close()
+            raise DingerNotOk("Invalid", reason)
+
+        sock.close()
+
     else:
         raise DingerNotOk("No Auth Service Defined")
 
@@ -31,10 +46,9 @@ def redir(req, config, data):
     req.send_response(307)
     req.send_header("Location", data["redir"])
     req.end_headers()
-    print("sending redir headers")
 
 
-def setup(config):
+def setup_handlers(config):
     config["_handler-func"] = {
         "pw_auth": pw_auth,
     }

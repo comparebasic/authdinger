@@ -1,3 +1,5 @@
+BSTREAM_MAX = 2048
+
 from .utils.config import ParseConfig, ParseCli
 from .utils.exception import DingerNotOk 
 from .utils.log import GetLogger

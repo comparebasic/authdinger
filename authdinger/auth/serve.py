@@ -19,39 +19,48 @@ class DingerAuthHandler(socketserver.StreamRequestHandler):
         content_state = STATE_KEY
         first = None
 
-        data = {}
+        items = []
 
         content = b""
         while more != False:
-            if state == STATE_LENGTH:
-                length = 2
-            cont = self.rfile.read(length)
-            content += cont
-            if len(content) == length:
-                if state == STATE_LENGTH:
-                    length = (int(content[0]) * 255) + int(content[1])
-                    state = content_state
-                elif state == STATE_KEY:
-                    key = content
-                    if key == b"end":
-                        more = False
-                    if not first:
-                        first = key
-                    content_state = STATE_VALUE
-                    state = STATE_LENGTH 
-                elif state == STATE_VALUE:
-                    data[key] = content
-                    content_state = STATE_KEY
-                    state = STATE_LENGTH 
-
-                content = b""
-        
-        if first:
             try:
-                Handler(self, config, ident.Ident(first), data)
-            except DingerNotOk as err:
-                resp = bstream.add(b"", "ok")
-                self.wfile.write(resp)
+                content = bstream.read_next(self.rfile)
+            except (ValueError, TypeError) as err:
+                self.server.logger.error("Erronous login")
+                self.respond("no", err.args[0], "")
+                return
+                
+            if content is None:
+                break
+
+            items.append(content)
+
+        if len(items) == 0:
+            self.respond("no", "no items recieved", "")
+
+        p_ident = ident.Ident(items[0])
+
+        try:
+            data = bstream.arr_to_dict(items)
+            Handle(self, config, p_ident, data)
+
+            self.server.logger.log("Successful login")
+            self.respond("ok", "")
+            return
+
+        except DingerNotOk as err:
+            self.server.logger.log("Invalid login")
+            self.respond("no", err.args[0], "")
+            return
+
+        self.server.logger.log("Noop login")
+        self.respond("no", "")
+
+
+    def respond(self, *args):
+        msg = bstream.from_array(args)
+        self.wfile.write(msg)
+
 
 class DingerAuthServer(socketserver.UnixStreamServer):
     def __init__(self, config, logger, bind_and_activate=True):

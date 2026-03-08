@@ -6,16 +6,19 @@ class Log(object):
         self.color = color
 
     def _log(self, level, message, obj, color):
-        if self.color and color:
-            print("\x1b[{}m".format(color), end="")
-
         if obj:
-            print("{} {}: {} {}".format(level, datetime.now(), message, obj))
+            if self.color and color:
+                print("\x1b[{}m{} {}: {} {}\x1b[0m".format(
+                    color, level, datetime.now(), message, obj))
+            else:
+                print("{} {}: {} {}".format(level, datetime.now(), message, obj))
         else:
-            print("{} {}: {}".format(level, datetime.now(), message))
+            if self.color and color:
+                print("\x1b[{}m{} {}: {}\x1b[0m".format(
+                    color, level, datetime.now(), message))
+            else: 
+                print("{} {}: {}".format(level, datetime.now(), message))
 
-        if self.color and color:
-            print("\x1b[0m", end="")
 
     def log(self, message, obj=None):
         self._log("Log", message, obj, colors.CYAN)

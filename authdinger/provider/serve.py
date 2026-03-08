@@ -1,9 +1,9 @@
-import argparse, json, urllib, socket
+import argparse, json, urllib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from .. import GetLogger, DingerNotOk
 from ..utils import templ, ident, form
-from .handlers import Handle
+from .handlers import Handle, setup_handlers
 
 class DingerHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -33,7 +33,6 @@ class DingerHandler(BaseHTTPRequestHandler):
         if not data.get("error"):
             data["error"] = None
             
-        print(data)
         content = ""
         for p in route:
             p_ident = ident.Ident(p)
@@ -67,7 +66,7 @@ class DingerHandler(BaseHTTPRequestHandler):
         for h in handler:
             h_ident = ident.Ident(h)
             try:
-                handlers.Handle(self, config, h_ident, data)
+                Handle(self, config, h_ident, data)
             except DingerNotOk as err:
                 knockout = config["knockouts"].get(path)
                 if knockout:
@@ -90,6 +89,6 @@ class DingerProviderServer(HTTPServer):
     def __init__(self, config, logger, address):
         self.config = config
         self.logger = logger
-        logger.warn("Serving {}".format(address))
+        setup_handlers(config)
         return super().__init__(address, DingerHandler)
 

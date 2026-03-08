@@ -25,7 +25,6 @@ def run_provider(config, logger):
         GetLogger(config), ('localhost', port))
 
     try:
-        logger.warn("Serving...")
         httpd.serve_forever()
     finally:
         httpd.server_close()
