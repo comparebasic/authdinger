@@ -1,9 +1,6 @@
 import argparse, json, urllib
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import templ
-import ident
-import form
-import handlers
+import templ, ident, form, handlers
 from log import GetLogger
 from exception import DingerNotOk
 
@@ -11,6 +8,13 @@ class DingerServer(HTTPServer):
     def __init__(self, config, logger, address, port):
         self.config = config
         self.logger = logger
+        if config.get("user_socket"):
+            self.user_server = socket.socket(
+                socket.AF_UNIX, socket.SOCK_STREAM)
+            self.user_server.connect(config["user_socket"])
+        else:
+            self.user_server = None
+
         return super().__init__(address, port)
 
 class DingerHandler(BaseHTTPRequestHandler):
@@ -97,7 +101,7 @@ class DingerHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Authdinger.Serve",
-        description="OAuth Provider Server")
+        description="ECAuth Provider Server")
     parser.add_argument("--port")
     parser.add_argument("--config")
     arg = parser.parse_args()

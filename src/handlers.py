@@ -1,4 +1,5 @@
 from exception import DingerNotOk
+import bstream
 
 def Handle(req, config, ident, data):
     func = None
@@ -14,11 +15,16 @@ def Handle(req, config, ident, data):
 
 
 def pw_auth(req, config, data):
-    if data.get("password") == "password" and data.get("user") == "test":
-        print("pw pass")
-        return
+    if req.user_server:
+        ident_s = "pw_auth@{}".format(data["user"])
+        b = bstream.add(b"", ident_s)
+        b = bstream.add(b"", data["password"])
+        print("Sending {}".format(b))
+        req.user_server.sendall(b)
+        resp = req.user_server.recv(1024)
+        print("Recieved {}".format(resp))
     else:
-        raise DingerNotOk("auth fail")
+        raise DingerNotOk("No Auth Service Defined")
 
 
 def redir(req, config, data):

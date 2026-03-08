@@ -18,5 +18,6 @@
     "knockouts": {
         "/auth/login": "get@/auth/login"
     },
-    "banned-data": {"password": true}
+    "banned-data": {"password": true},
+    "user_socket": "example/user_serve/user.sock"
 }
