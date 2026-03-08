@@ -1,0 +1,2 @@
+class DingerNotOk(ValueError):
+    pass

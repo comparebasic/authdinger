@@ -1,10 +1,13 @@
+<p><span>{error}</span></p>
 <form method="POST" action="{action}">
     <label name="user">
         <span>User:</span>
-        <input type="text" name="user" value="{user}" placeholder="user"></input>
+        <input type="text" name="user" placeholder="user"></input>
     </label>
     <label name="password">
         <span>Password:</span>
         <input type="text" name="password" placeholder="password"></input>
     </label>
+    <input type="hidden" name="redir" value="{redir}" />
+    <button type="submit">Login</button>
 </form>
