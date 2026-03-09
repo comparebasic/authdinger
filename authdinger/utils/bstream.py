@@ -1,9 +1,6 @@
 from .. import BSTREAM_MAX
 from socket import socket as socktype
 
-START = 0
-CUR = 1
-END = 2
 
 def quote(s):
     b = bytearray()
@@ -17,11 +14,15 @@ def quote(s):
 
 
 def unquote(bs):
+    print("Unquote {}".format(bs))
     b = bytearray()
     a = bytearray() 
 
     count = 0
     
+    if isinstance(bs, (str)):
+        bs = bytes(bs, "utf-8")
+
     for c in bs:
         if c == ord('#'):
             count = 2
@@ -104,7 +105,10 @@ def read_next(stream):
 
 
 def read_next_r(stream):
+    if stream.tell() == 0:
+        raise DingerNotOk("Early beginning of file reached")
     stream.seek(-2, CUR)
+
     length_s = stream.read(2)
     length = int.from_bytes(length_s, "big")
     if length == 0:
@@ -112,7 +116,10 @@ def read_next_r(stream):
     elif length > BSTREAM_MAX:
         raise ValueError("Length exeeds max", length)
 
+    if stream.tell() == 0:
+        raise DingerNotOk("Early beginning of file reached")
     stream.seek(-length, CUR)
+
     b = stream.read(length)
 
     if len(b) != length:

@@ -2,6 +2,8 @@ import socket
 from .. import DingerNotOk
 from ..utils import bstream
 from ..utils import user 
+from ..utils import bstream
+
 
 def Handle(req, config, ident, data):
     func = None
@@ -21,10 +23,13 @@ def pw_auth(req, config, data):
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.connect(config["auth-socket"]) 
 
+        email_token = bstream.quote(data["email"]).decode("utf-8")
         bstream.send(sock, (
-                "pw_auth@{}".format(data["user"]),
+            "ident",     
+                "pw_auth@{}.email".format(email_token),
+            "password",
                 data["password"], 
-                ""))
+            ""))
 
         answer = bstream.read_next(sock) 
         if answer != "ok":
@@ -38,6 +43,38 @@ def pw_auth(req, config, data):
         raise DingerNotOk("No Auth Service Defined")
 
 
+def pw_set(req, config, data):
+    if config.get("auth-socket"): 
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(config["auth-socket"]) 
+
+        email_token = bstream.quote(data["email"]).decode("utf-8")
+        bstream.send(sock, (
+            "ident", 
+                "pw_set@{}.email".format(email_token),
+            "password-hash",
+                data["password-hash"], 
+            ""))
+
+        answer = bstream.read_next(sock) 
+        if answer != "ok":
+            reason = bstream.read_next(sock)
+            sock.close()
+            raise DingerNotOk("Invalid", reason)
+
+        sock.close()
+
+    else:
+        raise DingerNotOk("No Auth Service Defined")
+
+
+def register(req, config, data):
+    try:
+        user.create(req, config, data)
+    except DingerNotOk as err:
+        raise DingerNotOk("Unable to register", err.args[0])
+
+
 def redir(req, config, data):
     req.send_response(307)
     req.send_header("Location", data["redir"])
@@ -47,9 +84,9 @@ def redir(req, config, data):
 def setup_handlers(config):
     config["_handler-func"] = {
         "pw_auth": pw_auth,
+        "pw_set": pw_set,
         "register": user.create,
     }
     config["_handler-action"] = {
         "redir": redir,
     }
-    

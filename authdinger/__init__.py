@@ -1,4 +1,9 @@
 BSTREAM_MAX = 2048
+SALT_BYTES = 64
+
+SEEK_START = 0
+SEEK_CUR = 1
+SEEK_END = 2
 
 from .utils.config import ParseConfig, ParseCli
 from .utils.exception import DingerNotOk 

@@ -38,10 +38,12 @@ class DingerAuthHandler(socketserver.StreamRequestHandler):
         if len(items) == 0:
             self.respond("no", "no items recieved", "")
 
-        p_ident = ident.Ident(items[0])
+        data = bstream.arr_to_dict(items)
+        if not data.get("ident"):
+            raise DingerNotOk("Ident not found")
 
+        p_ident = ident.Ident(data["ident"])
         try:
-            data = bstream.arr_to_dict(items)
             Handle(self, config, p_ident, data)
 
             self.server.logger.log("Successful login")

@@ -1,14 +1,25 @@
 <h1>Login</h1>
 <p><span>{error}</span></p>
 <form method="POST" action="{action}">
+    <fieldset>
     <label name="user">
         <span>User:</span>
-        <input type="text" name="user" placeholder="user"></input>
+        <span>
+            <input type="text" name="user" placeholder="user"></input>
+        </span>
     </label>
     <label name="password">
         <span>Password:</span>
-        <input type="text" name="password" placeholder="password"></input>
+        <span>
+            <input type="text" name="password" placeholder="password"></input>
+        </span>
     </label>
+    <label>
+        <span>&nbsp;</span>
+        <span>
+            <button type="submit">Login</button>
+        </span>
+    </label>
+    </fieldset>
     <input type="hidden" name="redir" value="{redir}" />
-    <button type="submit">Login</button>
 </form>

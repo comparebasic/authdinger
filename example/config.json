@@ -20,7 +20,7 @@
     },
     "handlers": {
         "/auth/login": ["func@pw_auth", "action@redir"],
-        "/auth/register": ["func@register", "action@redir"]
+        "/auth/register": ["func@register", "func@pw_set", "action@redir"]
     },
     "knockouts": {
         "/auth/login": "get@/auth/login"
