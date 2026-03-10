@@ -17,6 +17,10 @@ def Handle(req, config, ident, data):
 
 
 def pw_auth(req, config, data):
+    if data.get("send-email-auth"):
+        req.server.logger.log("Skipping pw_auth")
+        return
+
     if config.get("auth-socket"): 
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.connect(config["auth-socket"]) 
@@ -52,6 +56,7 @@ def session_start(req, config, data):
 
 def pw_set(req, config, data):
     if data.get("send-email-auth"):
+        req.server.logger.log("Skipping pw_set")
         return
 
     if config.get("auth-socket"): 
@@ -94,7 +99,8 @@ def send_email(req, config, data):
 
 
 def send_auth_email(req, config, data):
-    pass
+    req.server.logger.log("Send auth email")
+    return
 
 
 def auth_email(req, config, data):
