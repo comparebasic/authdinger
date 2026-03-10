@@ -15,6 +15,14 @@
         </span>
     </label>
     <label>
+        <span>
+            <input type="checkbox" name="email-auth" />
+        </span>
+        <span>
+            Email an Auth Token instead!
+        </span>
+    </label>
+    <label>
         <span>&nbsp;</span>
         <span>
             <button type="submit">Login</button>

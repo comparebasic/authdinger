@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from .. import DingerNotOk, SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
 from ..utils import bstream
+from ..utils.user import get_userfile
 
 
 def from_cookie(config, cookie):
@@ -28,8 +29,7 @@ def from_cookie(config, cookie):
     if not s_data.get("email-token"):
         raise DingerNotOk("User email-token not found")
 
-    fname = "{}.rseg".format(s_data["email-token"].decode("utf-8"))
-    u_path = os.path.join(config["dirs"]["user-data"], fname)
+    u_path = get_userfile(config, s_data["email-token"].decode("utf-8"))
     u_keys = config["fields"]["user"]
 
     try:

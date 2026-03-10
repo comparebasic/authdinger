@@ -21,6 +21,14 @@
         </span>
     </label>
     <label>
+        <span>
+            <input type="checkbox" data-disable="password" name="email-auth" />
+        </span>
+        <span>
+            Email an Auth Token instead!
+        </span>
+    </label>
+    <label>
         <span>&nbsp;</span>
         <span>
             <button type="submit">Register</button>

@@ -7,6 +7,7 @@ from .handlers import Handle, setup_handlers
 
 ext_mime = {
     "css": "text/css",
+    "js": "text/javascript",
     "format": "text/html",
     "html": "text/html",
     "txt": "text/plain"

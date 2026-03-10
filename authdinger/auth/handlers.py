@@ -3,6 +3,12 @@ from ..utils.exception import DingerNotOk
 from ..utils import bstream
 from .. import SEEK_END, SEEK_CUR, SEEK_START
 
+def get_authdir(config, email_token):
+    return os.path.join(config["dirs"]["auth-data"], email_token)
+
+def get_authfile(config, email_token):
+    return os.path.join(get_authdir(config, email_token),
+                "auth.linr")
 
 def Handle(req, config, ident, data):
     func = None
@@ -25,8 +31,7 @@ def pw_auth(req, config, data):
     req.server.logger.log("Auth Password {}".format(
         bstream.unquote(data["email-token"])))
 
-    fname = "{}.rseg".format(data["email-token"])
-    path = os.path.join(config["dirs"]["auth-data"],fname)
+    path = get_authfile(config, data["email-token"])
 
     with open(path, "rb") as f:
         f.seek(0, SEEK_END)
@@ -46,9 +51,11 @@ def pw_set(req, config, data):
     req.server.logger.log("Setting Password {}".format(
         bstream.unquote(data["email-token"])))
 
-    fname = "{}.rseg".format(data["email-token"])
-    print("fname is {}".format(fname))
-    path = os.path.join(config["dirs"]["auth-data"],fname)
+    path = get_authfile(config, data["email-token"])
+
+    dir_path = get_authdir(config, data["email-token"])
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
 
     with open(path, "wb") as f:
         f.seek(0, SEEK_END)

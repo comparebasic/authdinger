@@ -19,7 +19,8 @@
             "inc@header.html", "page@error.html", "inc@footer.html"],
         "/auth/dashboard": [
             "inc@header.html", "page@dashboard.format", "inc@footer.html"],
-        "/static/styles.css": ["static@styles.css"]
+        "/static/styles.css": ["static@styles.css"],
+        "/static/form.js": ["static@form.js"]
     },
     "fields": {
         "session": {

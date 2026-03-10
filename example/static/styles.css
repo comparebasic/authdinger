@@ -15,18 +15,22 @@ fieldset label {
 
 fieldset label span {
     display: table-cell;
-    font-weight: bold;
     padding: 4px 8px;
 }
 
 fieldset label span:first-child {
     text-align: right;
+    font-weight: bold;
 }
 
 fieldset label input {
     border-radius: 8px;
     padding: 4px 8px;
     width: 200px;
+}
+
+fieldset label input:disabled {
+    background: rgb(210,210,210);
 }
 
 fieldset button {
@@ -42,4 +46,9 @@ fieldset button:hover {
 
 fieldset button:active {
     background: rgb(160,200,160);
+}
+
+input[type="checkbox"] {
+    display: inline;
+    width: auto;
 }
