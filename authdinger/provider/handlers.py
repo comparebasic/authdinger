@@ -1,5 +1,4 @@
-import socket
-from .. import DingerNotOk
+import socket from .. import DingerNotOk
 from ..utils import bstream, user, session
 
 

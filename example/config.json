@@ -8,51 +8,54 @@
         "sessions": "example/sessions"
     },
     "routes": {
-        "/": ["inc@header.html", "page@welcome.html", "inc@footer.html"],
+        "/": [
+            "get@", "inc@header.html", "page@welcome.html", "inc@footer.html"],
         "/auth/login": [
-            "inc@header.html", "page@login-form.format", "inc@footer.html"],
+            ["get@", "inc@header.html", "page@login-form.format", "inc@footer.html"],
+            ["post@", 
+                ["data@send-auth-email.on", "func@auth_email", "func@session_start", "redir@data.redir"],
+                ["func@pw_auth", "func@session_start", "redir@data.redir"] 
+            ],
+            ["inc@header.html", "page@login-form.format", "inc@footer.html"]
+        ],
         "/auth/token-login": [
-            "inc@header.html", "page@tokin-login.format", "inc@footer.html"],
+            ["get@", "func@token_consume", "func@session_start", "redir@data.redir"],
+            ["get@", "inc@header.html", "page@token.format", "inc@footer.html"]
+        ],
         "/auth/register": [
-            "inc@header.html", "page@register.format", "inc@footer.html"],
-        "/not-found": [
-            "inc@header.html", "page@not-found.html", "inc@footer.html"],
-        "/error": [
-            "inc@header.html", "page@error.html", "inc@footer.html"],
+            ["get@", "inc@header.html", "page@register.format", "inc@footer.html"],
+            ["post@", 
+                ["data@send-auth-email.on", "func@auth_email", "func@session_start", "redir@data.redir"],
+                ["func@pw_auth", "func@session_start", "redir@data.redir"] 
+            ],
+            ["inc@header.html", "page@register.format", "inc@footer.html"]
+        ],
+        "/not-found": ["inc@header.html", "page@not-found.html", "inc@footer.html"],
+        "/error": ["inc@header.html", "page@error.html", "inc@footer.html"],
         "/auth/dashboard": [
-            "inc@header.html", "page@dashboard.format", "inc@footer.html"],
+            ["@get", "func@gather_user", "inc@header.html", "page@dashboard.format", "inc@footer.html"],
+            ["redir@/auth/login"]
+        ],
         "/static/styles.css": ["static@styles.css"],
         "/static/form.js": ["static@form.js"]
     },
     "fields": {
         "session": {
-            "email-token": false,
+            "email-token": "unquot@email",
             "start-time": false,
             "session-token": true,
             "fullname": true
         },
         "user": {
             "fullname": true,
-            "email": true
+            "salt": false,
+            "email-token": "unquot@email"
+        },
+        "auth": {
+            "email-token": true,
+            "password": false
         }
     },
-    "gathers": {
-        "/user": ["func@gather_user"]
-    },
-    "handlers": {
-        "/auth/login": [
-            "func@auth_email", "func@pw_auth", 
-            "func@session_start", "action@redir"],
-        "/auth/tokin-login": [
-            "func@taken_consume", "action@redir"],
-        "/auth/register": [
-            "func@register", "func@auth_email",
-            "func@pw_set", "action@redir"]
-    },
-    "knockouts": {
-        "/auth/login": "get@/auth/login"
-    },
-    "banned-data": {"password": true},
     "port": 3000,
     "auth-socket": "example/auth.sock"
 }

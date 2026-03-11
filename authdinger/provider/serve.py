@@ -17,6 +17,7 @@ class DingerHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.header_stage = {}
         self.session = {}
+        self.done = False
         return super().__init__(*args, **kwargs)
 
     def do_cookie(self, config):
