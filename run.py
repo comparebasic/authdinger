@@ -24,10 +24,10 @@ def run_provider(config, logger):
     httpd = DingerProviderServer(config,
         GetLogger(config), ('localhost', port))
 
-    try:
-        httpd.serve_forever()
-    finally:
-        httpd.server_close()
+    #try:
+    #    httpd.serve_forever()
+    #finally:
+    #    httpd.server_close()
 
 
 if __name__ == "__main__":

@@ -2,8 +2,8 @@ import argparse, json, urllib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from .. import GetLogger, DingerNotOk
-from ..utils import templ, ident, form, session
-from .handlers import Handle, setup_handlers
+from ..utils import templ, identifier, form, session, handler
+from . import handlers
 
 ext_mime = {
     "css": "text/css",
@@ -121,8 +121,8 @@ class DingerHandler(BaseHTTPRequestHandler):
 
 class DingerProviderServer(HTTPServer):
     def __init__(self, config, logger, address):
+        handler.setup_config(config, "routes", handlers)
         self.config = config
         self.logger = logger
-        setup_handlers(config)
         return super().__init__(address, DingerHandler)
 

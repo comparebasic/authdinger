@@ -2,7 +2,7 @@ import socketserver, argparse, json, os, select
 
 from ..utils.log import GetLogger
 from ..utils.exception import DingerNotOk
-from ..utils import ident, bstream
+from ..utils import identifier, bstream
 from .handlers import Handle
 
 STATE_LENGTH = "length"
@@ -43,7 +43,7 @@ class DingerAuthHandler(socketserver.StreamRequestHandler):
         if not data.get("ident"):
             raise DingerNotOk("Ident not found")
 
-        p_ident = ident.Ident(data["ident"].decode('utf-8'))
+        p_ident = identfier.Ident(data["ident"].decode('utf-8'))
         self.server.logger.log("Auth handle ident{}".format(p_ident))
         try:
             resp = Handle(self, config, p_ident, data)

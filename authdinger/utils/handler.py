@@ -1,5 +1,22 @@
+from ..utils import identifier
 
-def do_chain(req, chain, data fmap):
+class Inst(object):
+    def __init__(self, ident, mod):
+
+        self.ident = ident
+        if not hasattr(mod, ident.tag):
+            raise ValueError("Missing function for {}".format(ident))
+
+        self.func = getattr(mod, ident.tag)
+
+    def __str__(self):
+        return "Inst<{}>".format(self.ident)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+def do_chain(req, chain, data):
     "This function goes through the chain, and tries each branch until one"
     "completes or there are no more to try."
     if req.done:
@@ -10,54 +27,22 @@ def do_chain(req, chain, data fmap):
             try:
                 # go through this branch of the chain
                 return do_chain(req, h, data, hmap)
-            except DingerNotOk as err:
+            except DingerKnockout as ko:
+                continue
+            except DingerError as err:
                 # go to the next branch
                 data["error"] = err.args[0]
                 continue
+        elif isinstance(h, (Inst)):
+            try:
+                h.func(reg, h.ident, data)
 
-        h_ident = ident.Ident(h)
-        try:
-
-            match h_ident.tag:
-                case "get":
-                    if req.command != "GET":    
-                        raise DingerNotOk("Method mismatch")
-                case "post":
-                    if req.command != "POST":
-                        raise DingerNotOk("Method mismatch")
-
-                case "inc" | "static" | "page":
-                    mime = ext_mime.get(p_ident.ext)
-                    if mime:
-                        self.header_stage["Content-Type"] = mime;
-                    content += templ.templFrom(config, p_ident, data)
-
-                case "func":
-                    if fmap.get(h_ident.base): 
-                        func(req, config, data)
-                    else:
-                        raise DingerNotOk("Not func found for handler {}".format(ident))
-
-                case "redir":
-                    req.send_response(302)
-                    location = h_ident.base
-                    if h_ident.tag == "data":
-                        location = data.get(h_ident.base)
-
-                    if not location:
-                        location = "/error"
-                        
-                    req.send_header("Location", location)
-                    for k,v in req.header_stage.items():
-                        req.send_header(k, v)
-                    req.end_headers()
-                    req.done = True
-
-            if not func:
-
-        except DingerNotOk as err:
-            data["error"] = err.args[0]
-            raise
+            except (DingerNotOk, DingerError) as err:
+                data["error"] = err.args[0]
+                raise
+        else:
+            raise TypeError(h)
+        
 
 def Handle(req, chain, data, fmap):
     try:
@@ -73,3 +58,37 @@ def Handle(req, chain, data, fmap):
         self.wfile.write(bytes(content, "utf-8"))
 
     req.done = True
+
+def _setup_chain(config, chain, mod):
+    sub_chain = []
+    for i, v in enumerate(chain):
+        if isinstance(v, (list)):
+            sub_chain.append(_setup_chain(config, v, mod))
+
+        if isinstance(v, (str)):
+            if not isinstance(v, (identifier.Ident)):
+                ident = identifier.Ident(v)
+
+            if config.get("templates") and config["templates"].get(ident.location): 
+                sub_sub_chain = []
+                # handle page stuff here
+                for sv in config["templates"][ident.location]:
+                    if isinstance(sv, (str)):
+                        sub_sub_chain.append(Inst(identifier.Ident(sv), mod))
+                    elif sv == True:
+                        sub_sub_chain.append(Inst(ident, mod))
+
+                sub_chain.extend(sub_sub_chain)
+            else:
+                sub_chain.append(Inst(ident, mod))
+
+    return sub_chain
+            
+
+def setup_config(config, key, mod):
+    route_insts = {}
+    for path, chain in config[key].items():
+        route_insts[path] = _setup_chain(config, chain, mod)
+
+    print("route_insts {}".format(route_insts))
+    return route_insts

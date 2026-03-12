@@ -9,35 +9,38 @@
     },
     "routes": {
         "/": [
-            "get@", "inc@header.html", "page@welcome.html", "inc@footer.html"],
+            "get", "content=welcome.html@page"],
         "/auth/login": [
-            ["get@", "inc@header.html", "page@login-form.format", "inc@footer.html"],
-            ["post@", 
-                ["data@send-auth-email.on", "func@auth_email", "func@session_start", "redir@data.redir"],
-                ["func@pw_auth", "func@session_start", "redir@data.redir"] 
+            ["get", "content=login-form.format@page"],
+            ["post", 
+                ["data=on@send-auth-email", "auth_email", "session_start", "redir=redir@data"],
+                ["pw_auth", "session_start", "redir=redir@data"] 
             ],
-            ["inc@header.html", "page@login-form.format", "inc@footer.html"]
+            ["content=login-form.format@page"]
         ],
         "/auth/token-login": [
-            ["get@", "func@token_consume", "func@session_start", "redir@data.redir"],
-            ["get@", "inc@header.html", "page@token.format", "inc@footer.html"]
+            ["get", "token_consume", "session_start", "redir=data.redir"],
+            ["get", "content=token.format@page"]
         ],
         "/auth/register": [
-            ["get@", "inc@header.html", "page@register.format", "inc@footer.html"],
-            ["post@", 
-                ["data@send-auth-email.on", "func@auth_email", "func@session_start", "redir@data.redir"],
-                ["func@pw_auth", "func@session_start", "redir@data.redir"] 
+            ["get", "content=register.format@page"],
+            ["post", 
+                ["data=send-auth-email.on", "auth_email", "session_start", "redir=data.redir"],
+                ["pw_auth", "session_start", "redir=data.redir"] 
             ],
-            ["inc@header.html", "page@register.format", "inc@footer.html"]
+            ["inc=header.html", "page=register.format", "inc=footer.html"]
         ],
-        "/not-found": ["inc@header.html", "page@not-found.html", "inc@footer.html"],
-        "/error": ["inc@header.html", "page@error.html", "inc@footer.html"],
+        "/not-found": ["content=not-found.html@page"],
+        "/error": ["content=error.format@page"],
         "/auth/dashboard": [
-            ["@get", "func@gather_user", "inc@header.html", "page@dashboard.format", "inc@footer.html"],
-            ["redir@/auth/login"]
+            ["get", "gather_user", "content=dashboard.format@page"],
+            ["redir=/auth/login"]
         ],
-        "/static/styles.css": ["static@styles.css"],
-        "/static/form.js": ["static@form.js"]
+        "/static/styles.css": ["content=styles.css@static"],
+        "/static/form.js": ["content=form.js@static"]
+    },
+    "templates": {
+        "page": ["content=header.format@inc", true, "content=footer.html@inc"]
     },
     "fields": {
         "session": {
