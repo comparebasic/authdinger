@@ -13,10 +13,11 @@ from . import handlers
 class DingerHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.header_stage = {}
-        self.session = {}
         self.done = False
         self.form_data = {}
         self.query_data = {}
+        self.cookie = {}
+        self.session = {}
         self.content = ""
         self.code = 0 
         return super().__init__(*args, **kwargs)
@@ -64,6 +65,8 @@ class DingerHandler(BaseHTTPRequestHandler):
 
         self.query_data = self.parse_query()
         self.form_data = self.parse_form()
+        if self.headers.get("Cookie"):
+            self.cookie = session.parse_cookie(self.headers["Cookie"])
 
         data = {"error": None}
         try: 

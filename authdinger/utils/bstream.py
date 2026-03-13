@@ -139,7 +139,7 @@ def latest_r(stream, key):
 
         value = item
 
-def map_r(stream, keys):
+def map_r(stream, keys=None):
     key = None
     value = None
     data = {}
@@ -147,11 +147,21 @@ def map_r(stream, keys):
         item  = read_next_r(stream)
         if value:
             key = item.decode("utf-8")
-            if keys.get(key) is not None and data.get(key) is None: 
+            if (not keys or keys.get(key) is not None) \
+                    and data.get(key) is None: 
                 data[key] = value 
             value = None
         else:
             value = item
+    return data
+
+
+def map_str_r(stream, keys=None):
+    data = {}
+    raw = map_r(stream, keys)
+    for k, v in raw.items():
+        if not keys or keys[k]:
+            data[k] = v.decode("utf-8")
     return data
     
 

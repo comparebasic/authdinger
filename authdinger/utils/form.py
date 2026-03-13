@@ -8,7 +8,7 @@ def parseFormData(s):
         if len(pairs) == 2:
             k = pairs[0]
             v = pairs[1]
-            data[k] = urllib.parse.unquote(v, encoding=None, errors=None)
+            data[k] = urllib.parse.unquote_plus(v, encoding=None, errors=None)
     print("{} -> {}".format(s, data))
     return data
 

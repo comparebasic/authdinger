@@ -6,39 +6,52 @@ from ..utils.maps import mime_map
 
 
 def map(req, ident, data):
+    kv = {}
+    for field in ident.name.split(","):
+        parts = field.split("/")
+        key = parts[0]
+        if len(parts) == 1:
+            val_key = parts[0]
+        elif len(parts) == 2:
+            val_key = parts[1]
+        else:
+            raise DingerError("Unparsable fields definition", ident.name)
 
-    parts = ident.name.split("/")
-    key = parts[0]
-    if len(parts) == 1:
-        val_key = parts[0]
-    elif len(parts) == 2:
-        val_key = parts[1]
-    else:
-        raise DingerError("Unparsable fields definition", ident.name)
-
-    if ident.location == "req":
-        if not hasattr(req, val_key):
-            raise DingerKnockout("Field not found", ident)
-
-        data[key] = getattr(req, val_key)
-
-    if ident.location == "query":
-        req.server.logger.log("Query map {}".format(req.query_data))
-        if not req.query_data.get(val_key):
-            raise DingerKnockout("Field not found", ident)
-
-        data[key] = req.query_data[val_key]
+        kv[key] = val_key
 
 
-def cookie(req, ident, data):
-    config = req.server.config
-    cookie = req.headers.get("Cookie")
-    if cookie:
-        res.server.logger.warn("Session From {}".format(cookie))
-        ssion = session.from_cookie(config, cookie)
-        if ssion:
-            req.session = ssion
-            req.server.logger.warn("Session Data {}".format(req.session))
+    match ident.location:
+        case "req":
+            for k,v in kv.items():
+                if not hasattr(req, v):
+                    raise DingerKnockout("Field not found for req {}".format(ident))
+
+            data[key] = getattr(req, v)
+        case "query" | "form" | "data" | "cookie" | "session":
+            match ident.location:
+                case "query":
+                    source = req.query_data
+                case "form":
+                    source = req.form_data
+                case "data":
+                    source = data 
+                case "cookie":
+                    source = req.cookie
+                case "session":
+                    source = req.session
+
+            for k,v in kv.items():
+                if v.endswith("?"):
+                    v = v[:-1]
+                    if k.endswith("?"):
+                        k = k[:-1]
+                    data[k] = source.get(v)
+                else:
+                    if not source.get(v):
+                        raise DingerKnockout("Field not found for query {}".format(ident))
+                    data[k] = source[v]
+
+    req.server.logger.log("After Map {}".format(data))
 
 
 def get(req, ident, data):
@@ -104,7 +117,7 @@ def pw_auth(req, ident, data):
 
         bstream.send(sock, (
             "ident",     
-                "pw_auth@{}.email".format(data["email-token"]),
+                "pw_auth={}@email".format(data["email-token"]),
             "password-hash",
                 password_hash, 
             ""))
@@ -125,11 +138,18 @@ def token_consume(req, ident, data):
 
 
 def session_start(req, ident, data):
-    session.start(req, ident, data)
+    session.start(req, data)
 
     cookie = "Ssid={}; Expires={}; HttpOnly; Secure; SameSite=Strict;".format(
         data["session-token"], data["session-expires"])
+    del data["session-token"]
+    del data["session-expires"]
     req.header_stage["Set-Cookie"] = cookie
+
+
+def session_open(req, ident, data):
+    session.load(req, data)
+    req.server.logger.log("Session {}".format(req.session))
 
 
 def pw_set(req, ident, data):
@@ -145,7 +165,7 @@ def pw_set(req, ident, data):
         email_token = bstream.quote(data["email"]).decode("utf-8")
         bstream.send(sock, (
             "ident", 
-                "pw_set@{}.email".format(email_token),
+                "pw_set={}@email".format(email_token),
             "password-hash",
                 data["password-hash"], 
             ""))
@@ -160,10 +180,6 @@ def pw_set(req, ident, data):
 
     else:
         raise DingerNotOk("No Auth Service Defined")
-
-
-def gather_user(req, ident, data):
-    pass
 
 
 def register(req, ident, data):

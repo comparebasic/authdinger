@@ -3,7 +3,7 @@ import socketserver, argparse, json, os, select
 from ..utils.log import GetLogger
 from ..utils.exception import DingerNotOk
 from ..utils import identifier, bstream
-from .handlers import Handle
+from . import handlers
 
 STATE_LENGTH = "length"
 STATE_KEY = "key"
@@ -11,6 +11,7 @@ STATE_VALUE = "value"
 states = [STATE_LENGTH, STATE_KEY, STATE_VALUE]
 
 class DingerAuthHandler(socketserver.StreamRequestHandler):
+
     def handle(self):
         self.server.logger.log("Auth handle")
         config = self.server.config
@@ -43,12 +44,19 @@ class DingerAuthHandler(socketserver.StreamRequestHandler):
         if not data.get("ident"):
             raise DingerNotOk("Ident not found")
 
-        p_ident = identfier.Ident(data["ident"].decode('utf-8'))
-        self.server.logger.log("Auth handle ident{}".format(p_ident))
+        ident = identifier.Ident(data["ident"].decode('utf-8'))
+        self.server.logger.log("Auth handle ident {} with {}".format(
+            ident, data))
         try:
-            resp = Handle(self, config, p_ident, data)
+            if not hasattr(handlers, ident.tag):
+                raise DingerNotOk("Handler not found {}".format(ident.tag))
 
-            self.server.logger.log("Successful")
+            try:
+                resp = getattr(handlers, ident.tag)(self, ident, data)
+            except DingerNotOk:
+                raise
+
+            self.server.logger.log("Auth run {}".format(ident.tag))
             if resp:
                 self.respond("ok", resp, "")
             else:

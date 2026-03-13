@@ -11,12 +11,12 @@
         "/": [
             "get", "content=welcome.html@page"],
         "/auth/login": [
-            ["get", "content=login-form.format@page"],
-            ["post", 
+            ["get", "map=action/path@req", "map=redir@query", "content=login-form.format@page"],
+            ["post", "map=email,data-send-email?,password?@form",
                 ["data=on@send-auth-email", "auth_email", "session_start", "redir=redir@data"],
-                ["pw_auth", "session_start", "redir=redir@data"] 
+                ["pw_auth", "session_start", "map=redir@query", "redir=redir@data"] 
             ],
-            ["content=login-form.format@page"]
+            ["map=action/path@req", "map=redir@query", "content=login-form.format@page"]
         ],
         "/auth/token-login": [
             ["get", "token_consume", "session_start", "redir=data.redir"],
@@ -24,16 +24,16 @@
         ],
         "/auth/register": [
             ["get", "map=action/path@req", "map=redir@query", "content=register.format@page"],
-            ["post", 
+            ["post", "map=action/path@req", "map=redir@query", "map=email,fullname,data-send-email?,password?@form",
                 ["data=send-auth-email.on", "auth_email", "session_start", "redir=data.redir"],
-                ["pw_auth", "session_start", "redir=data.redir"] 
+                ["register", "pw_set", "redir=data.redir"] 
             ],
-            ["content=header.html@inc", "page=register.format", "inc=footer.html"]
+            ["content=register.format@page"]
         ],
         "/not-found": ["content=not-found.html@page"],
         "/error": ["content=error.format@page"],
         "/auth/dashboard": [
-            ["get", "gather_user", "content=dashboard.format@page"],
+            ["get", "session_open", "map=email,fullname@session", "content=dashboard.format@page"],
             ["redir=/auth/login"]
         ],
         "/static/styles.css": ["content=styles.css@static"],

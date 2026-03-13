@@ -15,28 +15,13 @@ def get_authfile(config, email_token):
 def get_tokenfile(config, email_token, token):
     return os.path.join(get_authdir(config, email_token), token)
 
-def Handle(req, config, ident, data):
-    func = None
-    if ident.ext == "email":
-        if ident.tag == "pw_auth":
-            func = pw_auth
-            data["email-token"] = ident.base
 
-        if ident.tag == "pw_set":
-            func = pw_set
-            data["email-token"] = ident.base
-
-    if not func:
-        raise DingerNotOk("Not func found for handler {}".format(ident))
-
-    func(req, config, data)
-
-
-def pw_auth(req, config, data):
+def pw_auth(req, ident, data):
+    config = req.server.config
     req.server.logger.log("Auth Password {}".format(
-        bstream.unquote(data["email-token"])))
+        bstream.unquote(ident.name)))
 
-    path = get_authfile(config, data["email-token"])
+    path = get_authfile(config, ident.name)
 
     with open(path, "rb") as f:
         f.seek(0, SEEK_END)
@@ -52,47 +37,14 @@ def pw_auth(req, config, data):
         raise DingerNotOk("password mismatch")
 
 
-def token_create(req, config, data):
-    req.server.logger.log("Setting Token {}".format(
-        bstream.unquote(data["email-token"])))
-
-    dir_path = get_authdir(config, data["email-token"])
-    if not os.path.exists(dir_path):
-        raise DingerNotOk("User dir not found")
-
-    token = utils.token(data["email-token"])
-    path = get_tokenfile(config, data["email-token"], token)
-
-    with open(path, "w+") as f:
-        f.write(rfc822(datetime.now()))
-
-    return token
-
-
-def token_consume(req, config, data):
-    req.server.logger.log("Consuming Token {}".format(
-        bstream.unquote(data["email-token"])))
-
-    dir_path = get_authdir(config, data["email-token"])
-    if not os.path.exists(dir_path):
-        raise DingerNotOk("User dir not found")
-
-    token = utils.token(data["email-token"])
-    path = get_tokenfile(config, data["email-token"], token)
-
-    if not os.path.exists(path):
-        raise DingerNotOk("Invalid")
-
-    os.remove(path)
-
-
-def pw_set(req, config, data):
+def pw_set(req, ident, data):
+    config = req.server.config
     req.server.logger.log("Setting Password {}".format(
-        bstream.unquote(data["email-token"])))
+        bstream.unquote(ident.name)))
 
-    path = get_authfile(config, data["email-token"])
+    path = get_authfile(config, ident.name)
 
-    dir_path = get_authdir(config, data["email-token"])
+    dir_path = get_authdir(config, ident.name)
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
         os.mkdir(os.path.join(dir_path, "tokens"))
@@ -102,9 +54,45 @@ def pw_set(req, config, data):
         
         if f.tell() == 0:
             details = [
-                "email-token", data["email-token"],
+                "email-token", ident.name,
                 "password-hash", data["password-hash"]]
         else:
             details = ["password-hash", data["password-hash"]]
 
         bstream.send_r(f, details)
+
+
+def token_create(req, ident, data):
+    config = req.server.config
+    req.server.logger.log("Setting Token {}".format(
+        bstream.unquote(ident.name)))
+
+    dir_path = get_authdir(config, ident.name)
+    if not os.path.exists(dir_path):
+        raise DingerNotOk("User dir not found")
+
+    token = utils.token(ident.name)
+    path = get_tokenfile(config, ident.name, token)
+
+    with open(path, "w+") as f:
+        f.write(rfc822(datetime.now()))
+
+    return token
+
+
+def token_consume(req, ident, data):
+    config = req.server.config
+    req.server.logger.log("Consuming Token {}".format(
+        bstream.unquote(ident.name)))
+
+    dir_path = get_authdir(config, ident.name)
+    if not os.path.exists(dir_path):
+        raise DingerNotOk("User dir not found")
+
+    token = utils.token(ident.name)
+    path = get_tokenfile(config, ident.name, token)
+
+    if not os.path.exists(path):
+        raise DingerNotOk("Invalid")
+
+    os.remove(path)

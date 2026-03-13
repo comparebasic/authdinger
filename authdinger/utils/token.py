@@ -1,6 +1,9 @@
 import random, time, hashlib, os
 from ..utils import session
 
+def time_bytes(t):
+    return int(t*1000000).to_bytes(8)
+
 def get_token(content):
     h = hashlib.sha256()
     h.update(content)

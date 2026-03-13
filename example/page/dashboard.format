@@ -1,2 +1,2 @@
 <h1>Dashboard</h1>
-<p>Hi, {fullname}</p>
+<p>Hi, {fullname}/{email}</p>

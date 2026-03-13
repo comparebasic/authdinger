@@ -40,6 +40,9 @@ class Ident(object):
             raise TypeError(ident)
        
 
+    def __repr__(self):
+        return self.__str__()
+
     def __str__(self):
         return "Ident<{}={}@{}>".format(
             self.tag, self.name, self.location) 

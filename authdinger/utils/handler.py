@@ -30,10 +30,11 @@ def do_chain(req, chain, data):
                 # go through this branch of the chain
                 return do_chain(req, h, data)
             except DingerKnockout as ko:
+                data["error"] = str(ko.args)
                 continue
             except DingerError as err:
                 # go to the next branch
-                data["error"] = err.args[0]
+                data["error"] = str(err.args)
                 raise 
         elif isinstance(h, (Inst)):
             try:
