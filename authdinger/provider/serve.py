@@ -1,127 +1,94 @@
 import argparse, json, urllib
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from .. import GetLogger, DingerNotOk
+from ..utils.maps import http_messages
+
+from ..utils.log import GetLogger
+from ..utils.exception import \
+     DingerNotOk, DingerError, DingerKnockout, DingerReChain, DingerNotFound
 from ..utils import templ, identifier, form, session, handler
 from . import handlers
 
-ext_mime = {
-    "css": "text/css",
-    "js": "text/javascript",
-    "format": "text/html",
-    "html": "text/html",
-    "txt": "text/plain"
-}
 
 class DingerHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.header_stage = {}
         self.session = {}
         self.done = False
+        self.form_data = {}
+        self.query_data = {}
+        self.content = ""
+        self.code = 0 
         return super().__init__(*args, **kwargs)
 
-    def do_cookie(self, config):
-        cookie = self.headers.get("Cookie")
-        if cookie:
-            self.server.logger.warn("Session From {}".format(cookie))
-            ssion = session.from_cookie(config, cookie)
-            if ssion:
-                self.session = ssion
-                self.server.logger.warn("Session Data {}".format(self.session))
 
-    def do_GET(self):
-        config = self.server.config
-        self.do_cookie(config)
-
-        path, query = form.parseUrl(self.path)
-
-        route = config["routes"].get(path)
-        if not route:
-            self.send_response(404)
-            route = config["routes"]["/not-found"]
-        else:
-            self.send_response(200)
-
-        data = {}
-
-        data["action"] = path
-        if query:
-            params = form.parseFormData(query)
-            data.update(params)
-        else:
-            data["redir"] = None
-    
-        if not data.get("error"):
-            data["error"] = None
-            
-
-        content = ""
-        for p in route:
-            p_ident = ident.Ident(p)
-            if p_ident.tag == "page" or p_ident.tag == "static":
-                data.update(self.session)
-                mime = ext_mime.get(p_ident.ext)
-                if mime:
-                    self.header_stage["Content-Type"] = mime;
-            content += templ.templFrom(config, p_ident, data)
-
-        if not self.header_stage.get("Content-Type"):
-            self.header_stage["Content-Type"] = "text/html";
-
-        for k,v in self.header_stage.items():
-            self.send_header(k, v)
-        self.end_headers()
-
-        self.wfile.write(bytes(content, "utf-8"))
-
-    def do_POST(self):
-        path, _ = form.parseUrl(self.path)
-
-        config = self.server.config
-        handler = config["handlers"].get(path)
-
-        if not handler:
-            self.path = "/not-found"
-            return self.do_GET()
-
-        data = {}
-
+    def parse_form(self):
         length = self.headers.get("Content-Length")
         if length:
             content = self.rfile.read(int(length))
-
             params = form.parseFormData(content.decode("utf-8"))
+
             if params:
                 for k,v in params.items():
                     params[k] = urllib.parse.unquote(v,
                         encoding=None, errors=None)
-                data.update(params)
         
-        for h in handler:
-            h_ident = ident.Ident(h)
-            try:
-                Handle(self, config, h_ident, data)
-            except DingerNotOk as err:
-                knockout = config["knockouts"].get(path)
-                if knockout:
-                    k_ident = ident.Ident(knockout)
-                    if k_ident.tag == "get":
-                        data["error"] = err.args[0]
-                        self.path = "{}?{}".format(
-                            k_ident.source, 
-                            form.toQuery(config, data))
-                        self.do_GET()
-                        return
+            return params
+        return {}
 
-                self.server.logger.error("handler error", err)
-                self.server.logger.error("handler error", h_ident)
-                self.path = "/error"
-                return self.do_GET()
+    def parse_query(self):
+        idx = self.path.find("?")
 
+        if idx != -1 and idx+1 < len(self.path):
+            return form.parseFormData(self.path[idx+1:])
+        else:
+            return {}
+
+
+    def do_GET(self):
+        return self._do_STUFF()
+
+
+    def do_POST(self):
+        return self._do_STUFF()
+
+
+    def _do_STUFF(self):
+        path, _ = form.parseUrl(self.path)
+
+        config = self.server.config
+        chain = self.server.routes.get(path)
+
+        if not chain:
+            raise DingerNotFound("Chain not found")
+
+        self.query_data = self.parse_query()
+        self.form_data = self.parse_form()
+
+        data = {"error": None}
+        try: 
+            handler.do_chain(self, chain, data)
+        except DingerError as event:
+            raise
+
+        if self.code == 0:
+            self.code = 200
+
+        if not self.header_stage.get("Content-Type"):
+            self.header_stage["Content-Type"] = "text/html";
+
+        self.send_response(self.code, http_messages[self.code]) 
+        for k,v in self.header_stage.items():
+            self.send_header(k, v)
+        self.end_headers()
+
+        if len(self.content) > 0:
+            self.wfile.write(bytes(self.content, "utf-8"))
+            
 
 class DingerProviderServer(HTTPServer):
     def __init__(self, config, logger, address):
-        handler.setup_config(config, "routes", handlers)
+        self.routes = handler.setup_config(config, "routes", handlers)
         self.config = config
         self.logger = logger
         return super().__init__(address, DingerHandler)

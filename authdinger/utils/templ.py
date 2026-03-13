@@ -1,15 +1,15 @@
 import os
 
-def templFrom(config, ident, data):
+def templFrom(config, ident, ext, data):
     templ_dir = None
-    if ident.tag:
-        templ_dir = config["dirs"].get(ident.tag);
+    if ident.location:
+        templ_dir = config["dirs"].get(ident.location);
     else:
         templ_dir = config["dirs"].get("page");
             
-    with open(os.path.join(templ_dir, ident.source), "r") as f:
+    with open(os.path.join(templ_dir, ident.name), "r") as f:
         content = f.read()
-        if ident.ext == "format":
+        if ext == "format":
             return content.format(**data)
         else:
             return content

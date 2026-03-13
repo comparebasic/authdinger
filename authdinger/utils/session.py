@@ -1,7 +1,9 @@
 import time, os
 from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
-from .. import DingerNotOk, SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
+from ..utils.exception import \
+     DingerNotOk, DingerError, DingerKnockout, DingerReChain
+from .. import SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
 from ..utils import bstream
 from ..utils.user import get_userfile
 from ..utils.token import get_token, rfc822

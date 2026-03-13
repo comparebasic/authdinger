@@ -1,4 +1,6 @@
 from ..utils import identifier
+from ..utils.exception import \
+    DingerNotOk, DingerKnockout, DingerError, DingerReChain
 
 class Inst(object):
     def __init__(self, ident, mod):
@@ -26,16 +28,17 @@ def do_chain(req, chain, data):
         if isinstance(h, (list)):
             try:
                 # go through this branch of the chain
-                return do_chain(req, h, data, hmap)
+                return do_chain(req, h, data)
             except DingerKnockout as ko:
                 continue
             except DingerError as err:
                 # go to the next branch
                 data["error"] = err.args[0]
-                continue
+                raise 
         elif isinstance(h, (Inst)):
             try:
-                h.func(reg, h.ident, data)
+                req.server.logger.warn("Handler {}".format(h))
+                h.func(req, h.ident, data)
 
             except (DingerNotOk, DingerError) as err:
                 data["error"] = err.args[0]
@@ -58,6 +61,7 @@ def Handle(req, chain, data, fmap):
         self.wfile.write(bytes(content, "utf-8"))
 
     req.done = True
+
 
 def _setup_chain(config, chain, mod):
     sub_chain = []

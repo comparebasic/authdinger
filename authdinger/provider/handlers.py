@@ -1,25 +1,68 @@
 import socket
-from .. import DingerNotOk
-from ..utils import bstream, user, session
+from ..utils.exception import \
+     DingerNotOk, DingerError, DingerKnockout, DingerReChain
+from ..utils import bstream, user, session, templ
+from ..utils.maps import mime_map
 
 
-def get(req, config, ident, data):
+def map(req, ident, data):
+
+    parts = ident.name.split("/")
+    key = parts[0]
+    if len(parts) == 1:
+        val_key = parts[0]
+    elif len(parts) == 2:
+        val_key = parts[1]
+    else:
+        raise DingerError("Unparsable fields definition", ident.name)
+
+    if ident.location == "req":
+        if not hasattr(req, val_key):
+            raise DingerKnockout("Field not found", ident)
+
+        data[key] = getattr(req, val_key)
+
+    if ident.location == "query":
+        req.server.logger.log("Query map {}".format(req.query_data))
+        if not req.query_data.get(val_key):
+            raise DingerKnockout("Field not found", ident)
+
+        data[key] = req.query_data[val_key]
+
+
+def cookie(req, ident, data):
+    config = req.server.config
+    cookie = req.headers.get("Cookie")
+    if cookie:
+        res.server.logger.warn("Session From {}".format(cookie))
+        ssion = session.from_cookie(config, cookie)
+        if ssion:
+            req.session = ssion
+            req.server.logger.warn("Session Data {}".format(req.session))
+
+
+def get(req, ident, data):
     if req.command != "GET":
         raise DingerKnockout("Method mismatch")
 
 
-def post(req, config, ident, data):
+def post(req, ident, data):
     if req.command != "POST":
         raise DingerKnockout("Method mismatch")
 
-def content(req, config, ident, data):
-    mime = ext_mime.get(p_ident.location)
+def content(req, ident, data):
+    config = req.server.config
+
+    parts = ident.name.split(".")
+    ext = parts[-1]
+
+    mime = mime_map.get(ext)
     if mime:
         req.header_stage["Content-Type"] = mime;
-    req.content += templ.templFrom(config, p_ident, data)
+    req.content += templ.templFrom(config, ident, ext, data)
 
 
-def data(req, config, ident, data):
+def data(req, ident, data):
     if not data.get(ident.location):
         raise DingerKnockout()
 
@@ -29,7 +72,7 @@ def data(req, config, ident, data):
 
 inc = static = page = content
 
-def redir(req, config, ident, data):
+def redir(req, ident, data):
     req.send_response(302)
     if ident.location == "data":
         location = data.get(ident.name)
@@ -46,7 +89,8 @@ def redir(req, config, ident, data):
     req.done = True
     
 
-def pw_auth(req, config, ident, data):
+def pw_auth(req, ident, data):
+    config = req.server.config
     if data.get("send-email-auth"):
         req.server.logger.log("Skipping pw_auth")
         return
@@ -76,19 +120,20 @@ def pw_auth(req, config, ident, data):
     else:
         raise DingerNotOk("No Auth Service Defined")
 
-def token_consume(req, config, ident, data):
+def token_consume(req, ident, data):
     pass
 
 
-def session_start(req, config, ident, data):
-    session.start(req, config, ident, data)
+def session_start(req, ident, data):
+    session.start(req, ident, data)
 
     cookie = "Ssid={}; Expires={}; HttpOnly; Secure; SameSite=Strict;".format(
         data["session-token"], data["session-expires"])
     req.header_stage["Set-Cookie"] = cookie
 
 
-def pw_set(req, config, ident, data):
+def pw_set(req, ident, data):
+    config = req.server.config
     if data.get("send-email-auth"):
         req.server.logger.log("Skipping pw_set")
         return
@@ -117,32 +162,33 @@ def pw_set(req, config, ident, data):
         raise DingerNotOk("No Auth Service Defined")
 
 
-def gather_user(req, config, ident, data):
+def gather_user(req, ident, data):
     pass
 
 
-def register(req, config, ident, data):
+def register(req, ident, data):
+    config = req.server.config
     try:
         user.create(req, config, data)
     except DingerNotOk as err:
         raise DingerNotOk("Unable to register", err.args[0])
 
 
-def send_email(req, config, ident, data):
+def send_email(req, ident, data):
     pass
 
 
-def send_auth_email(req, config, ident, data):
+def send_auth_email(req, ident, data):
     req.server.logger.log("Send auth email")
     return
 
 
-def auth_email(req, config, ident, data):
+def auth_email(req, ident, data):
     if data.get("send-email-auth"):
-        send_auth_email(req, config, ident, data)
+        send_auth_email(req, ident, data)
 
 
-def redir(req, config, ident, data):
+def redir(req, ident, data):
     req.send_response(302)
     req.send_header("Location", data["redir"])
     for k,v in req.header_stage.items():

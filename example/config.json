@@ -23,12 +23,12 @@
             ["get", "content=token.format@page"]
         ],
         "/auth/register": [
-            ["get", "content=register.format@page"],
+            ["get", "map=action/path@req", "map=redir@query", "content=register.format@page"],
             ["post", 
                 ["data=send-auth-email.on", "auth_email", "session_start", "redir=data.redir"],
                 ["pw_auth", "session_start", "redir=data.redir"] 
             ],
-            ["inc=header.html", "page=register.format", "inc=footer.html"]
+            ["content=header.html@inc", "page=register.format", "inc=footer.html"]
         ],
         "/not-found": ["content=not-found.html@page"],
         "/error": ["content=error.format@page"],
@@ -40,7 +40,7 @@
         "/static/form.js": ["content=form.js@static"]
     },
     "templates": {
-        "page": ["content=header.format@inc", true, "content=footer.html@inc"]
+        "page": ["content=header.html@inc", true, "content=footer.html@inc"]
     },
     "fields": {
         "session": {

@@ -1,7 +1,7 @@
 import os
-from authdinger import \
-    ParseConfig, ParseCli, DingerAuthServer, DingerProviderServer, \
-    GetLogger
+from authdinger import  DingerAuthServer, DingerProviderServer
+from authdinger.utils.log import GetLogger
+from authdinger.utils.config import ParseConfig, ParseCli
 
 def run_auth(config, logger):
     logger.log("Serving AuthDinger Auth on socket {}".format(config["auth-socket"]))
@@ -24,10 +24,10 @@ def run_provider(config, logger):
     httpd = DingerProviderServer(config,
         GetLogger(config), ('localhost', port))
 
-    #try:
-    #    httpd.serve_forever()
-    #finally:
-    #    httpd.server_close()
+    try:
+        httpd.serve_forever()
+    finally:
+        httpd.server_close()
 
 
 if __name__ == "__main__":

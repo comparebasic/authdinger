@@ -9,6 +9,7 @@ def parseFormData(s):
             k = pairs[0]
             v = pairs[1]
             data[k] = urllib.parse.unquote(v, encoding=None, errors=None)
+    print("{} -> {}".format(s, data))
     return data
 
 def toQuery(config, data):
