@@ -79,7 +79,8 @@ def content(req, ident, data):
     req.content += templ.templFrom(config, ident, data)
 
 
-def data(req, ident, data):
+def data_eq(req, ident, data):
+    req.server.logger.log("data_eq {} vs {}".format(data.get(ident.location), ident.name))
     if not data.get(ident.location):
         raise DingerKnockout()
 

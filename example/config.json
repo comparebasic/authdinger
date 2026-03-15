@@ -13,8 +13,8 @@
             "get", "content=welcome.html@page"],
         "/auth/login": [
             ["get", "map=action/path@req", "map=redir@query", "content=login-form.format@page"],
-            ["post", "map=email,data-send-email?,password?@form",
-                ["data=on@send-auth-email", "auth_email", "session_start", "redir=redir@data"],
+            ["post", "map=email,send-email-auth?,password?@form",
+                ["data_eq=on@send-auth-email", "auth_email", "session_start", "redir=redir@data"],
                 ["pw_auth", "session_start", "map=redir@query", "redir=redir@data"] 
             ],
             ["map=action/path@req", "map=redir@query", "content=login-form.format@page"]
@@ -25,8 +25,8 @@
         ],
         "/auth/register": [
             ["get", "map=action/path@req", "map=redir@query", "content=register.format@page"],
-            ["post", "map=action/path@req", "map=redir@query", "map=email,fullname,data-send-email?,password?@form",
-                ["data=on@send-auth-email", "get_token", "map=brand,url@config", "email=auth-token-email",
+            ["post", "map=action/path@req", "map=redir@query", "map=email,fullname,send-email-auth?,password?@form",
+                ["data_eq=on@send-email-auth", "get_token", "map=brand,url@config", "email=auth-token-email",
                     "content=email-sent.format@page"],
                 ["register", "pw_set", "redir=data.redir"] 
             ],

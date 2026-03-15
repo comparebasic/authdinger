@@ -30,6 +30,8 @@ def do_chain(req, chain, data):
                 # go through this branch of the chain
                 return do_chain(req, h, data)
             except DingerKnockout as ko:
+                req.server.logger.warn(
+                    "Knockout {}".format(str(ko.args)))
                 data["error"] = str(ko.args)
                 continue
             except DingerError as err:
@@ -95,5 +97,4 @@ def setup_config(config, key, mod):
     for path, chain in config[key].items():
         route_insts[path] = _setup_chain(config, chain, mod)
 
-    print("route_insts {}".format(route_insts))
     return route_insts

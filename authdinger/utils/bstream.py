@@ -13,7 +13,6 @@ def quote(s):
 
 
 def unquote(bs):
-    print("Unquote {}".format(bs))
     b = bytearray()
     a = bytearray() 
 
@@ -51,7 +50,6 @@ def send(stream, arr):
             s += seg.encode("utf-8")
         else:
             s += seg
-    print("sending sock {}".format(s))
     if hasattr(stream, 'sendall'):
         stream.sendall(s)
     else:
@@ -64,10 +62,7 @@ def send_r(stream, arr):
         if isinstance(seg, str):
             seg = bytes(seg, "utf-8")
         s += seg
-        print(s)
         s += len(seg).to_bytes(2, "big")
-        print(s)
-    print("sending file {}".format(s))
 
     if hasattr(stream, 'send'):
         stream.send(s)
