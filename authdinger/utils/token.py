@@ -1,5 +1,4 @@
 import random, time, hashlib, os
-from ..utils import session
 
 def time_bytes(t):
     return int(t*1000000).to_bytes(8)

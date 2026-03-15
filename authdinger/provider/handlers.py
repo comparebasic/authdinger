@@ -4,11 +4,6 @@ from ..utils.exception import \
 from ..utils import bstream, user, session, templ
 from ..utils.maps import mime_map
 from smtplib import SMTP
-from email.mime.text import MIMEText
-from email.mime.html import MIMEHtml
-from email.mime.image import MIMEImage
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
 import smtplib
 
 
@@ -199,26 +194,14 @@ def register(req, ident, data):
         raise DingerNotOk("Unable to register", err.args[0])
 
 
-def send_email(req, ident, data):
+def email(req, ident, data):
     config = req.server.config
-
-    subject_ident = "content={}.subject@{}".format(ident.name, ident.location)
-    subject = templ.templFrom(config, subject_ident, data)
-
-    text_ident = "content={}.txt@{}".format(ident.name, ident.location)
-    text = templ.templFrom(config, text_ident, data)
-
-    html_ident = "content={}.html@{}".format(ident.name, ident.location)
-    html = templ.templFrom(config, html_ident, data)
-
-    msg = MIMEMultiplart()
-    msg["Subject"] = subject
-    msg.attach(MIMEText(text))
-    msg.attach(MIMEHtml(html))
+    msg = templ.emailMsgFromIdent(config, 
+        ident, data,
+        from_addr=config["system-email"], to_addrs=[config["email"]])
 
     with SMTP(config["smtp"]) as smtp:
-        smtp.send_message(msg,
-            from_addr=config["system-email"], to_addrs=[config["email"]])
+        smtp.send_message(msg, from_addr=msg["From"], to_addrs=msg["To"])
 
 
 def get_token(req, ident, data):
