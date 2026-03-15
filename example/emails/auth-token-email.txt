@@ -1,0 +1,2 @@
+Hi {fullname},
+{token} is your {brand} login code, or visit {url}/auth/login?token={token}.

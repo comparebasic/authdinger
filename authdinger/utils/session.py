@@ -52,9 +52,6 @@ def load(req, ident):
     except FileNotFoundError:
         raise DingerNotOk("User not found")
 
-    if data.get("email-token"):
-        data["email"] = bstream.unquote(data["email-token"])
-
     req.session = data
 
 

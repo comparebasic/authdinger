@@ -3,6 +3,13 @@ from ..utils.exception import \
      DingerNotOk, DingerError, DingerKnockout, DingerReChain
 from ..utils import bstream, user, session, templ
 from ..utils.maps import mime_map
+from smtplib import SMTP
+from email.mime.text import MIMEText
+from email.mime.html import MIMEHtml
+from email.mime.image import MIMEImage
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+import smtplib
 
 
 def map(req, ident, data):
@@ -39,6 +46,8 @@ def map(req, ident, data):
                     source = req.cookie
                 case "session":
                     source = req.session
+                case "config":
+                    source = config 
 
             for k,v in kv.items():
                 if v.endswith("?"):
@@ -72,7 +81,7 @@ def content(req, ident, data):
     mime = mime_map.get(ext)
     if mime:
         req.header_stage["Content-Type"] = mime;
-    req.content += templ.templFrom(config, ident, ext, data)
+    req.content += templ.templFrom(config, ident, data)
 
 
 def data(req, ident, data):
@@ -191,12 +200,52 @@ def register(req, ident, data):
 
 
 def send_email(req, ident, data):
-    pass
+    config = req.server.config
+
+    subject_ident = "content={}.subject@{}".format(ident.name, ident.location)
+    subject = templ.templFrom(config, subject_ident, data)
+
+    text_ident = "content={}.txt@{}".format(ident.name, ident.location)
+    text = templ.templFrom(config, text_ident, data)
+
+    html_ident = "content={}.html@{}".format(ident.name, ident.location)
+    html = templ.templFrom(config, html_ident, data)
+
+    msg = MIMEMultiplart()
+    msg["Subject"] = subject
+    msg.attach(MIMEText(text))
+    msg.attach(MIMEHtml(html))
+
+    with SMTP(config["smtp"]) as smtp:
+        smtp.send_message(msg,
+            from_addr=config["system-email"], to_addrs=[config["email"]])
 
 
-def send_auth_email(req, ident, data):
-    req.server.logger.log("Send auth email")
-    return
+def get_token(req, ident, data):
+    config = req.server.config
+
+    if config.get("auth-socket"): 
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(config["auth-socket"]) 
+
+        email_token = bstream.quote(data["email"]).decode("utf-8")
+        bstream.send(sock, (
+            "ident", 
+                "token_create={}@email".format(email_token),
+            ""))
+
+        answer = bstream.read_next(sock) 
+        if answer != b"ok":
+            reason = bstream.read_next(sock)
+            sock.close()
+            raise DingerNotOk("Invalid", reason)
+
+        token = bstream.read_next(sock)
+        data["token"] = token
+        sock.close()
+
+    else:
+        raise DingerNotOk("No Auth Service Defined")
 
 
 def auth_email(req, ident, data):

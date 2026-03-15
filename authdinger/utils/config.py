@@ -11,5 +11,5 @@ def ParseCli():
         description="ECAuth Provider Server")
     parser.add_argument("--config")
     parser.add_argument("--log-color", action="store_true")
-    parser.add_argument("--type", choices=["provider", "auth"], required=False)
+    parser.add_argument("--type", choices=["provider", "auth", "sasl"], required=False)
     return parser.parse_args()

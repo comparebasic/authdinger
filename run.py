@@ -14,6 +14,7 @@ def run_auth(config, logger):
         os.remove(config["auth-socket"])
 
 
+
 def run_provider(config, logger):
     try:
         port = int(config["port"])
@@ -34,9 +35,10 @@ if __name__ == "__main__":
     cli = ParseCli()
     config = ParseConfig(cli.config)
     config["log-color"] = cli.log_color
-    logger = GetLogger(config)
+    config["type"] = cli.type 
 
-    if not cli.type or cli.type == "auth":
+    logger = GetLogger(config)
+    if cli.type == "auth" or cli.type == "sasl":
         run_auth(config, logger)
 
     if not cli.type or cli.type == "provider":

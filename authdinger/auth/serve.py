@@ -27,6 +27,7 @@ class DingerAuthHandler(socketserver.StreamRequestHandler):
         while more != False:
             try:
                 content = bstream.read_next(self.rfile)
+                print("Content: {}".format(content))
             except (ValueError, TypeError) as err:
                 self.server.logger.error("Erronous login")
                 self.respond("no", err.args[0], "")
@@ -40,6 +41,17 @@ class DingerAuthHandler(socketserver.StreamRequestHandler):
         if len(items) == 0:
             self.respond("no", "no items recieved", "")
 
+        if config["type"] == "sasl":
+            self.sasl()
+        else:
+            self.auth()
+
+
+    def sasl(self, items):
+        self.server.logger.log("Sasl Items {}".format(items))
+
+
+    def auth(self, items):
         data = bstream.arr_to_dict(items)
         if not data.get("ident"):
             raise DingerNotOk("Ident not found")

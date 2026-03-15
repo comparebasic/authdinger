@@ -5,7 +5,8 @@
         "static": "example/static",
         "user-data": "example/user-data",
         "auth-data": "example/auth-data",
-        "sessions": "example/sessions"
+        "sessions": "example/sessions",
+        "emails": "example/emails"
     },
     "routes": {
         "/": [
@@ -25,26 +26,27 @@
         "/auth/register": [
             ["get", "map=action/path@req", "map=redir@query", "content=register.format@page"],
             ["post", "map=action/path@req", "map=redir@query", "map=email,fullname,data-send-email?,password?@form",
-                ["data=send-auth-email.on", "auth_email", "session_start", "redir=data.redir"],
+                ["data=on@send-auth-email", "get_token", "map=brand,url@config", "email=auth-token-email",
+                    "content=email-sent.format@page"],
                 ["register", "pw_set", "redir=data.redir"] 
             ],
             ["content=register.format@page"]
         ],
-        "/not-found": ["content=not-found.html@page"],
-        "/error": ["content=error.format@page"],
         "/auth/dashboard": [
             ["get", "session_open", "map=email,fullname@session", "content=dashboard.format@page"],
             ["redir=/auth/login"]
         ],
         "/static/styles.css": ["content=styles.css@static"],
-        "/static/form.js": ["content=form.js@static"]
+        "/static/form.js": ["content=form.js@static"],
+        "/not-found": ["content=not-found.html@page"],
+        "/error": ["content=error.format@page"]
     },
     "templates": {
         "page": ["content=header.html@inc", true, "content=footer.html@inc"]
     },
     "fields": {
         "session": {
-            "email-token": "unquot@email",
+            "email-token": "unquote=email",
             "start-time": false,
             "session-token": true,
             "fullname": true
@@ -52,7 +54,7 @@
         "user": {
             "fullname": true,
             "salt": false,
-            "email-token": "unquot@email"
+            "email-token": "unquote=email"
         },
         "auth": {
             "email-token": true,
@@ -60,5 +62,10 @@
         }
     },
     "port": 3000,
-    "auth-socket": "example/auth.sock"
+    "auth-socket": "example/auth.sock",
+    "sasl-socket": "example/sasl.sock",
+    "system-email": "noreply@cb-local",
+    "brand": "Authdinger",
+    "url": "http://localhost:3000/",
+    "smtp": "localhost"
 }
