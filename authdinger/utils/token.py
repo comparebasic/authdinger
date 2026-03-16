@@ -1,7 +1,9 @@
 import random, time, hashlib, os
 
+
 def time_bytes(t):
     return int(t*1000000).to_bytes(8)
+
 
 def get_token(content):
     h = hashlib.sha256()
@@ -10,11 +12,12 @@ def get_token(content):
     h.update(random.randbytes(4))
     return h.hexdigest() 
 
+
 def get_short_token(content):
     return get_token(content)[32:]
 
 
 def rfc822(dt):
     ctime = dt.ctime()
-    return "{}, {} {}".format(
-        ctime[:3], ctime[4:8], dt.strftime(" %d %Y %H:%M:%S %Z"))
+    return "{}, {} {} {} {}".format(
+        ctime[:3], ctime[8:10], ctime[4:7], ctime[20:24], dt.strftime("%H:%M:%S %z (%Z)"))

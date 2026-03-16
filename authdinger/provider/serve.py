@@ -46,6 +46,17 @@ class DingerHandler(BaseHTTPRequestHandler):
             return {}
 
 
+    def resolve(self, path, data):
+        config = self.server.config
+
+        chain = self.server.routes.get(path)
+
+        if not chain:
+            raise DingerNotFound(path)
+
+        handler.do_chain(self, chain, data)
+
+
     def do_GET(self):
         return self._do_STUFF()
 
@@ -58,10 +69,6 @@ class DingerHandler(BaseHTTPRequestHandler):
         path, _ = form.parseUrl(self.path)
 
         config = self.server.config
-        chain = self.server.routes.get(path)
-
-        if not chain:
-            raise DingerNotFound("Chain not found")
 
         self.query_data = self.parse_query()
         self.form_data = self.parse_form()
@@ -69,10 +76,21 @@ class DingerHandler(BaseHTTPRequestHandler):
             self.cookie = session.parse_cookie(self.headers["Cookie"])
 
         data = {"error": None}
-        try: 
-            handler.do_chain(self, chain, data)
-        except DingerError as event:
-            raise
+        try:
+            self.resolve(path, data)
+        except DingerNotFound as err:
+            data["error"] = str(err.args)
+            self.resolve("/not-found", data)
+            self.code = 404
+        except DingerError as err:
+            data["error"] = str(err.args)
+            self.resolve("/error", data)
+            self.code = 500
+        except Exception as err:
+            data["error"] = str(err.args)
+            self.resolve("/error", data)
+            self.code = 500
+            self.server.logger.error(err)
 
         if self.code == 0:
             self.code = 200

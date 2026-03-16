@@ -1,9 +1,11 @@
 import os
 from datetime import datetime
+from dateutil.tz import tzlocal
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from ..utils.token import rfc822
 from ..utils import identifier
+from ..utils.exception import DingerError
 
 
 def templFrom(config, ident, data):
@@ -21,7 +23,7 @@ def templFrom(config, ident, data):
             try:
                 return content.format(**data)
             except KeyError as err:
-                raise DingerError("Key Error in templ", err, data) 
+                raise DingerError("Key Error in templ", err) 
         else:
             return content
 
@@ -39,11 +41,11 @@ def emailMsgFromIdent(config, ident, data, from_addr, to_addrs):
         "content={}_html.format@{}".format(ident.name, ident.location))
     html = templFrom(config, html_ident, data)
 
-    msg = MIMEMultiplart("alternative")
+    msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = from_addr
     msg["To"] = ",".join(to_addrs)
-    msg["Date"] = rfc822(datetime.now())
+    msg["Date"] = rfc822(datetime.now(tzlocal()))
     msg.attach(MIMEText(text, "plain"))
     msg.attach(MIMEText(html, "html"))
 

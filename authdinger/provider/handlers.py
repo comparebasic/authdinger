@@ -13,6 +13,8 @@ def end(req, ident, data):
 
 
 def map(req, ident, data):
+    config = req.server.config
+
     kv = {}
     for field in ident.name.split(","):
         parts = field.split("/")
@@ -34,7 +36,7 @@ def map(req, ident, data):
                     raise DingerKnockout("Field not found for req {}".format(ident))
 
             data[key] = getattr(req, v)
-        case "query" | "form" | "data" | "cookie" | "session":
+        case "query" | "form" | "data" | "cookie" | "session" | "config":
             match ident.location:
                 case "query":
                     source = req.query_data
@@ -50,6 +52,7 @@ def map(req, ident, data):
                     source = config 
 
             for k,v in kv.items():
+                print(k)
                 if v.endswith("?"):
                     v = v[:-1]
                     if k.endswith("?"):
@@ -60,7 +63,7 @@ def map(req, ident, data):
                         raise DingerKnockout("Field not found for query {}".format(ident))
                     data[k] = source[v]
 
-    req.server.logger.log("After Map {}".format(data))
+    req.server.logger.log("After Map {} {}".format(ident, data))
 
 
 def get(req, ident, data):
@@ -256,7 +259,7 @@ def get_token(req, ident, data):
             raise DingerNotOk("Invalid", reason)
 
         token = bstream.read_next(sock)
-        data["token"] = token
+        data["token"] = token.decode("utf-8")
         sock.close()
 
     else:

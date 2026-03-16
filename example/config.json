@@ -66,6 +66,6 @@
     "sasl-socket": "example/sasl.sock",
     "system-email": "noreply@cb-local",
     "brand": "Authdinger",
-    "url": "http://localhost:3000/",
+    "url": "http://localhost:3000",
     "smtp": "localhost"
 }
