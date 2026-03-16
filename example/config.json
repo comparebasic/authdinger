@@ -24,13 +24,13 @@
             ["get", "content=token.format@page"]
         ],
         "/auth/register": [
-            ["get", "map=action/path@req", "map=redir@query", "content=register.format@page"],
+            ["get", "map=action/path@req", "map=redir@query", "content=register.format@page", "end"],
             ["post", "map=action/path@req", "map=redir@query", "map=email,fullname,send-email-auth?,password?@form",
-                ["data_eq=on@send-email-auth", "get_token", "map=brand,url@config", "email=auth-token-email",
-                    "content=email-sent.format@page"],
-                ["register", "pw_set", "redir=data.redir"] 
+                ["data_eq=on@send-email-auth", "register", "get_token", "map=brand,url@config", "email=auth-token-email@emails",
+                    "content=email-sent.format@page", "end"],
+                ["data_neq=on@send-email-auth", "register", "pw_set", "redir=data.redir", "end"] 
             ],
-            ["content=register.format@page"]
+            ["content=register.format@page", "end"]
         ],
         "/auth/dashboard": [
             ["get", "session_open", "map=email,fullname@session", "content=dashboard.format@page"],

@@ -14,18 +14,24 @@
             <input type="text" name="fullname" placeholder="first middle last"></input>
         </span>
     </label>
-    <label name="password">
-        <span>Password</span>
-        <span>
-            <input type="text" name="password" placeholder="password"></input>
-        </span>
-    </label>
     <label>
         <span>
             <input type="checkbox" data-disable="password" name="send-email-auth" />
         </span>
         <span>
-            Email an Auth Token instead!
+            Email an Auth Token
+        </span>
+    </label>
+    <label>
+        <span>&nbsp;</span>
+        <span>
+            or
+        </span>
+    </label>
+    <label name="password">
+        <span>Password</span>
+        <span>
+            <input type="text" name="password" placeholder="password"></input>
         </span>
     </label>
     <label>

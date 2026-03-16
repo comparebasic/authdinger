@@ -1,10 +1,15 @@
-import socket
+import socket, bcrypt
 from ..utils.exception import \
      DingerNotOk, DingerError, DingerKnockout, DingerReChain
 from ..utils import bstream, user, session, templ
 from ..utils.maps import mime_map
 from smtplib import SMTP
 import smtplib
+
+
+def end(req, ident, data):
+    req.done = True
+    raise DingerKnockout()
 
 
 def map(req, ident, data):
@@ -87,6 +92,14 @@ def data_eq(req, ident, data):
     if ident.name and data[ident.location] != ident.name:
         raise DingerKnockout()
 
+def data_neq(req, ident, data):
+    try:
+        data_eq(req, ident, data)
+    except DingerKnockout:
+        return
+
+    raise DingerKnockout()
+
 
 inc = static = page = content
 
@@ -109,10 +122,6 @@ def redir(req, ident, data):
 
 def pw_auth(req, ident, data):
     config = req.server.config
-    if data.get("send-email-auth"):
-        req.server.logger.log("Skipping pw_auth")
-        return
-
     if config.get("auth-socket"): 
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.connect(config["auth-socket"]) 
@@ -159,13 +168,14 @@ def session_open(req, ident, data):
 
 def pw_set(req, ident, data):
     config = req.server.config
-    if data.get("send-email-auth"):
-        req.server.logger.log("Skipping pw_set")
-        return
-
     if config.get("auth-socket"): 
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.connect(config["auth-socket"]) 
+
+        if data.get("password"):
+            data["password-hash"] = bcrypt.hashpw(
+                data["password"].encode("utf-8"), data["salt"])
+            del data["password"]
 
         email_token = bstream.quote(data["email"]).decode("utf-8")
         bstream.send(sock, (
@@ -194,12 +204,33 @@ def register(req, ident, data):
     except DingerNotOk as err:
         raise DingerNotOk("Unable to register", err.args[0])
 
+    if config.get("auth-socket"): 
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(config["auth-socket"]) 
+
+        email_token = bstream.quote(data["email"]).decode("utf-8")
+        bstream.send(sock, (
+            "ident", 
+                "register={}@email".format(email_token),
+            ""))
+
+        answer = bstream.read_next(sock) 
+        if answer != b"ok":
+            reason = bstream.read_next(sock)
+            sock.close()
+            raise DingerNotOk("Invalid", reason)
+
+        sock.close()
+
+    else:
+        raise DingerNotOk("No Auth Service Defined")
+
 
 def email(req, ident, data):
     config = req.server.config
     msg = templ.emailMsgFromIdent(config, 
         ident, data,
-        from_addr=config["system-email"], to_addrs=[config["email"]])
+        from_addr=config["system-email"], to_addrs=[data["email"]])
 
     with SMTP(config["smtp"]) as smtp:
         smtp.send_message(msg, from_addr=msg["From"], to_addrs=msg["To"])

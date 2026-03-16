@@ -22,9 +22,6 @@ def create(req, config, data):
         raise DingerNotOk("User Exists")
     
     data["salt"] = bcrypt.gensalt()
-    data["password-hash"] = bcrypt.hashpw(
-        data["password"].encode("utf-8"), data["salt"])
-    del data["password"]
 
     details = [
         "email-token", email_token,

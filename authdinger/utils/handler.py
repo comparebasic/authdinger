@@ -28,16 +28,21 @@ def do_chain(req, chain, data):
         if isinstance(h, (list)):
             try:
                 # go through this branch of the chain
-                return do_chain(req, h, data)
+                do_chain(req, h, data)
+                continue
             except DingerKnockout as ko:
                 req.server.logger.warn(
                     "Knockout {}".format(str(ko.args)))
-                data["error"] = str(ko.args)
+                continue
+            except DingerNotOk as nok:
+                req.server.logger.warn(
+                    "NotOk {}".format(str(nok.args)))
+                data["error"] = str(nok.args)
                 continue
             except DingerError as err:
-                # go to the next branch
                 data["error"] = str(err.args)
                 raise 
+
         elif isinstance(h, (Inst)):
             try:
                 req.server.logger.warn("Handler {}".format(h))

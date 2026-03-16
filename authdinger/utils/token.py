@@ -13,6 +13,7 @@ def get_token(content):
 def get_short_token(content):
     return get_token(content)[32:]
 
+
 def rfc822(dt):
     ctime = dt.ctime()
     return "{}, {} {}".format(

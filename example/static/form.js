@@ -5,13 +5,16 @@
     for(let i = 0; i < len; i++){
         inp = inp_li[i];
         by_name[inp.getAttribute("name")] = inp;
+    } 
+    for(let i = 0; i < len; i++){
+        inp = inp_li[i];
         if(inp.getAttribute("type") == "checkbox"){
             let disableName = inp.getAttribute("data-disable");
             if(disableName){
                 (function(disableInput){
                     inp.onclick = function(){
-                        console.log(disableInput);
                         disableInput.disabled = this.checked;
+                        console.log(disableInput);
                     }
                 })(by_name[disableName]);
             }

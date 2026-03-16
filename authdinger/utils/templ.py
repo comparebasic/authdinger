@@ -3,6 +3,8 @@ from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from ..utils.token import rfc822
+from ..utils import identifier
+
 
 def templFrom(config, ident, data):
     templ_dir = None
@@ -16,19 +18,26 @@ def templFrom(config, ident, data):
     with open(os.path.join(templ_dir, ident.name), "r") as f:
         content = f.read()
         if ext == "format":
-            return content.format(**data)
+            try:
+                return content.format(**data)
+            except KeyError as err:
+                raise DingerError("Key Error in templ", err, data) 
         else:
             return content
 
+
 def emailMsgFromIdent(config, ident, data, from_addr, to_addrs):
-    subject_ident = "content={}.subject@{}".format(ident.name, ident.location)
-    subject = templ.templFrom(config, subject_ident, data)
+    subject_ident = identifier.Ident(
+        "content={}_subject.format@{}".format(ident.name, ident.location))
+    subject = templFrom(config, subject_ident, data)
 
-    text_ident = "content={}.txt@{}".format(ident.name, ident.location)
-    text = templ.templFrom(config, text_ident, data)
+    text_ident = identifier.Ident(
+        "content={}_txt.format@{}".format(ident.name, ident.location))
+    text = templFrom(config, text_ident, data)
 
-    html_ident = "content={}.html@{}".format(ident.name, ident.location)
-    html = templ.templFrom(config, html_ident, data)
+    html_ident = identifier.Ident(
+        "content={}_html.format@{}".format(ident.name, ident.location))
+    html = templFrom(config, html_ident, data)
 
     msg = MIMEMultiplart("alternative")
     msg["Subject"] = subject
