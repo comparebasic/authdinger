@@ -1,2 +1,2 @@
 Hi {fullname},
-{token} is your {brand} login code, or visit {url}/auth/login?token={token}.
+{token} is your {brand} login code, or visit {url}/auth/token-login?token={token}&email={email-token}&redir=/auth/dashboard.

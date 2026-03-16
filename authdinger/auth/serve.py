@@ -76,7 +76,7 @@ class DingerAuthHandler(socketserver.StreamRequestHandler):
             return
 
         except DingerNotOk as err:
-            self.server.logger.log("Invalid login")
+            self.server.logger.log("Invalid login", err.args)
             self.respond("no", err.args[0], "")
             return
 

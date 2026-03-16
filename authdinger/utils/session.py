@@ -39,10 +39,15 @@ def load(req, ident):
         
     req.server.logger.log("Session Data {}".format(data))
 
-    if not data.get("email-token"):
-        raise DingerNotOk("User email-token not found")
+    if data.get("email-token"):
+        email_token = data["email-token"]
+    else:
+        if data.get("email"):
+            email_token = bstream.quote(data["email"]).decode("utf-8")
+        else:
+            raise DingerNotOk("User email-token not found")
 
-    path = get_userfile(config, data["email-token"])
+    path = get_userfile(config, email_token)
     keys = config["fields"]["user"]
 
     try:
@@ -58,7 +63,16 @@ def load(req, ident):
 
 def start(req, data):
     config = req.server.config
-    token = get_token(data["email-token"].encode('utf-8'))
+
+    if data.get("email-token"):
+        email_token = data["email-token"]
+    else:
+        if data.get("email"):
+            email_token = bstream.quote(data["email"])
+        else:
+            raise DingerNotOk("User email-token not found")
+
+    token = get_token(email_token)
     path = os.path.join(config["dirs"]["sessions"],token)
 
     data["start-time"] = time_bytes(time.time())
@@ -67,7 +81,7 @@ def start(req, data):
             datetime.now(tzlocal())+timedelta(days=SESSION_DAYS))
 
     with open(path, "wb+") as f:
-        details = ["email-token", data["email-token"], 
+        details = ["email-token", email_token, 
             "session-token", data["session-token"],
             "start-time", data["start-time"]]
         bstream.send_r(f, details) 

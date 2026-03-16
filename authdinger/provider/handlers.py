@@ -169,9 +169,11 @@ def token_consume(req, ident, data):
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.connect(config["auth-socket"]) 
 
+        email_token = bstream.quote(data["email"]).decode("utf-8")
+
         bstream.send(sock, (
             "ident",     
-                "token_consume={}@email".format(data["email-token"]),
+                "token_consume={}@email".format(email_token),
             "token",
                 data["token"], 
             ""))
@@ -258,6 +260,7 @@ def register(req, ident, data):
             sock.close()
             raise DingerNotOk("Invalid", reason)
 
+        data["email-token"] = email_token
         sock.close()
 
     else:

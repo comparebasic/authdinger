@@ -12,29 +12,29 @@
         "/": [
             "get", "content=welcome.html@page"],
         "/auth/login": [
-            ["get", "map=action/path@req", "map=redir@query", "content=login-form.format@page"],
-            ["post", "map=email,send-email-auth?,password?@form",
-                ["data_eq=on@send-auth-email", "auth_email", "session_start", "redir=redir@data"],
-                ["pw_auth", "session_start", "map=redir@query", "redir=redir@data"] 
+            ["get", "map=action/path@req", "map=redir@query", "set_query", "content=login-form.format@page", "end"],
+            ["post", "map=email,send-email-auth?,password?@form", "map=redir@query", "set_query",
+                ["data_eq=on@send-auth-email", "auth_email", "session_start", "redir=redir@data", "end"],
+                ["pw_auth", "session_start", "redir=redir@data", "end"] 
             ],
-            ["map=action/path@req", "map=redir@query", "content=login-form.format@page"]
+            ["map=action/path@req", "map=redir@query", "content=login-form.format@page", "end"]
         ],
         "/auth/token-login": [
-            ["get", "token_consume", "session_start", "redir=data.redir"],
-            ["get", "content=token.format@page"]
+            ["get", "map=redir,token,email@query", "set_query", "token_consume", "session_start", "redir=redir@data", "end"],
+            ["get", "content=token.format@page", "end"]
         ],
         "/auth/register": [
-            ["get", "map=action/path@req", "map=redir@query", "content=register.format@page", "end"],
-            ["post", "map=action/path@req", "map=redir@query", "map=email,fullname,send-email-auth?,password?@form",
+            ["get", "map=action/path@req", "map=redir@query", "set_query", "content=register.format@page", "end"],
+            ["post", "map=action/path@req", "map=redir@query","set_query", "map=email,fullname,send-email-auth?,password?@form",
                 ["data_eq=on@send-email-auth", "register", "get_token", "map=brand,url@config", "email=auth-token-email@emails",
                     "content=email-sent.format@page", "end"],
-                ["data_neq=on@send-email-auth", "register", "pw_set", "redir=data.redir", "end"] 
+                ["data_neq=on@send-email-auth", "register", "pw_set", "redir=redir@data", "end"] 
             ],
             ["content=register.format@page", "end"]
         ],
         "/auth/dashboard": [
-            ["get", "session_open", "map=email,fullname@session", "content=dashboard.format@page"],
-            ["redir=/auth/login"]
+            ["get", "session_open", "map=email,fullname@session", "content=dashboard.format@page", "end"],
+            ["set_query=redir/path@req", "redir=/auth/login", "end"]
         ],
         "/static/styles.css": ["content=styles.css@static"],
         "/static/form.js": ["content=form.js@static"],

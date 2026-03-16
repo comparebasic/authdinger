@@ -8,7 +8,7 @@ def quote(s):
         if c >= ord('a') and c <= ord('z') or c >= ord('A') and c <= ord('Z'):
             b.append(c)
         else:
-            b.append(ord('#'))
+            b.append(ord('%'))
             b += bytearray(c.to_bytes(1, "big").hex(), 'ascii')
     return bytes(b)
 
@@ -23,7 +23,7 @@ def unquote(bs):
         bs = bytes(bs, "utf-8")
 
     for c in bs:
-        if c == ord('#'):
+        if c == ord('%'):
             count = 2
             a = bytearray()
             continue

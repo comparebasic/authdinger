@@ -104,15 +104,18 @@ def token_consume(req, ident, data):
     req.server.logger.log("Consuming Token {}".format(
         bstream.unquote(ident.name)))
 
-    dir_path = get_authdir(config, ident.name)
+    email_token = ident.name
+    dir_path = get_authdir(config, email_token)
     if not os.path.exists(dir_path):
-        raise DingerNotOk("User dir not found")
+        raise DingerNotOk("User dir not found", dir_path)
 
-    tk = data["token"] 
+    tk = data["token"].decode("utf-8") 
     path = get_tokenfile(config, ident.name, tk)
 
     if not os.path.exists(path):
-        raise DingerNotOk("Invalid")
+        raise DingerNotOk("Invalid", path)
 
     os.remove(path)
     del data["token"]
+
+    req.server.logger.log("Token Consumed {}".format(path))
