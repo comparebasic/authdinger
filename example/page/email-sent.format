@@ -1,2 +1,19 @@
 <h1>Email Sent</h1>
 <p>An email has been sent to <em>{email}</em></p>
+<form method="POST" action="{action}">
+    <fieldset>
+    <label name="code">
+        <span>Enter Code:</span>
+        <span>
+            <input type="num" name="six-code" placeholder="six digit code"></input>
+        </span>
+    </label>
+    <label>
+        <span>&nbsp;</span>
+        <span>
+            <button type="submit">Login</button>
+        </span>
+    </label>
+    </fieldset>
+    <input type="hidden" value="{email"} name="email"></input>
+</form>

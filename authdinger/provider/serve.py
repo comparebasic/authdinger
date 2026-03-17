@@ -83,6 +83,7 @@ class DingerHandler(BaseHTTPRequestHandler):
             self.resolve("/not-found", data)
             self.code = 404
         except DingerError as err:
+            self.server.logger.error(err, traceback.format_exception(err))
             data["error"] = str(err.args)
             self.resolve("/error", data)
             self.code = 500

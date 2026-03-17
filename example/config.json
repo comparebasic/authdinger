@@ -14,10 +14,16 @@
         "/auth/login": [
             ["get", "map=action/path@req", "set_query", "content=login-form.format@page", "end"],
             ["post", "map=email,send-email-auth?,password?@form", "set_query",
-                ["data_eq=on@send-auth-email", "auth_email", "session_start", "redir=/auth/dashboard", "end"],
-                ["pw_auth", "session_start", "redir=/auth/dashboard", "end"] 
+                ["data_eq=on@send-auth-email", "get_token", "map=brand,url@config", "email=auth-token-email@emails",
+                    "content=email-sent.format@page", "end"],
+                ["data_neq=on@send-auth-email", "pw_auth", "session_start", "redir=/auth/dashboard", "end"] 
             ],
             ["map=action/path@req", "content=login-form.format@page", "end"]
+        ],
+        "/email-sent": [
+                ["get", "redir=@/auth/login", "end"],
+                ["post", "map=email,six-code@form", "token_consume_code", "session_start", "redir=redir@data","end"],
+                ["content=email-sent.format@page", "end"]
         ],
         "/auth/token-login": [
             ["get", "map=redir,token,email@query", "set_query", "token_consume", "session_start", "redir=redir@data", "end"],

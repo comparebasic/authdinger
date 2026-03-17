@@ -98,6 +98,36 @@ def token_create(req, ident, data):
 
     return tk
 
+def token_consume_code(req, ident, data):
+    config = req.server.config
+    req.server.logger.log("Consuming Token {}".format(
+        bstream.unquote(ident.name)))
+
+    email_token = ident.name
+    dir_path = get_authdir(config, email_token)
+    if not os.path.exists(dir_path):
+        raise DingerNotOk("User dir not found", dir_path)
+
+    path = os.path.join(dir_path, "tokens")
+    tk = None
+    for itk in os.listdir(path):
+        print("Checking {} vs {} -> {}".format(data["six-code"], itk, token.get_six(itk)))
+        print(token.check_six(data["six-code"], itk))
+
+        if token.check_six(data["six-code"], itk):
+            tk = itk
+            break
+
+    if not tk:
+        raise DingerNotOk("Invalid code", tk)
+
+    path = get_tokenfile(config, ident.name, tk)
+    if not os.path.exists(path):
+        raise DingerNotOk("Invalid path from code", path)
+
+    os.remove(path)
+
+    req.server.logger.log("Token Consumed {}".format(path))
 
 def token_consume(req, ident, data):
     config = req.server.config
@@ -116,6 +146,5 @@ def token_consume(req, ident, data):
         raise DingerNotOk("Invalid", path)
 
     os.remove(path)
-    del data["token"]
 
     req.server.logger.log("Token Consumed {}".format(path))

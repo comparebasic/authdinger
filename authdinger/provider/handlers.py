@@ -1,7 +1,7 @@
 import socket, bcrypt
 from ..utils.exception import \
      DingerNotOk, DingerError, DingerKnockout, DingerReChain
-from ..utils import bstream, user, session, templ, form
+from ..utils import bstream, user, session, templ, form, token
 from ..utils.maps import mime_map
 from smtplib import SMTP
 import smtplib
@@ -163,6 +163,36 @@ def pw_auth(req, ident, data):
     else:
         raise DingerNotOk("No Auth Service Defined")
 
+
+def token_consume_code(req, ident, data):
+    config = req.server.config
+    if config.get("auth-socket"): 
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(config["auth-socket"]) 
+
+        email_token = bstream.quote(data["email"]).decode("utf-8")
+
+        bstream.send(sock, (
+            "ident",     
+                "token_consume_code={}@email".format(email_token),
+            "six-code",
+                data["six-code"], 
+            ""))
+
+        answer = bstream.read_next(sock) 
+        if answer != b"ok":
+            reason = bstream.read_next(sock)
+            sock.close()
+            raise DingerNotOk("Invalid", reason)
+
+        del data["six-code"]
+        sock.close()
+
+    else:
+        raise DingerNotOk("No Auth Service Defined")
+
+
+
 def token_consume(req, ident, data):
     config = req.server.config
     if config.get("auth-socket"): 
@@ -281,8 +311,10 @@ def email(req, ident, data):
         data["email-token"] = bstream.unquote(data["email"])
 
     msg = templ.emailMsgFromIdent(config, 
-        ident, data,
-        from_addr=config["system-email"], to_addrs=[data["email"]])
+        ident,
+        data,
+        from_addr=config["system-email"],
+        to_addrs=[data["email"]])
 
     with SMTP(config["smtp"]) as smtp:
         smtp.send_message(msg, from_addr=msg["From"], to_addrs=msg["To"])
@@ -307,8 +339,9 @@ def get_token(req, ident, data):
             sock.close()
             raise DingerNotOk("Invalid", reason)
 
-        token = bstream.read_next(sock)
-        data["token"] = token.decode("utf-8")
+        tk = bstream.read_next(sock)
+        data["token"] = tk.decode("utf-8")
+        data["six-code"] = token.get_six(data["token"])
         sock.close()
 
     else:
