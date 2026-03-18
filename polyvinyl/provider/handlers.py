@@ -116,6 +116,8 @@ def data_neq(req, ident, data):
 inc = static = page = content
 
 def redir(req, ident, data):
+    config = req.server.config
+
     if ident.location == "data":
         location = data.get(ident.name)
     else:
@@ -128,6 +130,9 @@ def redir(req, ident, data):
             location,
             form.toQuery(req.server.config, req.query_data))
         
+    if not location.startswith("http"):
+        location = "{}{}".format(config["url"], location)
+
     req.code = 302
     req.header_stage["Location"] = location
     req.server.logger.log("Redir {}".format(location))
