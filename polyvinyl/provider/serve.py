@@ -79,6 +79,8 @@ class DingerHandler(BaseHTTPRequestHandler):
         data = {"error": None}
         try:
             self.resolve(path, data)
+        except DingerKnockout as ko:
+            pass
         except DingerNotFound as err:
             data["error"] = str(err.args)
             self.resolve("/not-found", data)
