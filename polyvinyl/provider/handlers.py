@@ -231,6 +231,8 @@ def session_start(req, ident, data):
     del data["session-expires"]
     req.header_stage["Set-Cookie"] = cookie
 
+    req.server.logger.warn("Login Cookie {}".format(cookie))
+
 
 def session_open(req, ident, data):
     session.load(req, data)
