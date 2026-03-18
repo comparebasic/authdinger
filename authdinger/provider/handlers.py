@@ -130,6 +130,7 @@ def redir(req, ident, data):
             form.toQuery(req.server.config, req.query_data))
         
     req.send_header("Location", location)
+    req.server.logger.log("Redir {}".format(location))
     for k,v in req.header_stage.items():
         req.send_header(k, v)
     req.end_headers()
