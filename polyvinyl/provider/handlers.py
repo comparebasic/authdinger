@@ -230,7 +230,6 @@ def session_start(req, ident, data):
     del data["session-token"]
     del data["session-expires"]
     req.header_stage["Set-Cookie"] = cookie
-    req.header_stage["Cookie"] = cookie
 
 
 def session_open(req, ident, data):
