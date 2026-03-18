@@ -36,7 +36,7 @@ def load(req, ident):
     data = {}
     config = req.server.config
     if not req.cookie.get("Ssid"):
-        raise DingerNotOk("No Ssid from cookie")
+        raise DingerNotOk("No Ssid from cookie", req.cookie)
 
     path = os.path.join(config["dirs"]["sessions"], req.cookie["Ssid"])
     keys = config["fields"]["session"]
