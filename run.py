@@ -1,7 +1,7 @@
 import os
-from authdinger import  DingerAuthServer, DingerProviderServer
-from authdinger.utils.log import GetLogger
-from authdinger.utils.config import ParseConfig, ParseCli
+from polyvinyl import  DingerAuthServer, DingerProviderServer
+from polyvinyl.utils.log import GetLogger
+from polyvinyl.utils.config import ParseConfig, ParseCli
 
 def run_auth(config, logger):
     logger.log("Serving AuthDinger Auth on socket {}".format(config["auth-socket"]))

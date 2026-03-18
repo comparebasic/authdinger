@@ -1,18 +1,18 @@
-# AuthDinger
+# PolyVinyl
 
-Two services, one for a SAML based user management framework, and another as an
-OAUTH frontend service.
+Two services, one for a authentication and one for a web services management framework.
 
-## AuthDingerUser
+## Auth 
 
-This service is starts with a UDP socket server using the SAML protocol for
-authentication, and the superset of that protocol for user management
+This service is starts with a UNIX socket server using the a protocal that
+communicates content length in two bytes, followed by content, to transmit a
+series of tokens. The response is communicated in similar tokens.
 
-found in the [auth](authdinger/auth) folder of the source folder.
+found in the [auth](polyvinyl/auth) folder of the source folder.
 
-## AuthDingerServer
+## Provider 
 
-This service is a frontend for the OAuth protocol and it's interaction with the
-underlying User service.
+This is a configuration based web services framework powerd by the JSON
+configuration found at [example/config.json](example/config.json).
 
-found in the [provider](authdinger/provider) folder of the source folder.
+found in the [provider](polyvinyl/provider) folder of the source folder.
