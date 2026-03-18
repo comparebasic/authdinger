@@ -226,7 +226,7 @@ def token_consume(req, ident, data):
 def session_start(req, ident, data):
     session.start(req, data)
 
-    cookie = "Ssid={}; Expires={}; HttpOnly; Secure; SameSite=Strict;".format(
+    cookie = "Ssid={}; Expires={}; HttpOnly; Secure; SameSite=Lax;".format(
         data["session-token"], data["session-expires"])
     del data["session-token"]
     del data["session-expires"]
