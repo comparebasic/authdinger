@@ -31,12 +31,15 @@ def do_chain(req, chain, data):
                 do_chain(req, h, data)
                 continue
             except DingerKnockout as ko:
+                req.server.logger.log("Knockout {}".format(ko))
                 continue
             except DingerNotOk as nok:
                 data["error"] = str(nok.args)
+                req.server.logger.log("NotOk {}".format(ko))
                 continue
             except DingerError as err:
                 data["error"] = str(err.args)
+                req.server.logger.log("Error {}".format(ko))
                 raise 
 
         elif isinstance(h, (Inst)):
