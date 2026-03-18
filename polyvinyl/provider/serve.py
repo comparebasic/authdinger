@@ -101,6 +101,8 @@ class DingerHandler(BaseHTTPRequestHandler):
 
         self.send_response(self.code, http_messages[self.code]) 
         for k,v in self.header_stage.items():
+            if k == "Cookie-Set":
+                print("Setting Cookie {}".format(v))
             self.send_header(k, v)
         self.end_headers()
 
