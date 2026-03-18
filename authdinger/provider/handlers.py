@@ -308,7 +308,7 @@ def email(req, ident, data):
     config = req.server.config
 
     if not data.get('email-token'):
-        data["email-token"] = bstream.unquote(data["email"])
+        data["email-token"] = bstream.quote(data["email"]).encode("utf-8")
 
     msg = templ.emailMsgFromIdent(config, 
         ident,
@@ -319,6 +319,14 @@ def email(req, ident, data):
     with SMTP(config["smtp"]) as smtp:
         smtp.send_message(msg, from_addr=msg["From"], to_addrs=msg["To"])
 
+
+def set_token_url(req, ident, data):
+    if not data.get('email-token'):
+        data["email-token"] = bstream.quote(data["email"]).decode("utf-8")
+    
+    data["login-url"] = "{}{}?email={}&token={}".format(
+        data["url"], ident.name, data["email-token"], data["six-code"])
+    
 
 def get_token(req, ident, data):
     config = req.server.config

@@ -9,9 +9,11 @@ from .. import SEEK_END, SEEK_CUR, SEEK_START
 def get_authdir(config, email_token):
     return os.path.join(config["dirs"]["auth-data"], email_token)
 
+
 def get_authfile(config, email_token):
     return os.path.join(get_authdir(config, email_token),
                 "auth.linr")
+
 
 def get_tokenfile(config, email_token, token):
     return os.path.join(
@@ -98,6 +100,7 @@ def token_create(req, ident, data):
 
     return tk
 
+
 def token_consume_code(req, ident, data):
     config = req.server.config
     req.server.logger.log("Consuming Token {}".format(
@@ -128,6 +131,7 @@ def token_consume_code(req, ident, data):
     os.remove(path)
 
     req.server.logger.log("Token Consumed {}".format(path))
+
 
 def token_consume(req, ident, data):
     config = req.server.config
