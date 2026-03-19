@@ -14,9 +14,12 @@ Two services are included, one for a authentication and one for a web services m
 
 ## Auth 
 
-This service is starts with a UNIX socket server using the a protocal that
-communicates content length in two bytes, followed by content, to transmit a
-series of identifiers. The response is communicated in similar identifiers.
+This service is a unix socket server using the a protocal that communicates
+content length in two bytes, followed by that content. It transmits identifiers
+and small pieces of information. The largest value is a that it can easily
+centralize and house sensative data in a seperate process using a seperate
+system user. Using the `Lin` format that you can read more about [here](doc/lin.md).
+
 
 found in the [auth](polyvinyl/auth) folder of the source folder.
 
