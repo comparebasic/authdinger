@@ -8,6 +8,8 @@ This is a task-management and web application framework based on the following t
 - Identifier syntax for defining common actions in the form `<tag>=<name>@<location>`.
 - Simple data format for storing and streaming data known as `Lin`.
 
+This system is presently written in Python 3 and available under a 3-clause BSD [Licence](LICENSE).
+
 # Services
 
 Two services are included, one for authentication and one for web services management.
@@ -31,7 +33,9 @@ Found in the [provider](polyvinyl/provider) folder of the source folder.
 
 # Spatial Oriented Programming
 
-This is a discipline of creating small parts that get routed around the application almost like spaces. It has a strong focus on keeping behaviour in lists and configuration that can be read and discussed at a high level.
+This is a discipline of creating small parts that get routed around the
+application almost like spaces. It has a strong focus on keeping behaviour in
+lists and configuration that can be read and discussed at a high level.
 
 # `Chain` configuration syntax
 
