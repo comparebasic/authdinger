@@ -51,32 +51,32 @@ Here is an example configuration for the routes of the login page:
 }
 ```
 
-At a high level this is loading and processing a login page. Becuase this example uses the [polyvinyl/provider/serve.py] Provider service, all of the `tag` values of the identifiers will reference functions defined in [provider/handlers.py](polyvinyl/provider/handlers.py).
+At a high level this is loading and processing a login page. Becuase this
+example uses the [provider/serve.py](polyvinyl/provider/serve.py) Provider
+service, all of the `tag` values of the identifiers will reference functions
+defined in [provider/handlers.py](polyvinyl/provider/handlers.py).
 
 See more about how this breaks down [here](/doc/chain.md).
 
 # Identifier Syntax
 
-The identifier is a simple string that represents three distinct parts and can be repurposed for several uses.
+The identifier is a simple string that represents three distinct parts and can
+be repurposed for several uses.
 
 The identifier syntax is a 3 part data identifier with the following syntax:
 
     <tag>=<name>@<location>
 
-This is used for defining what function to run, what action to perform, or what credentials to use for actions like user login or registration.
-
+This is used for defining what function to run, what action to perform, or what
+credentials to use for actions like user login or registration.
 
 example identifiers:
 
-    redir=/auth/login
-
-    map=action/path@req
-
-    pw_set
-
-    session_start
-
-    register=test%40cb%2elocal@email
+    - redir=/auth/login
+    - map=action/path@req
+    - pw_set
+    - session_start
+    - register=test%40cb%2elocal@email
     
 
 To describe what each identifier does, It's worth understanding what this system does: it routes a series of actions to move data and process or product a webpage.
