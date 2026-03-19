@@ -41,7 +41,7 @@ lists and configuration that can be read and discussed at a high level.
 
 Here is an example configuration for the routes of the login page:
 
-```json
+```jsonc
 "routes": {
     "/auth/login": [
         ["get", "map=action/path@req", "content=login-form.format@page", "end"],
@@ -84,6 +84,11 @@ example identifiers:
     - register=test%40cb%2elocal@email
     
 
-To describe what each identifier does, It's worth understanding what this system does: it routes a series of actions to move data and process or product a webpage.
+To describe what each identifier does, It's worth understanding what this
+system does: it routes a series of actions to move data and process or produce
+a webpage.
 
-See more about how this breaks [here](doc/identifier.md).
+See more about what these identifiers mean in the [Identifier](doc/identifier.md) documentation.
+
+(c) Copyright 2026 - Copmpare Basic Incorporated
+See [licence](LICENSE) for details.

@@ -15,13 +15,16 @@ Here is an example configuration for the routes of the login page:
 }
 ```
 
-At a high level this is loading and processing a login page. Becuase this example uses the [polyvinyl/provider/serve.py] Provider service, all of the `tag` values of the identifiers will reference functions defined in [provider/handlers.py](polyvinyl/provider/handlers.py).
+At a high level this is loading and processing a login page. Becuase this
+example uses the Provider service ([polyvinyl/provider/serve.py]), all of the
+`tag` values of the identifiers will reference functions defined in
+[provider/handlers.py](polyvinyl/provider/handlers.py).
 
 Let's break down what this is doing:
 
 - When the server recieves the page "/auth/login" this configuration entry is used.
 
-```json
+```jsonc
 "routes": {
     // Serve the following config for a page http://<host>/auth/login
     "/auth/login": [
@@ -30,9 +33,10 @@ Let's break down what this is doing:
 }
 ```
 
-- If the method of the requests is GET, it then maps the "path" value from the `req` object into the "action" value of the `data` for the request,
+- If the method of the requests is GET, it then maps the "path" value from the
+  `req` object into the "action" value of the `data` for the request,
 
-```json
+```jsonc
 "routes": {
     "/auth/login": [
         [   // Ensure this is a GET request
@@ -41,6 +45,7 @@ Let's break down what this is doing:
             "map=action/path@req",  
             // serve content for login-form
             "content=login-form.format@page",  
+            // Finish and send request
             "end"
         ],
         ...
@@ -48,9 +53,11 @@ Let's break down what this is doing:
 ```
 
 
-- The second branch of the sub-chain will be run if any identifier raised a DingerKnockout exception. In this case if the request was not GET we can expect the second sub-chain to run.
+- The second branch of the sub-chain will be run if any identifier in the first
+  branch failed (and raised a DingerKnockout exception). In this case if the
+  request was not GET we can expect the second sub-chain to run.
 
-```json
+```jsonc
 "routes": {
     "/auth/login": [
         ["get", "map=action/path@req", "content=login-form.format@page", "end"],
@@ -64,9 +71,9 @@ Let's break down what this is doing:
 }
 ```
 
-- Then once the form data has been recieved, the form has two optional paths: register or login.
+- Then, once the form data has been recieved, the form has two optional paths: register or login.
 
-```json
+```jsonc
 "routes": {
     "/auth/login": [
         ["get", "map=action/path@req", "content=login-form.format@page", "end"],
@@ -82,7 +89,7 @@ Let's break down what this is doing:
             [
                 // Proceed with this subchain if data["register"] != "on"
                 "data_neq=on@register", 
-                // Check that the passwor dis valid 
+                // Check that the password is valid 
                 "pw_auth"
             ],
                 // If either sub-chain above has succeded this will now run
@@ -99,7 +106,7 @@ Let's break down what this is doing:
 }
 ```
 
-```json
+```jsonc
 "routes": {
     "/auth/login": [
         ["get", "map=action/path@req", "content=login-form.format@page", "end"],
@@ -123,6 +130,12 @@ Let's break down what this is doing:
 }
 ```
 
-While it is increadibly condensed, it is very easy to converse about the steps of the system at a high level, without needing to dig through layers of code to find the order of operations.
+While it is increadibly condensed, it is very easy to converse about the steps
+of the system at a high level, without needing to dig through layers of code to
+find the order of operations.
 
 See the full configuration example here: [examples/config.json](examples/config.json)
+
+Example handler files can be found [here](polyvinyl/auth/handlers.py) and
+[here](polyvinyl/provider/handlers.py). The chain system itself can be found
+[here](polyvinyl/utils/handler.py).
