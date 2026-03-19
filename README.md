@@ -10,7 +10,7 @@ This is a task-management and web application framework based on the following t
 
 # Services
 
-Two services are included, one for a authentication and one for a web services management framework.
+Two services are included, one for authentication and one for web services management.
 
 ## Auth 
 
@@ -20,15 +20,14 @@ and small pieces of information. The largest value is a that it can easily
 centralize and house sensative data in a seperate process using a seperate
 system user. Using the `Lin` format that you can read more about [here](doc/lin.md).
 
-
-found in the [auth](polyvinyl/auth) folder of the source folder.
+Found in the [auth](polyvinyl/auth) folder of the source folder.
 
 ## Provider 
 
 This is a configuration based web services framework powerd by the JSON
 configuration found at [example/config.json](example/config.json).
 
-found in the [provider](polyvinyl/provider) folder of the source folder.
+Found in the [provider](polyvinyl/provider) folder of the source folder.
 
 # Spatial Oriented Programming
 
@@ -51,12 +50,14 @@ Here is an example configuration for the routes of the login page:
 }
 ```
 
-At a high level this is loading and processing a login page. Becuase this
-example uses the [provider/serve.py](polyvinyl/provider/serve.py) Provider
-service, all of the `tag` values of the identifiers will reference functions
-defined in [provider/handlers.py](polyvinyl/provider/handlers.py).
+At a high level this is loading and processing a login page. Because this
+example uses the Provider service
+([provider/serve.py](polyvinyl/provider/serve.py)), all of the `tag` values of
+the identifiers will reference functions defined in
+[provider/handlers.py](polyvinyl/provider/handlers.py).
 
 See more about how this breaks down [here](/doc/chain.md).
+
 
 # Identifier Syntax
 
