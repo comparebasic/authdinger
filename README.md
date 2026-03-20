@@ -14,6 +14,47 @@ Architectural Diagram:
 
 ![Architectural Diagram](doc/polyvinyl-arch.svg)
 
+# Convention
+
+The main convention of the system is that it uses a series three-part
+identifiers to define behavior. These identifiers are stored in a
+[configuration](example/config.json) file that loads against a
+[module](provider/handlers.py) with functions defined to be triggered by the
+identifiers.
+
+An example identifiery is as follows, see more about identifiers [here](doc/identifier.md):
+
+```
+<tag>=<name>@<location>
+```
+
+
+This is the function signature for handling the behavior of an identitifier.
+
+```python
+def func(request, ident, data):
+    # do stuff that either:
+    #
+    #    1. modifies values in the *data* dict argument
+    #    or
+    #    2. raises an exception
+```
+
+Such that `content=dashboard.html@page` loads the `content` function to render
+the `dashboard.html` file in the `page` folder.
+
+Some functions raise exceptions which tell the server to move on to the next
+series of identifiers, serving essentially as an if/else statement.
+
+```python
+    "data_eq=on@register"
+    # will raise a DingerKnockout() exception if data["register"] != "on"
+```
+
+This is why the configuration is so dense in exchange for a complete view of
+the system in one configuration file. This is also how the system can be used
+to composes web services.
+
 # Services
 
 Two services are included, one for authentication and one for web services management.
