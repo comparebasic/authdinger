@@ -1,4 +1,4 @@
-import os
+import os, pystache
 from datetime import datetime
 from dateutil.tz import tzlocal
 from email.mime.text import MIMEText
@@ -7,9 +7,35 @@ from ..utils.token import rfc822
 from ..utils import identifier
 from ..utils.exception import PolyVinylError, PolyVinylReChain
 
+renderer = pystache.Renderer()
+cache = {}
 
-def templFrom(config, ident, data):
-    templ_dir = None
+
+def render_stache(req, ident, data):
+    config = req.server.config
+    prep = cache.get(ident.ident)
+    if not prep:
+        templ_dir = None
+        if ident.location:
+            templ_dir = config["dirs"].get(ident.location);
+        else:
+            templ_dir = config["dirs"].get("page");
+                
+        parts = ident.name.split(".")
+        ext = parts[-1]
+        try:
+            with open(os.path.join(templ_dir, ident.name), "r") as f:
+                prep = pystache.parse(f.read())
+                cache[ident] = prep
+        except FileNotFoundError as err:
+            raise PolyVinylError(err.args[0], err)
+
+    return renderer.render(prep, {"data": data, "role": req.role, "session": req.session})
+
+
+def templFrom(req, ident, data):
+    config = req.server.config
+
     if ident.location:
         templ_dir = config["dirs"].get(ident.location);
     else:
@@ -17,9 +43,14 @@ def templFrom(config, ident, data):
             
     parts = ident.name.split(".")
     ext = parts[-1]
-    try:
-        with open(os.path.join(templ_dir, ident.name), "r") as f:
-            content = f.read()
+
+    if ext == "stache":
+        return render_stache(req, ident, data) 
+    else:
+        try:
+            with open(os.path.join(templ_dir, ident.name), "r") as f:
+                content = f.read()
+
             if ext == "format":
                 try:
                     return content.format(**data)
@@ -27,22 +58,22 @@ def templFrom(config, ident, data):
                     raise PolyVinylError("Key Error in templ", err) 
             else:
                 return content
-    except FileNotFoundError as err:
-        raise PolyVinylError(err.args[0], err)
+        except FileNotFoundError as err:
+            raise PolyVinylError(err.args[0], err)
 
 
-def emailMsgFromIdent(config, ident, data, from_addr, to_addrs):
+def emailMsgFromIdent(req, ident, data, from_addr, to_addrs):
     subject_ident = identifier.Ident(
         "content={}_subject.format@{}".format(ident.name, ident.location))
-    subject = templFrom(config, subject_ident, data)
+    subject = templFrom(req, subject_ident, data)
 
     text_ident = identifier.Ident(
         "content={}_txt.format@{}".format(ident.name, ident.location))
-    text = templFrom(config, text_ident, data)
+    text = templFrom(req, text_ident, data)
 
     html_ident = identifier.Ident(
         "content={}_html.format@{}".format(ident.name, ident.location))
-    html = templFrom(config, html_ident, data)
+    html = templFrom(req, html_ident, data)
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject

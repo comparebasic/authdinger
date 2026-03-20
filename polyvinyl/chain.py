@@ -1,15 +1,15 @@
 import os
-from .utils import identifier
+from .utils import identifier, user
 from .utils.exception import \
-    PolyVinylNotOk, PolyVinylKnockout, PolyVinylError, PolyVinylReChain
+    PolyVinylNotOk, PolyVinylKnockout, PolyVinylError, PolyVinylReChain, PolyVinylNoAuth
 
 class Inst(object):
     def __init__(self, ident, mod):
 
-        self.ident = ident
         if not hasattr(mod, ident.tag):
             raise ValueError("Missing function for {}".format(ident))
 
+        self.ident = ident
         self.func = getattr(mod, ident.tag)
 
     def __str__(self):
@@ -75,20 +75,29 @@ def Handle(req, chain, data, fmap):
 
 def idents(req, ident, data):
     config = req.server.config
-    if ident.location:
+
+    if ident.location == "user":
+        req.server.logger.log(" -> Users Ident {}".format(ident))
+        if not req.role.get("email-token"):
+            raise PolyVinylNoAuth(ident)
+
+        templ_dir = os.path.join(user.get_userdir(config, req.role["email-token"]), "idents")
+    elif ident.location:
         templ_dir = config["dirs"].get(ident.location);
     else:
         templ_dir = config["dirs"].get("page");
 
-    with open(os.path.join(templ_dir, ident.name), "r") as f:
-        content = f.read()
-        print("content {}".format(content.split("\n")))
-        ch = [
-            Inst(identifier.Ident(v.strip()), req.server.handlers) \
-                for v in content.split("\n") \
-                if v.strip()
-        ]
-        raise PolyVinylReChain(ch)
+    try:
+        with open(os.path.join(templ_dir, ident.name), "r") as f:
+            content = f.read()
+            ch = [
+                Inst(identifier.Ident(v.strip()), req.server.handlers) \
+                    for v in content.split("\n") \
+                    if v.strip()
+            ]
+            raise PolyVinylReChain(ch)
+    except FileNotFoundError as err:
+        pass
     
 
 def _setup_chain(config, chain, mod):
@@ -106,9 +115,11 @@ def _setup_chain(config, chain, mod):
                 # handle page stuff here
                 for sv in config["templates"][ident.location]:
                     if isinstance(sv, (str)):
-                        sub_sub_chain.append(Inst(identifier.Ident(sv), mod))
+                        inst = Inst(identifier.Ident(sv), mod)
                     elif sv == True:
-                        sub_sub_chain.append(Inst(ident, mod))
+                        # place original intent in place of the variable True
+                        inst = Inst(ident, mod)
+                    sub_sub_chain.append(inst)
 
                 sub_chain.extend(sub_sub_chain)
             else:

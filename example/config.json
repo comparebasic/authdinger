@@ -26,7 +26,7 @@
             ["map=action/path@req", "content=login-form.format@page", "end"]
         ],
         "/auth/dashboard": [
-            ["get", "session_open", "map=email,fullname@session", "idents=dashboard.idents@page", "end"],
+            ["get", "session_open", "idents=dashboard.idents@page", "end"],
             ["redir=/auth/login", "end"]
         ],
         "/auth/logout": [

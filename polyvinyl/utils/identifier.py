@@ -4,20 +4,20 @@ class Ident(object):
     "notes:\n"
     "  - source = <base>.<ext>\n"
     "  - a tag with no @ symbol is assigned to <tag>\n"
-    "  - ident represents the original string\n"
+    "  - ident_s represents the original string\n"
     "  - if base is numerical it is assigned as an integer\n"
 
 
-    def __init__(self, ident):
+    def __init__(self, ident_s):
 
-        self.ident = ident
+        self.ident = ident_s
         self.tag = None
         self.name = None
         self.location = None
 
-        parts = ident.split("=")
+        parts = ident_s.split("=")
         if len(parts) == 1:
-            self.tag = ident
+            self.tag = ident_s
         elif len(parts) == 2:
             self.tag = parts[0]
             self.name = parts[1]
@@ -37,7 +37,7 @@ class Ident(object):
             except ValueError:
                 pass
         else:
-            raise TypeError(ident)
+            raise TypeError(ident_s)
        
 
     def __repr__(self):

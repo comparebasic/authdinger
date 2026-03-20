@@ -2,6 +2,7 @@ import socket
 from . import BSTREAM_MAX, SEEK_END, SEEK_CUR, SEEK_START
 from .utils import identifier
 from .utils.exception import PolyVinylError, PolyVinylNotOk
+from .utils import config as config_d
 
 def query_path(path, details):
     try:
@@ -171,25 +172,8 @@ def map_r(stream, keys=None):
 
 
 def map_str_r(stream, keys=None):
-    data = {}
     raw = map_r(stream, keys)
-    for k, v in raw.items():
-        print("item ({}/{})".format(k,v))
-        if not keys:
-            data[k] = v.decode("utf-8") 
-
-        elif keys[k]:
-            value = v.decode("utf-8")
-            data[k] = value 
-            if isinstance(keys[k], (str)):
-                ident = identifier.Ident(keys[k])
-                if ident.tag == "unquote":
-                    value = unquote(value)
-                if ident.name:
-                    k = ident.name
-
-            data[k] = value 
-    return data
+    return config_d.map_keys(keys, raw, {})
     
 
 def arr_to_dict(arr):

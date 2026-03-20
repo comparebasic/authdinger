@@ -32,6 +32,7 @@ def close(req, ident):
     os.remove(path)
     req.session = {}
 
+
 def load(req, ident):
     data = {}
     config = req.server.config
@@ -65,11 +66,14 @@ def load(req, ident):
         with open(path, "rb") as f:
             f.seek(0, SEEK_END)
             keys = config["fields"]["user"]
-            data.update(lin.map_str_r(f, keys))
+            req.role = lin.map_str_r(f, keys)
+            req.role["email-token"] = email_token
     except FileNotFoundError:
         raise PolyVinylNotOk("User not found")
 
     req.session = data
+
+    req.server.logger.warn("Role {} Session {}".format(req.role, req.session))
 
 
 def start(req, data):

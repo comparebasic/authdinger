@@ -7,6 +7,9 @@ class PolyVinylKnockout(ValueError):
 class PolyVinylNotFound(ValueError):
     pass
 
+class PolyVinylNoAuth(ValueError):
+    pass
+
 class PolyVinylReChain(ValueError):
     pass
 

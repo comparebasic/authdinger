@@ -5,6 +5,7 @@ from ..utils.exception import PolyVinylNotOk
 def get_userdir(config, email_token):
     return os.path.join(config["dirs"]["user-data"], email_token)
 
+
 def get_userfile(config, email_token):
     return os.path.join(get_userdir(config, email_token),
                 "details.linr")
@@ -29,9 +30,13 @@ def create(req, config, data):
         "salt", data["salt"]]
 
     req.server.logger.log("Create User {}".format(details))
-    os.mkdir(get_userdir(config, email_token.decode("utf-8")))
+    dir_path = get_userdir(config, email_token.decode("utf-8")) 
+    os.mkdir(dir_path)
     with open(path, "wb+") as f:
         lin.send_r(f, details) 
+
+    for v in ["forms", "idents"]:
+        os.mkdir(os.path.join(dir_path, v))
 
         
 def pw_hash(req, config, data):

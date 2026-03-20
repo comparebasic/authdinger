@@ -86,6 +86,7 @@ def post(req, ident, data):
 
 
 def idents(req, ident, data):
+    print("Handlers.idents {}".format(ident))
     chain.idents(req, ident, data)
 
 
@@ -98,7 +99,7 @@ def content(req, ident, data):
     mime = mime_map.get(ext)
     if mime:
         req.header_stage["Content-Type"] = mime;
-    req.content += templ.templFrom(config, ident, data)
+    req.content += templ.templFrom(req, ident, data)
 
 
 def data_eq(req, ident, data):
@@ -176,7 +177,6 @@ def token_consume_code(req, ident, data):
         del data["six-code"]
     else:
         raise PolyVinylNotOk("No Auth Service Defined")
-
 
 
 def token_consume(req, ident, data):
@@ -267,7 +267,7 @@ def email(req, ident, data):
     if not data.get('email-token'):
         data["email-token"] = lin.quote(data["email"]).encode("utf-8")
 
-    msg = templ.emailMsgFromIdent(config, 
+    msg = templ.emailMsgFromIdent(req, 
         ident,
         data,
         from_addr=config["system-email"],

@@ -1,0 +1,16 @@
+{
+    "items": [
+        "section=A few questions about how widely to circulate your donation. Who are you willing to share your name with.@Privacy",
+        "input=Other Donors/donors,Other potential donars,Publicly on comparebasic.com@checkbox,",
+        "section=An explanation of a reporting criteria that effects the timing of your stock allocation@Allocation",
+        "content=Because Compare Basic has been delayed, I have missed a reporting deadline for the SEC, to remedy this, filing all financial statements having recieved \"donations\" but not yet \"allocated stock\" has become necessary while reporting to state and federal agencies. As the incorporator I am still obligated to issue your stock, and am not allowed to take any action that have any impact on your investment until it is allocated.",
+        "question=Does this statement make sense as a good-faith adjustement to the terms of donation?",
+        "input=Yes that is acceptable,No I have concerns@radio",
+        "content=npa.html@inc",
+        "question=Do you agree to the terms of the CB NPA?",
+        ["input=Yes,No let's discuss@radio", ["", "content=That's ok for now\\, certain pages may not be accessible."]],
+        "question=By entering your name you are making the answers to these questions as statements to Compare Basic Incorporated.",
+        "input=Signature@text",
+        "input=Submit@button"
+    ]
+}
