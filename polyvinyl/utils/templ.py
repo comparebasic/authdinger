@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from ..utils.token import rfc822
 from ..utils import identifier
-from ..utils.exception import DingerError
+from ..utils.exception import PolyVinylError, PolyVinylReChain
 
 
 def templFrom(config, ident, data):
@@ -17,15 +17,18 @@ def templFrom(config, ident, data):
             
     parts = ident.name.split(".")
     ext = parts[-1]
-    with open(os.path.join(templ_dir, ident.name), "r") as f:
-        content = f.read()
-        if ext == "format":
-            try:
-                return content.format(**data)
-            except KeyError as err:
-                raise DingerError("Key Error in templ", err) 
-        else:
-            return content
+    try:
+        with open(os.path.join(templ_dir, ident.name), "r") as f:
+            content = f.read()
+            if ext == "format":
+                try:
+                    return content.format(**data)
+                except KeyError as err:
+                    raise PolyVinylError("Key Error in templ", err) 
+            else:
+                return content
+    except FileNotFoundError as err:
+        raise PolyVinylError(err.args[0], err)
 
 
 def emailMsgFromIdent(config, ident, data, from_addr, to_addrs):

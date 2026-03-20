@@ -1,7 +1,7 @@
-import socket, bcrypt
+import bcrypt
 from ..utils.exception import \
-     DingerNotOk, DingerError, DingerKnockout, DingerReChain
-from ..utils import bstream, user, session, templ, form, token
+     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain
+from ..utils import lin, user, session, templ, form, token, chain
 from ..utils.maps import mime_map
 from smtplib import SMTP
 import smtplib
@@ -19,7 +19,7 @@ def _map(req, ident, data, dest):
         elif len(parts) == 2:
             val_key = parts[1]
         else:
-            raise DingerError("Unparsable fields definition", ident.name)
+            raise PolyVinylError("Unparsable fields definition", ident.name)
 
         kv[key] = val_key
 
@@ -28,7 +28,7 @@ def _map(req, ident, data, dest):
         case "req":
             for k,v in kv.items():
                 if not hasattr(req, v):
-                    raise DingerKnockout("Field not found for req {}".format(ident))
+                    raise PolyVinylKnockout("Field not found for req {}".format(ident))
 
             data[key] = getattr(req, v)
         case "query" | "form" | "data" | "cookie" | "session" | "config":
@@ -54,7 +54,7 @@ def _map(req, ident, data, dest):
                     dest[k] = source.get(v)
                 else:
                     if not source.get(v):
-                        raise DingerKnockout("Field not found for query {}".format(ident))
+                        raise PolyVinylKnockout("Field not found for query {}".format(ident))
                     dest[k] = source[v]
 
     req.server.logger.log("After Map {} {}".format(ident, dest))
@@ -62,7 +62,7 @@ def _map(req, ident, data, dest):
 
 def end(req, ident, data):
     req.done = True
-    raise DingerKnockout()
+    raise PolyVinylKnockout()
 
 
 def map(req, ident, data):
@@ -77,12 +77,17 @@ def set_query(req, ident, data):
 
 def get(req, ident, data):
     if req.command != "GET":
-        raise DingerKnockout("Method mismatch")
+        raise PolyVinylKnockout("Method mismatch")
 
 
 def post(req, ident, data):
     if req.command != "POST":
-        raise DingerKnockout("Method mismatch")
+        raise PolyVinylKnockout("Method mismatch")
+
+
+def idents(req, ident, data):
+    chain.idents(req, ident, data)
+
 
 def content(req, ident, data):
     config = req.server.config
@@ -99,18 +104,19 @@ def content(req, ident, data):
 def data_eq(req, ident, data):
     req.server.logger.log("data_eq {} vs {}".format(data.get(ident.location), ident.name))
     if not data.get(ident.location):
-        raise DingerKnockout()
+        raise PolyVinylKnockout()
 
     if ident.name and data[ident.location] != ident.name:
-        raise DingerKnockout()
+        raise PolyVinylKnockout()
+
 
 def data_neq(req, ident, data):
     try:
         data_eq(req, ident, data)
-    except DingerKnockout:
+    except PolyVinylKnockout:
         return
 
-    raise DingerKnockout()
+    raise PolyVinylKnockout()
 
 
 inc = static = page = content
@@ -141,86 +147,53 @@ def redir(req, ident, data):
 def pw_auth(req, ident, data):
     config = req.server.config
     if config.get("auth-socket"): 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(config["auth-socket"]) 
-
-        data["email-token"] = bstream.quote(data["email"]).decode("utf-8")
+        data["email-token"] = lin.quote(data["email"]).decode("utf-8")
         password_hash = user.pw_hash(req, config, data)
 
-        bstream.send(sock, (
+        lin.query_path(config["auth-socket"], (
             "ident",     
                 "pw_auth={}@email".format(data["email-token"]),
             "password-hash",
                 password_hash, 
-            ""))
-
-        answer = bstream.read_next(sock) 
-        if answer != b"ok":
-            reason = bstream.read_next(sock)
-            sock.close()
-            raise DingerNotOk("Invalid", reason)
-
-        sock.close()
-
+            ""
+        ))
     else:
-        raise DingerNotOk("No Auth Service Defined")
+        raise PolyVinylNotOk("No Auth Service Defined")
 
 
 def token_consume_code(req, ident, data):
     config = req.server.config
     if config.get("auth-socket"): 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(config["auth-socket"]) 
+        email_token = lin.quote(data["email"]).decode("utf-8")
 
-        email_token = bstream.quote(data["email"]).decode("utf-8")
-
-        bstream.send(sock, (
+        lin.query_path(config["auth-socket"], (
             "ident",     
                 "token_consume_code={}@email".format(email_token),
             "six-code",
                 data["six-code"], 
             ""))
 
-        answer = bstream.read_next(sock) 
-        if answer != b"ok":
-            reason = bstream.read_next(sock)
-            sock.close()
-            raise DingerNotOk("Invalid", reason)
-
         del data["six-code"]
-        sock.close()
-
     else:
-        raise DingerNotOk("No Auth Service Defined")
+        raise PolyVinylNotOk("No Auth Service Defined")
 
 
 
 def token_consume(req, ident, data):
     config = req.server.config
     if config.get("auth-socket"): 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(config["auth-socket"]) 
+        email_token = lin.quote(data["email"]).decode("utf-8")
 
-        email_token = bstream.quote(data["email"]).decode("utf-8")
-
-        bstream.send(sock, (
+        lin.query_path(config["auth-socket"], (
             "ident",     
                 "token_consume={}@email".format(email_token),
             "token",
                 data["token"], 
             ""))
 
-        answer = bstream.read_next(sock) 
-        if answer != b"ok":
-            reason = bstream.read_next(sock)
-            sock.close()
-            raise DingerNotOk("Invalid", reason)
-
         del data["token"]
-        sock.close()
-
     else:
-        raise DingerNotOk("No Auth Service Defined")
+        raise PolyVinylNotOk("No Auth Service Defined")
 
 
 def session_start(req, ident, data):
@@ -250,69 +223,49 @@ def session_close(req, ident, data):
 def pw_set(req, ident, data):
     config = req.server.config
     if config.get("auth-socket"): 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(config["auth-socket"]) 
-
         if data.get("password"):
             data["password-hash"] = bcrypt.hashpw(
                 data["password"].encode("utf-8"), data["salt"])
             del data["password"]
 
-        email_token = bstream.quote(data["email"]).decode("utf-8")
-        bstream.send(sock, (
+        email_token = lin.quote(data["email"]).decode("utf-8")
+        lin.query_path(config["auth-socket"], (
             "ident", 
                 "pw_set={}@email".format(email_token),
             "password-hash",
                 data["password-hash"], 
-            ""))
+            ""
+        ))
 
-        answer = bstream.read_next(sock) 
-        if answer != b"ok":
-            reason = bstream.read_next(sock)
-            sock.close()
-            raise DingerNotOk("Invalid", reason)
-
-        sock.close()
-
+        del data["password-hash"]
     else:
-        raise DingerNotOk("No Auth Service Defined")
+        raise PolyVinylNotOk("No Auth Service Defined")
 
 
 def register(req, ident, data):
     config = req.server.config
     try:
         user.create(req, config, data)
-    except DingerNotOk as err:
-        raise DingerNotOk("Unable to register", err.args[0])
+    except PolyVinylNotOk as err:
+        raise PolyVinylNotOk("Unable to register", err.args[0])
 
     if config.get("auth-socket"): 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(config["auth-socket"]) 
-
-        email_token = bstream.quote(data["email"]).decode("utf-8")
-        bstream.send(sock, (
+        email_token = lin.quote(data["email"]).decode("utf-8")
+        lin.query_path(config["auth-socket"], (
             "ident", 
                 "register={}@email".format(email_token),
             ""))
 
-        answer = bstream.read_next(sock) 
-        if answer != b"ok":
-            reason = bstream.read_next(sock)
-            sock.close()
-            raise DingerNotOk("Invalid", reason)
-
         data["email-token"] = email_token
-        sock.close()
-
     else:
-        raise DingerNotOk("No Auth Service Defined")
+        raise PolyVinylNotOk("No Auth Service Defined")
 
 
 def email(req, ident, data):
     config = req.server.config
 
     if not data.get('email-token'):
-        data["email-token"] = bstream.quote(data["email"]).encode("utf-8")
+        data["email-token"] = lin.quote(data["email"]).encode("utf-8")
 
     msg = templ.emailMsgFromIdent(config, 
         ident,
@@ -326,7 +279,7 @@ def email(req, ident, data):
 
 def set_token_url(req, ident, data):
     if not data.get('email-token'):
-        data["email-token"] = bstream.quote(data["email"]).decode("utf-8")
+        data["email-token"] = lin.quote(data["email"]).decode("utf-8")
     
     data["login-url"] = "{}{}?email={}&six-code={}".format(
         data["url"], ident.name, data["email-token"], data["six-code"])
@@ -336,26 +289,16 @@ def get_token(req, ident, data):
     config = req.server.config
 
     if config.get("auth-socket"): 
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.connect(config["auth-socket"]) 
-
-        email_token = bstream.quote(data["email"]).decode("utf-8")
-        bstream.send(sock, (
+        email_token = lin.quote(data["email"]).decode("utf-8")
+        tk = lin.query_path(config["auth-socket"], (
             "ident", 
                 "token_create={}@email".format(email_token),
-            ""))
+            ""
+        ))
 
-        answer = bstream.read_next(sock) 
-        if answer != b"ok":
-            reason = bstream.read_next(sock)
-            sock.close()
-            raise DingerNotOk("Invalid", reason)
-
-        tk = bstream.read_next(sock)
         data["token"] = tk.decode("utf-8")
         data["six-code"] = token.get_six(data["token"])
         sock.close()
 
     else:
-        raise DingerNotOk("No Auth Service Defined")
-
+        raise PolyVinylNotOk("No Auth Service Defined")

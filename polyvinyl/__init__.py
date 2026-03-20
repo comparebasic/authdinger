@@ -8,12 +8,13 @@ SEEK_END = 2
 SESSION_DAYS = 14
 
 from .utils.config import ParseConfig, ParseCli
-from .auth.serve import DingerAuthServer
-from .provider.serve import DingerProviderServer
+from .auth.serve import PolyVinylAuthServer
+from .provider.serve import PolyVinylProviderServer
 
 __all__ = [
     "http_messages", "ParseConfig", "ParseCli", \
-    "DingerAuthServer", "DingerProviderServer"
+    "PolyVinylAuthServer", "PolyVinylProviderServer", \
+    "ParseConfig", "ParseCli"
 ]
 
 __version__ = "0"

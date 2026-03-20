@@ -1,6 +1,6 @@
 import os, urllib, random, bcrypt
-from ..utils import bstream
-from .exception import DingerNotOk 
+from ..utils import lin
+from .exception import PolyVinylNotOk 
 from .. import SALT_BYTES, SEEK_END, SEEK_CUR, SEEK_START
 
 def get_userdir(config, email_token):
@@ -11,15 +11,15 @@ def get_userfile(config, email_token):
                 "details.linr")
 
 def create(req, config, data):
-    email_token = bstream.quote(data["email"])
+    email_token = lin.quote(data["email"])
     path = get_userfile(config, email_token.decode("utf-8"))
 
     req.server.logger.log("Email Token Value {}".format(
-        bstream.unquote(email_token)))
+        lin.unquote(email_token)))
 
     if os.path.exists(path):
         req.server.logger.log("User Exists {}".format(path))
-        raise DingerNotOk("User Exists")
+        raise PolyVinylNotOk("User Exists")
     
     data["salt"] = bcrypt.gensalt()
 
@@ -32,7 +32,7 @@ def create(req, config, data):
     req.server.logger.log("Create User {}".format(details))
     os.mkdir(get_userdir(config, email_token.decode("utf-8")))
     with open(path, "wb+") as f:
-        bstream.send_r(f, details) 
+        lin.send_r(f, details) 
 
         
 def pw_hash(req, config, data):
@@ -42,9 +42,9 @@ def pw_hash(req, config, data):
         f.seek(0, SEEK_END)
         
         if f.tell() == 0:
-            raise DingerNotOk("Empty User File")
+            raise PolyVinylNotOk("Empty User File")
 
-        value = bstream.latest_r(f, b"salt")
+        value = lin.latest_r(f, b"salt")
         password = data["password"].encode("utf-8")
         del data["password"]
 

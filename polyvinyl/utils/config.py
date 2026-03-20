@@ -7,8 +7,8 @@ def ParseConfig(path):
 
 def ParseCli():
     parser = argparse.ArgumentParser(
-        prog="AuthDinger",
-        description="ECAuth Provider Server")
+        prog="PolyVinyl",
+        description="PolyVinyl Server")
     parser.add_argument("--config")
     parser.add_argument("--log-color", action="store_true")
     parser.add_argument("--type", choices=["provider", "auth", "sasl"], required=False)

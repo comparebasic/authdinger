@@ -1,11 +1,12 @@
 import os
-from polyvinyl import  DingerAuthServer, DingerProviderServer
+from polyvinyl import  PolyVinylAuthServer, PolyVinylProviderServer
 from polyvinyl.utils.log import GetLogger
 from polyvinyl.utils.config import ParseConfig, ParseCli
 
+
 def run_auth(config, logger):
-    logger.log("Serving AuthDinger Auth on socket {}".format(config["auth-socket"]))
-    streamd = DingerAuthServer(config, logger) 
+    logger.log("Serving PolyVinyl Auth Auth on socket {}".format(config["auth-socket"]))
+    streamd = PolyVinylAuthServer(config, logger) 
 
     try:
         streamd.serve_forever()
@@ -14,15 +15,14 @@ def run_auth(config, logger):
         os.remove(config["auth-socket"])
 
 
-
 def run_provider(config, logger):
     try:
         port = int(config["port"])
     except (ValueError, TypeError) as err:
         raise ValueError("Expected interger for port number", err)
 
-    logger.log("Serving AuthDinger Provider on port {}".format(port))
-    httpd = DingerProviderServer(config,
+    logger.log("Serving PolyVinyl Provider on port {}".format(port))
+    httpd = PolyVinylProviderServer(config,
         GetLogger(config), ('localhost', port))
 
     try:

@@ -1,2 +1,11 @@
-Hi {fullname},
-{token} is your {brand} login code, or click the link <a href="{url}/auth/token-login?token={token}&email={email-token}&redir=/auth/dashboard">{url}/auth/token-login?token={token}&email={email-token}&redir=/auth/dashboard</a>, to login.
+<div>
+<p>Hi,<br/>
+Use this code to login to {brand}:
+</p>
+
+<div style="display:block; margin: 12px; auto; color: black; padding: 10px 20px; text-align: center">
+    <span style="display: inline-block; padding: 8px; border-radius: 12px; border: 1px solid #4Ca; font-weight: bold; font-family: sans-serif; font-size: 20px">{six-code}</span>
+</div>
+
+<p>or... use this link: <a href="{login-url}">{login-url}</a></p>.
+</div>

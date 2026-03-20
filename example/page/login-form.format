@@ -1,32 +1,30 @@
-<h1>Login</h1>
+<h1>Login or Register</h1>
 <p><span>{error}</span></p>
 <form method="POST" action="{action}">
-    <fieldset>
-    <label name="user">
-        <span>Email:</span>
+    <label>
+        <span class="label-text">Email</span>
         <span>
             <input type="text" name="email" placeholder="email"></input>
         </span>
     </label>
-    <label name="password">
-        <span>Password:</span>
-        <span>
-            <input type="text" name="password" placeholder="password"></input>
-        </span>
+    <fieldset>
+    <label>
+        <input type="radio" name="auth-method" value="password" />
+        Use password
+        <input class="optional" type="password" name="password" placeholder="password" />
     </label>
     <label>
-        <span>
-            <input type="checkbox" name="email-auth" />
-        </span>
-        <span>
-            Email an Auth Token instead!
-        </span>
-    </label>
-    <label>
-        <span>&nbsp;</span>
-        <span>
-            <button type="submit">Login</button>
-        </span>
+        <input type="radio" name="auth-method" value="send-email" />
+        Email a code/link
     </label>
     </fieldset>
+    <label>
+        <input type="checkbox" name="register" value="on" />
+        Register new user 
+        <label class="optional">
+            <span class="sub-label-text">Fullname</span>
+            <input type="text" name="fullname" placeholder="first last" />
+        </label>
+    </label>
+    <button type="submit">Submit</button>
 </form>

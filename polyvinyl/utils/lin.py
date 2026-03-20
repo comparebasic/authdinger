@@ -1,6 +1,23 @@
-from socket import socket as socktype
+import socket
 from .. import BSTREAM_MAX, SEEK_END, SEEK_CUR, SEEK_START
 from ..utils import identifier
+
+def query_path(path, details):
+    try:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(path) 
+    except FileNotFoundError as err:
+        raise PolyVinylError(err.args[0], err)
+
+    send(sock, details)
+    answer = read_next(sock) 
+    reason = read_next(sock)
+    if answer != b"ok":
+        sock.close()
+        raise PolyVinylNotOk("Invalid", reason)
+
+    sock.close()
+    return reason
 
 def quote(s):
     b = bytearray()
@@ -100,7 +117,7 @@ def read_next(stream):
 
 def read_next_r(stream):
     if stream.tell() == 0:
-        raise DingerNotOk("Early beginning of file reached")
+        raise PolyVinylNotOk("Early beginning of file reached")
     stream.seek(-2, SEEK_CUR)
     length_s = stream.read(2)
     stream.seek(-2, SEEK_CUR)
@@ -112,7 +129,7 @@ def read_next_r(stream):
         raise ValueError("Length exeeds max", length)
 
     if stream.tell() == 0:
-        raise DingerNotOk("Early beginning of file reached")
+        raise PolyVinylNotOk("Early beginning of file reached")
     stream.seek(-length, SEEK_CUR)
     b = stream.read(length)
     stream.seek(-length, SEEK_CUR)

@@ -1,11 +1,16 @@
 <h1>Email Sent</h1>
+<p>{error}</p>
 <p>An email has been sent to <em>{email}</em></p>
-<form method="POST" action="{action}">
+<form method="POST" action="/auth/email-sent">
     <fieldset>
     <label name="code">
         <span>Enter Code:</span>
         <span>
-            <input type="num" name="six-code" placeholder="six digit code"></input>
+            <div class="six-grid-cont">
+            <input class="six-code" size="6" maxlength="6" type="number" type="text" name="six-code"></input>
+            <div class="six-grid">
+                <span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span></div>
+            </div>
         </span>
     </label>
     <label>
@@ -15,5 +20,5 @@
         </span>
     </label>
     </fieldset>
-    <input type="hidden" value="{email"} name="email"></input>
+    <input type="hidden" value="{email}" name="email"></input>
 </form>

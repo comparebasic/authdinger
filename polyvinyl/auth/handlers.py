@@ -1,7 +1,7 @@
 import os, bcrypt, time
 from datetime import datetime
-from ..utils.exception import DingerNotOk
-from ..utils import bstream
+from ..utils.exception import PolyVinylNotOk
+from ..utils import lin
 from ..utils import token
 from .. import SEEK_END, SEEK_CUR, SEEK_START
 
@@ -26,7 +26,7 @@ def get_tokenfile(config, email_token, token):
 def pw_auth(req, ident, data):
     config = req.server.config
     req.server.logger.log("Auth Password {}".format(
-        bstream.unquote(ident.name)))
+        lin.unquote(ident.name)))
 
     path = get_authfile(config, ident.name)
 
@@ -34,20 +34,20 @@ def pw_auth(req, ident, data):
         f.seek(0, SEEK_END)
         
         if f.tell() == 0:
-            raise DingerNotOk("Empty User File")
+            raise PolyVinylNotOk("Empty User File")
 
-        value = bstream.latest_r(f, b"password-hash")
+        value = lin.latest_r(f, b"password-hash")
 
     req.server.logger.log("Auth Password data {} vs pw {}".format(data, value))
 
     if value != data["password-hash"]:
-        raise DingerNotOk("password mismatch")
+        raise PolyVinylNotOk("password mismatch")
 
 
 def pw_set(req, ident, data):
     config = req.server.config
     req.server.logger.log("Setting Password {}".format(
-        bstream.unquote(ident.name)))
+        lin.unquote(ident.name)))
 
 
     dir_path = get_authdir(config, ident.name)
@@ -59,17 +59,17 @@ def pw_set(req, ident, data):
     with open(path, "wb") as f:
         f.seek(0, SEEK_END)
         details = ["password-hash", data["password-hash"]]
-        bstream.send_r(f, details)
+        lin.send_r(f, details)
 
 
 def register(req, ident, data):
     config = req.server.config
     req.server.logger.log("Register {}".format(
-        bstream.unquote(ident.name)))
+        lin.unquote(ident.name)))
 
     dir_path = get_authdir(config, ident.name)
     if os.path.exists(dir_path):
-        raise DingerNotOk("User already exists")
+        raise PolyVinylNotOk("User already exists")
 
     os.mkdir(dir_path)
     os.mkdir(os.path.join(dir_path, "tokens"))
@@ -79,18 +79,18 @@ def register(req, ident, data):
         details = ["email-token", ident.name, 
             "register-time", token.time_bytes(time.time())]
 
-        bstream.send_r(f, details)
+        lin.send_r(f, details)
 
 
 def token_create(req, ident, data):
     config = req.server.config
     email_token = ident.name
     req.server.logger.log("Setting Token {}".format(
-        bstream.unquote(ident.name)))
+        lin.unquote(ident.name)))
 
     dir_path = get_authdir(config, email_token)
     if not os.path.exists(dir_path):
-        raise DingerNotOk("User dir not found")
+        raise PolyVinylNotOk("User dir not found")
 
     tk = token.get_short_token(email_token.encode("utf-8"))
     path = get_tokenfile(config, email_token, tk)
@@ -104,12 +104,12 @@ def token_create(req, ident, data):
 def token_consume_code(req, ident, data):
     config = req.server.config
     req.server.logger.log("Consuming Token {}".format(
-        bstream.unquote(ident.name)))
+        lin.unquote(ident.name)))
 
     email_token = ident.name
     dir_path = get_authdir(config, email_token)
     if not os.path.exists(dir_path):
-        raise DingerNotOk("User dir not found", dir_path)
+        raise PolyVinylNotOk("User dir not found", dir_path)
 
     path = os.path.join(dir_path, "tokens")
     tk = None
@@ -122,11 +122,11 @@ def token_consume_code(req, ident, data):
             break
 
     if not tk:
-        raise DingerNotOk("Invalid code", tk)
+        raise PolyVinylNotOk("Invalid code", tk)
 
     path = get_tokenfile(config, ident.name, tk)
     if not os.path.exists(path):
-        raise DingerNotOk("Invalid path from code", path)
+        raise PolyVinylNotOk("Invalid path from code", path)
 
     os.remove(path)
 
@@ -136,18 +136,18 @@ def token_consume_code(req, ident, data):
 def token_consume(req, ident, data):
     config = req.server.config
     req.server.logger.log("Consuming Token {}".format(
-        bstream.unquote(ident.name)))
+        lin.unquote(ident.name)))
 
     email_token = ident.name
     dir_path = get_authdir(config, email_token)
     if not os.path.exists(dir_path):
-        raise DingerNotOk("User dir not found", dir_path)
+        raise PolyVinylNotOk("User dir not found", dir_path)
 
     tk = data["token"].decode("utf-8") 
     path = get_tokenfile(config, ident.name, tk)
 
     if not os.path.exists(path):
-        raise DingerNotOk("Invalid", path)
+        raise PolyVinylNotOk("Invalid", path)
 
     os.remove(path)
 

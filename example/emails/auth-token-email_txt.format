@@ -1,2 +1,6 @@
-Hi {fullname},
-{token} is your {brand} login code, or visit {url}/auth/token-login?token={token}&email={email-token}&redir=/auth/dashboard.
+Hi,
+Use this code to login to {brand}:
+
+{six-code}
+
+Or, use this link: {login-url}.

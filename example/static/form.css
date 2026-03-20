@@ -1,0 +1,138 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+form {
+    font-family: sans-serif;
+    font-size: 16px;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+fieldset {
+    border: none;
+    border-collapse: collapse;
+    margin: 12px 0;
+    padding: 0;
+}
+
+label {
+    display: block;
+    margin: 8px 0;
+}
+
+label span.label-text {
+    padding: 4px 8px 4px 0;
+    display: block;
+}
+
+label span.sub-label-text {
+    padding: 4px 8px 4px 0;
+    display: block;
+    font-size: 12px;
+}
+
+input[type=radio],
+input[type=checkbox] {
+    margin-left: 0;
+}
+
+input[type=checkbox] + input.optional,
+input[type=radio] + input.optional {
+    width: 178px;
+}
+
+input[type=checkbox] + .optional,
+input[type=radio] + .optional {
+    margin: 8px 0 12px 22px;
+    display: block;
+}
+
+input[type=checkbox]:not(:checked) + .optional,
+input[type=radio]:not(:checked) + .optional {
+    display: none;
+}
+
+input[type=text],
+input[type=password] {
+    border-radius: 8px;
+    padding: 8px 8px;
+    box-sizing: border-box;
+    width: 200px;
+    border: 1px solid #666;
+}
+
+input[type=radio] {
+    display: inline-block;
+}
+
+label input.six-code {
+    font-size: 32px; 
+    font-family: monospace;
+    letter-spacing: 4px;
+    padding: 3px 0 3px 4px;
+    box-sizing: border-box;
+    width: auto;
+    border: none;
+    width: 144px;
+    border-radius: 12px;
+    background:transparent;
+}
+
+.six-grid-cont {
+    width: 144px;
+    border-radius: 12px;
+    border: 1px solid #999;
+    position: relative;
+}
+
+.six-grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.six-grid span {
+    font-size: 32px;
+    font-family: monospace;
+    letter-spacing: 3px;
+    padding: 2px 0 6px 0;
+    box-sizing: border-box;
+    border-width: 0 1px 0 0;
+    border-style: solid;
+    border-color: #999;
+}
+
+.six-grid span:first-child {
+    padding-left: 3px;
+}
+
+label input:disabled {
+    background: rgb(210,210,210);
+}
+
+button {
+    border-radius: 8px;
+    border: none;
+    background: rgb(100,200,100);
+    padding: 8px 12px;
+    font-size: 22px;
+    margin-top: 12px;
+}
+
+button:hover {
+    background: rgb(130,230,130);
+}
+
+button:active {
+    background: rgb(160,200,160);
+}
+
+input[type="checkbox"] {
+    display: inline;
+    width: auto;
+}

@@ -5,12 +5,12 @@ from ..utils.maps import http_messages
 
 from ..utils.log import GetLogger
 from ..utils.exception import \
-     DingerNotOk, DingerError, DingerKnockout, DingerReChain, DingerNotFound
-from ..utils import templ, identifier, form, session, handler
+     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain, PolyVinylNotFound
+from ..utils import templ, identifier, form, session, chain
 from . import handlers
 
 
-class DingerHandler(BaseHTTPRequestHandler):
+class PolyVinylHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.header_stage = {}
         self.done = False
@@ -49,12 +49,12 @@ class DingerHandler(BaseHTTPRequestHandler):
     def resolve(self, path, data):
         config = self.server.config
 
-        chain = self.server.routes.get(path)
+        ch = self.server.routes.get(path)
 
-        if not chain:
-            raise DingerNotFound(path)
+        if not ch:
+            raise PolyVinylNotFound(path)
 
-        handler.do_chain(self, chain, data)
+        chain.do_chain(self, ch, data)
 
 
     def do_GET(self):
@@ -67,7 +67,7 @@ class DingerHandler(BaseHTTPRequestHandler):
 
     def _do_STUFF(self):
         path, _ = form.parseUrl(self.path)
-        self.server.logger.warn("Processing {} Headers {}".format(path, self.headers))
+        self.server.logger.warn("Processing {}".format(path))
 
         config = self.server.config
 
@@ -79,13 +79,13 @@ class DingerHandler(BaseHTTPRequestHandler):
         data = {"error": None}
         try:
             self.resolve(path, data)
-        except DingerKnockout as ko:
+        except PolyVinylKnockout as ko:
             pass
-        except DingerNotFound as err:
+        except PolyVinylNotFound as err:
             data["error"] = str(err.args)
             self.resolve("/not-found", data)
             self.code = 404
-        except DingerError as err:
+        except PolyVinylError as err:
             self.server.logger.error(err, traceback.format_exception(err))
             data["error"] = str(err.args)
             self.resolve("/error", data)
@@ -112,13 +112,14 @@ class DingerHandler(BaseHTTPRequestHandler):
         if len(self.content) > 0:
             self.wfile.write(bytes(self.content, "utf-8"))
 
-        self.server.logger.warn("Served {} Headers {}".format(path, self.header_stage))
+        self.server.logger.warn("Served {}".format(path))
             
 
-class DingerProviderServer(HTTPServer):
+class PolyVinylProviderServer(HTTPServer):
     def __init__(self, config, logger, address):
-        self.routes = handler.setup_config(config, "routes", handlers)
+        self.routes = chain.setup_config(config, "routes", handlers)
         self.config = config
         self.logger = logger
-        return super().__init__(address, DingerHandler)
+        self.handlers = handlers
+        return super().__init__(address, PolyVinylHandler)
 

@@ -1,6 +1,7 @@
+import os
 from ..utils import identifier
 from ..utils.exception import \
-    DingerNotOk, DingerKnockout, DingerError, DingerReChain
+    PolyVinylNotOk, PolyVinylKnockout, PolyVinylError, PolyVinylReChain
 
 class Inst(object):
     def __init__(self, ident, mod):
@@ -30,14 +31,14 @@ def do_chain(req, chain, data):
                 # go through this branch of the chain
                 do_chain(req, h, data)
                 continue
-            except DingerKnockout as ko:
+            except PolyVinylKnockout as ko:
                 req.server.logger.log("Knockout {}".format(ko))
                 continue
-            except DingerNotOk as nok:
+            except PolyVinylNotOk as nok:
                 data["error"] = str(nok.args)
                 req.server.logger.log("NotOk {}".format(nok))
                 continue
-            except DingerError as err:
+            except PolyVinylError as err:
                 data["error"] = str(err.args)
                 req.server.logger.log("Error {}".format(err))
                 raise 
@@ -46,8 +47,10 @@ def do_chain(req, chain, data):
             req.server.logger.log("Handle {}".format(h))
             try:
                 h.func(req, h.ident, data)
-
-            except (DingerNotOk, DingerError) as err:
+            except PolyVinylReChain as re:
+                req.server.logger.warn("ReChain {}", re.args[0])
+                do_chain(req, re.args[0], data)
+            except (PolyVinylNotOk, PolyVinylError) as err:
                 data["error"] = err.args[0]
                 raise
         else:
@@ -57,7 +60,7 @@ def do_chain(req, chain, data):
 def Handle(req, chain, data, fmap):
     try:
         do_chain(req, chain, data, fmap)
-    except DingerNotOk as err:
+    except PolyVinylNotOk as err:
        raise 
 
     if not req.done:
@@ -69,6 +72,24 @@ def Handle(req, chain, data, fmap):
 
     req.done = True
 
+
+def idents(req, ident, data):
+    config = req.server.config
+    if ident.location:
+        templ_dir = config["dirs"].get(ident.location);
+    else:
+        templ_dir = config["dirs"].get("page");
+
+    with open(os.path.join(templ_dir, ident.name), "r") as f:
+        content = f.read()
+        print("content {}".format(content.split("\n")))
+        ch = [
+            Inst(identifier.Ident(v.strip()), req.server.handlers) \
+                for v in content.split("\n") \
+                if v.strip()
+        ]
+        raise PolyVinylReChain(ch)
+    
 
 def _setup_chain(config, chain, mod):
     sub_chain = []

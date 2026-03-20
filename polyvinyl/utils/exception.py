@@ -1,14 +1,14 @@
-class DingerNotOk(ValueError):
+class PolyVinylNotOk(ValueError):
     pass
 
-class DingerKnockout(ValueError):
+class PolyVinylKnockout(ValueError):
     pass
 
-class DingerNotFound(ValueError):
+class PolyVinylNotFound(ValueError):
     pass
 
-class DingerReChain(ValueError):
+class PolyVinylReChain(ValueError):
     pass
 
-class DingerError(ValueError):
+class PolyVinylError(ValueError):
     pass

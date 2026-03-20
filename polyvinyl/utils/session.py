@@ -2,9 +2,9 @@ import time, os
 from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from ..utils.exception import \
-     DingerNotOk, DingerError, DingerKnockout, DingerReChain
+     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain
 from .. import SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
-from ..utils import bstream
+from ..utils import lin
 from ..utils.user import get_userfile
 from ..utils.token import get_token, rfc822, time_bytes
 
@@ -23,11 +23,11 @@ def parse_cookie(cookie):
 def close(req, ident):
     config = req.server.config
     if not req.cookie.get("Ssid"):
-        raise DingerNotOk("No Ssid from cookie")
+        raise PolyVinylNotOk("No Ssid from cookie")
 
     path = os.path.join(config["dirs"]["sessions"], req.cookie["Ssid"])
     if not os.path.exists(path):
-        raise DingerNotOk("No Ssid file found")
+        raise PolyVinylNotOk("No Ssid file found")
 
     os.remove(path)
     req.session = {}
@@ -36,7 +36,7 @@ def load(req, ident):
     data = {}
     config = req.server.config
     if not req.cookie.get("Ssid"):
-        raise DingerNotOk("No Ssid from cookie", req.cookie)
+        raise PolyVinylNotOk("No Ssid from cookie", req.cookie)
 
     path = os.path.join(config["dirs"]["sessions"], req.cookie["Ssid"])
     keys = config["fields"]["session"]
@@ -44,9 +44,9 @@ def load(req, ident):
     try:
         with open(path, "rb") as f:
             f.seek(0, SEEK_END)
-            data.update(bstream.map_str_r(f, keys))
+            data.update(lin.map_str_r(f, keys))
     except FileNotFoundError:
-        raise DingerNotOk("Session not found")
+        raise PolyVinylNotOk("Session not found")
         
     req.server.logger.log("Session Data {}".format(data))
 
@@ -54,9 +54,9 @@ def load(req, ident):
         email_token = data["email-token"]
     else:
         if data.get("email"):
-            email_token = bstream.quote(data["email"]).decode("utf-8")
+            email_token = lin.quote(data["email"]).decode("utf-8")
         else:
-            raise DingerNotOk("User email-token not found")
+            raise PolyVinylNotOk("User email-token not found")
 
     path = get_userfile(config, email_token)
     keys = config["fields"]["user"]
@@ -65,9 +65,9 @@ def load(req, ident):
         with open(path, "rb") as f:
             f.seek(0, SEEK_END)
             keys = config["fields"]["user"]
-            data.update(bstream.map_str_r(f, keys))
+            data.update(lin.map_str_r(f, keys))
     except FileNotFoundError:
-        raise DingerNotOk("User not found")
+        raise PolyVinylNotOk("User not found")
 
     req.session = data
 
@@ -79,9 +79,9 @@ def start(req, data):
         email_token = data["email-token"]
     else:
         if data.get("email"):
-            email_token = bstream.quote(data["email"])
+            email_token = lin.quote(data["email"])
         else:
-            raise DingerNotOk("User email-token not found")
+            raise PolyVinylNotOk("User email-token not found")
 
     token = get_token(email_token)
     path = os.path.join(config["dirs"]["sessions"],token)
@@ -95,4 +95,4 @@ def start(req, data):
         details = ["email-token", email_token, 
             "session-token", data["session-token"],
             "start-time", data["start-time"]]
-        bstream.send_r(f, details) 
+        lin.send_r(f, details) 
