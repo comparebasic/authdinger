@@ -51,7 +51,7 @@ places defined for a specific user.
 
 ```python
     "data_eq=on@register"
-    # will raise a DingerKnockout() exception if data["register"] != "on"
+    # will raise a PolyVinylKnockout() exception if data["register"] != "on"
 ```
 
 This is why the configuration is so dense in exchange for a complete view of
