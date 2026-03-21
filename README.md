@@ -33,12 +33,21 @@ This is the function signature for handling the behavior of an identitifier.
 
 ```python
 def func(request, ident, data):
-    # do stuff that either:
-    #
-    #    1. modifies values in the *data* dict argument
-    #    or
-    #    2. raises an exception
+    # do stuff
 ```
+
+The actions of the handler functions are three fold:
+    
+    1. Modify values in the `data` dict argument which is carried to subsequent
+    handler functions
+    2. Modify attributes of the `Request` 
+        a. Add/modify response headers
+        b. Add/modify response content
+        b. Set response mime type or status code
+    2. Raises an exception
+        a. indicate an error
+        b. knockout to the next branch in the chain
+        c. respond with an erroronous response code such as 404 or 500
 
 Such that `content=dashboard.html@page` loads the `content` function to render
 the `dashboard.html` file in the `page` folder.
@@ -67,9 +76,11 @@ Two services are included, one for authentication and one for web services manag
 
 This service is a unix socket server using the a protocal that communicates
 content length in two bytes, followed by that content. It transmits identifiers
-and small pieces of information. The largest value is a that it can easily
-centralize and house sensative data in a seperate process using a seperate
-system user. Using the `Lin` format that you can read more about [here](doc/lin.md).
+and small pieces of information back and forth. The largest reason for this
+architecure is to sequester off the authentication and user data into seperate
+processes that can be run under seperate system users or on seperate machines.
+While centralizing sensative data. Using the `Lin` format that you can read
+more about [here](doc/lin.md).
 
 Found in the [auth](polyvinyl/auth) folder of the source folder.
 
@@ -137,7 +148,18 @@ To describe what each identifier does, It's worth understanding what this
 system does: it routes a series of actions to move data and process or produce
 a webpage.
 
-See more about what these identifiers mean in the [Identifier](doc/identifier.md) documentation.
+See more about what these identifiers mean in the
+[Identifier](doc/identifier.md) documentation.
+
+# Python3 packages used
+
+- bcrypt
+- pystache
+
+# Status
+
+PolyVinyl is presently in development with the hope that it can launch demos
+and become thoroughly tested in the near future.
 
 (c) Copyright 2026 - Compare Basic Incorporated
 See [licence](LICENSE) for details.
