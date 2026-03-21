@@ -57,6 +57,8 @@ def templ_from(req, ident, data):
                     return content.format(**data)
                 except KeyError as err:
                     raise PolyVinylError("Key Error in templ", err) 
+            elif ext == "form":
+
             else:
                 return content
         except FileNotFoundError as err:

@@ -28,3 +28,24 @@ def parseUrl(s):
     if len(t) == 1:
         return (t[0], None)
     return (t[0], t[1])
+
+def compare_digest(config, ident, form, html, fields):
+    h = hashlib.sha256()
+    h.update(form)
+    h.update(fields)
+    h.update(html)
+    digest = h.hexdigest()
+    # compare to digets on disk
+
+
+def gen_from(config, ident, content):
+    # compare form json with cached form html
+        # produce if mismatch
+    # generate fields.json
+        # produce if mismatch
+    pass
+
+
+def process_form(req, ident, data):
+    # process form fields.json 
+    pass
