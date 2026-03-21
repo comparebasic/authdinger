@@ -38,7 +38,8 @@ after "hmac-concat" and before "end-sig":
 
 ![Auth digest diagram](auth-hmac-concat.svg)
     
-Here is the actual bytes of the message (with ... for password and signature values):
+Here is the actual bytes of the message (with ... for password and signature
+values):
 
 ```
     \{0}\{3}aim\{0}\x0bhmac-concat\{0}\{5}ident\{0}\x1fpw_auth=test%40cb%2elocal@email\{0}\rpassword-hash\{0}\{62}...\{0}\{7}end-sig\{0}\{32}...\{0}\{0}
