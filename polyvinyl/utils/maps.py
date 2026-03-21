@@ -11,5 +11,6 @@ mime_map = {
     "js": "text/javascript",
     "format": "text/html",
     "html": "text/html",
-    "txt": "text/plain"
+    "txt": "text/plain",
+    "json": "application/json"
 }

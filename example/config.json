@@ -6,9 +6,15 @@
         "user-data": "example/user-data",
         "auth-data": "example/auth-data",
         "sessions": "example/sessions",
-        "emails": "example/emails"
+        "emails": "example/emails",
+        "ui": "ui/",
+        "ui-page": "ui/"
     },
     "routes": {
+        "/ui/api/handlers": ["api=handlers"],
+        "/ui/ui.css": ["content=ui.css@ui"],
+        "/ui/editor": ["content=editor.html@ui-page"],
+        "/ui/ui.js": ["content=ui.js@ui"],
         "/auth/": ["redir=/auth/login", "end"],
         "/auth/login": [
             ["get", "map=action/path@req", "set_query", "content=login-form.format@page", "end"],
@@ -49,7 +55,8 @@
         "/error": ["content=error.format@page"]
     },
     "templates": {
-        "page": ["content=header.html@inc", true, "content=footer.html@inc"]
+        "page": ["content=header.html@inc", true, "content=footer.html@inc"],
+        "ui-page": ["content=header.html@inc", true, "content=footer.html@inc"]
     },
     "fields": {
         "session": {

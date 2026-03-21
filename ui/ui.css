@@ -1,0 +1,13 @@
+body {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.editor-ui {
+    padding: 0;
+    margin: 0;
+    background: #ccc;
+    height: 100vh;
+    width: 100vw;
+    box-sizing: border-box;
+}

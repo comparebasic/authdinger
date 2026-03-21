@@ -1,8 +1,9 @@
-import bcrypt
+"These are the handlers for the Provider" 
+import bcrypt, sys
 from ..utils.exception import \
      PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain
 from .. import chain, lin
-from ..utils import user, session, templ, form, token
+from ..utils import user, session, templ, form, token, api as api_d
 from ..utils.maps import mime_map
 from smtplib import SMTP
 
@@ -60,37 +61,59 @@ def _map(req, ident, data, dest):
     req.server.logger.log("After Map {} {}".format(ident, dest))
 
 
+def api(req, ident, data):
+    "Returns data about the handlers and the configuration"
+    config = req.server.config
+    if ident.name == "handlers":
+        print(api_d.handlers)
+        print(__name__)
+        req.content += api_d.handlers(req, sys.modules.get(__name__))
+
+    if ident.name == "config":
+        req.content  += api_d.config(req, sys.modules(__name__))
+
 def end(req, ident, data):
+    "Set the request complete and ready to respond\n"
     req.done = True
     raise PolyVinylKnockout()
 
 
 def map(req, ident, data):
+    "Map key/value pairs to the `data` object\n"
+    "<name> can be a comma seperated list of slash seperated key/value pairs \n"
+    "<location> is the object to pull from\n"
     _map(req, ident, data, data)
 
 
 def set_query(req, ident, data):
+    "Reset the Request.query object to the `<map>` body arguments provided" 
     req.query_data = {}
     if ident.name:
         _map(req, ident, data, req.query_data)
 
 
 def get(req, ident, data):
+    "Ensure Request method is GET"
     if req.command != "GET":
         raise PolyVinylKnockout("Method mismatch")
 
 
 def post(req, ident, data):
+    "Ensure Request method is POST"
     if req.command != "POST":
         raise PolyVinylKnockout("Method mismatch")
 
 
 def idents(req, ident, data):
-    print("Handlers.idents {}".format(ident))
+    "Inject identifiers that are listed in a file into the chain during runtime\n"
+    "Any directory can have a file listing Identifiers.\n"
+    "If <location> is `user` the user folder will be used and a user must be set in the session\n"
     chain.idents(req, ident, data)
 
 
 def content(req, ident, data):
+    "Load and process content from templates into the Requests output response buffer\n"
+    "Expected <location> types are `stache`, `format` or web file extension `html/css/js/txt`\n"
     config = req.server.config
 
     parts = ident.name.split(".")
@@ -99,10 +122,13 @@ def content(req, ident, data):
     mime = mime_map.get(ext)
     if mime:
         req.header_stage["Content-Type"] = mime;
-    req.content += templ.templFrom(req, ident, data)
+    req.content += templ.templ_from(req, ident, data)
 
 
 def data_eq(req, ident, data):
+    "Ensure a `data` key and value is present\n"
+    "<name> is the value\n"
+    "<location> is the key\n"
     req.server.logger.log("data_eq {} vs {}".format(data.get(ident.location), ident.name))
     if not data.get(ident.location):
         raise PolyVinylKnockout()
@@ -112,6 +138,9 @@ def data_eq(req, ident, data):
 
 
 def data_neq(req, ident, data):
+    "Ensure a `data` key and value is NOT present\n"
+    "<name> is the value\n"
+    "<location> is the key\n"
     try:
         data_eq(req, ident, data)
     except PolyVinylKnockout:
@@ -123,6 +152,7 @@ def data_neq(req, ident, data):
 inc = static = page = content
 
 def redir(req, ident, data):
+    "Populate the Request headers for a redirect to another url\n"
     config = req.server.config
 
     if ident.location == "data":
@@ -146,6 +176,7 @@ def redir(req, ident, data):
     
 
 def pw_auth(req, ident, data):
+    "Call the Auth service to validate a password\n"
     config = req.server.config
     if config.get("auth-socket"): 
         data["email-token"] = lin.quote(data["email"]).decode("utf-8")
@@ -163,6 +194,7 @@ def pw_auth(req, ident, data):
 
 
 def token_consume_code(req, ident, data):
+    "Call the Auth service to validate and consume a login six-code\n"
     config = req.server.config
     if config.get("auth-socket"): 
         email_token = lin.quote(data["email"]).decode("utf-8")
@@ -180,6 +212,7 @@ def token_consume_code(req, ident, data):
 
 
 def token_consume(req, ident, data):
+    "Call the Auth service to validate and consume a login token\n"
     config = req.server.config
     if config.get("auth-socket"): 
         email_token = lin.quote(data["email"]).decode("utf-8")
@@ -197,6 +230,7 @@ def token_consume(req, ident, data):
 
 
 def session_start(req, ident, data):
+    "Start a new session, assuming previous functions have validated the user\n"
     session.start(req, data)
 
     cookie = "Ssid={}; Expires={}; HttpOnly; Secure; SameSite=Lax;".format(
@@ -209,11 +243,13 @@ def session_start(req, ident, data):
 
 
 def session_open(req, ident, data):
+    "Open an existing session, assuming previous functions have validated the user\n"
     session.load(req, data)
     req.server.logger.log("Session {}".format(req.session))
 
 
 def session_close(req, ident, data):
+    "Close a session, and remove the cookie from the browser\n"
     session.close(req, ident)
     cookie = "Ssid=; Expires={}; HttpOnly; Secure; SameSite=Strict;".format(
         "Thu, 01 Jan 1970 00:00:00 GMT")
@@ -221,6 +257,7 @@ def session_close(req, ident, data):
     
 
 def pw_set(req, ident, data):
+    "Call the Auth service to set a users password\n"
     config = req.server.config
     if config.get("auth-socket"): 
         if data.get("password"):
@@ -243,6 +280,7 @@ def pw_set(req, ident, data):
 
 
 def register(req, ident, data):
+    "Call the Auth service to register a new user\n"
     config = req.server.config
     try:
         user.create(req, config, data)
@@ -262,6 +300,7 @@ def register(req, ident, data):
 
 
 def email(req, ident, data):
+    "Send an email\n"
     config = req.server.config
 
     if not data.get('email-token'):
@@ -278,6 +317,7 @@ def email(req, ident, data):
 
 
 def set_token_url(req, ident, data):
+    "Create the token url, usually for inclusion in an email\n"
     if not data.get('email-token'):
         data["email-token"] = lin.quote(data["email"]).decode("utf-8")
     
@@ -286,6 +326,7 @@ def set_token_url(req, ident, data):
     
 
 def get_token(req, ident, data):
+    "Call the Auth service to create a new token\n"
     config = req.server.config
 
     if config.get("auth-socket"): 

@@ -33,7 +33,7 @@ def render_stache(req, ident, data):
     return renderer.render(prep, {"data": data, "role": req.role, "session": req.session})
 
 
-def templFrom(req, ident, data):
+def templ_from(req, ident, data):
     config = req.server.config
 
     if ident.location:
@@ -47,8 +47,9 @@ def templFrom(req, ident, data):
     if ext == "stache":
         return render_stache(req, ident, data) 
     else:
+        path =os.path.join(templ_dir, ident.name)
         try:
-            with open(os.path.join(templ_dir, ident.name), "r") as f:
+            with open(path, "r") as f:
                 content = f.read()
 
             if ext == "format":
@@ -59,21 +60,21 @@ def templFrom(req, ident, data):
             else:
                 return content
         except FileNotFoundError as err:
-            raise PolyVinylError(err.args[0], err)
+            raise PolyVinylError(err.args[0], path, err)
 
 
 def emailMsgFromIdent(req, ident, data, from_addr, to_addrs):
     subject_ident = identifier.Ident(
         "content={}_subject.format@{}".format(ident.name, ident.location))
-    subject = templFrom(req, subject_ident, data)
+    subject = templ_from(req, subject_ident, data)
 
     text_ident = identifier.Ident(
         "content={}_txt.format@{}".format(ident.name, ident.location))
-    text = templFrom(req, text_ident, data)
+    text = templ_from(req, text_ident, data)
 
     html_ident = identifier.Ident(
         "content={}_html.format@{}".format(ident.name, ident.location))
-    html = templFrom(req, html_ident, data)
+    html = templ_from(req, html_ident, data)
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
