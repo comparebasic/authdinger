@@ -41,13 +41,13 @@ The actions of the handler functions are three fold:
 1. Modify values in the `data` dict argument which is carried to subsequent
 handler functions
 2. Modify attributes of the `Request` 
-    a. Add/modify response headers
-    b. Add/modify response content
-    b. Set response mime type or status code
+    - Add/modify response headers
+    - Add/modify response content
+    - Set response mime type or status code
 2. Raises an exception
-    a. indicate an error
-    b. knockout to the next branch in the chain
-    c. respond with an erroronous response code such as 404 or 500
+    - indicate an error
+    - knockout to the next branch in the chain
+    - respond with an erroronous response code such as 404 or 500
 
 Such that `content=dashboard.html@page` loads the `content` function to render
 the `dashboard.html` file in the `page` folder.
