@@ -12,7 +12,7 @@ This system is presently written in Python 3 and available under a 3-clause BSD 
 
 Architectural Diagram:
 
-![Architectural Diagram](doc/polyvinyl-arch.svg)
+![Architectural Diagram](/doc/polyvinyl-arch.svg)
 
 # Convention
 
@@ -22,7 +22,7 @@ identifiers to define behavior. These identifiers are stored in a
 [module](polyvinyl/provider/handlers.py) with functions defined to be triggered by the
 identifiers.
 
-An example identifiery is as follows, see more about identifiers [here](doc/identifier.md):
+An example identifiery is as follows, see more about identifiers [here](/doc/identifier.md):
 
 ```
 <tag>=<name>@<location>
@@ -80,11 +80,11 @@ and small pieces of information back and forth. The largest reason for this
 architecure is to sequester off the authentication and user data into seperate
 processes that can be run under seperate system users or on seperate machines.
 While centralizing sensative data. Using the `Lin` format that you can read
-more about [here](doc/lin.md).
+more about [here](/doc/lin.md).
 
 Code can be found in the [auth](polyvinyl/auth) folder of the source folder.
 
-More on the Auth service [here](doc/auth.md).
+More on the Auth service [here](/doc/auth.md).
 
 ## Provider 
 
@@ -153,7 +153,7 @@ system does: it routes a series of actions to move data and process or produce
 a webpage.
 
 See more about what these identifiers mean in the
-[Identifier](doc/identifier.md) documentation.
+[Identifier](/doc/identifier.md) documentation.
 
 # Python3 packages used
 

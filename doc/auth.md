@@ -9,7 +9,7 @@ tokens.
 A unix socket is provided to read and write the `Lin` format, which is inspired
 by SAML but only provides a subset of it's functionality for now.
 
-More on the `Lin` format is written [here](doc/lin.md).
+More on the `Lin` format is written [here](/doc/lin.md).
 
 ## Client Verification
 
