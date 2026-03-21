@@ -22,7 +22,7 @@
             fill: #000;
         }
      </style>
-     <path d="M 0 0 L 0 210 L 500 230 L 500 0 L 0 0" class="bg" />
+     <path d="M 0 0 L 0 280 L 500 280 L 500 0 L 0 0" class="bg" />
 
      <path d="M 90 70 L 80 70 L 80 90 L 90 90" class="line" />
      <text x="15" y="85" class="text">Header</text>
