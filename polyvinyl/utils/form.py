@@ -55,7 +55,9 @@ def render_item(ident, optional=False, content=""):
             " value={}".format(value) if value else "",
             ident.name)
 
-    else if ident.tag == "input":
+    if ident.tag == "fieldset":
+        return "\n<fieldset>{}</fieldset>".format(content)
+    elif ident.tag == "input":
         return "<label{}><span class=\"label-text\">{}</span><input type=\"{}\" name=\"{}\"{} />{}</label>".format(
             " class=\"optional\"" if optional else "",
             ident.name,
@@ -73,41 +75,40 @@ def render_item(ident, optional=False, content=""):
             content)
 
 
-def rev_gen_loop(ident, chain, content=""):
+def rev_gen_loop(ident, chain, data, content=""):
     top = len(chain)-1
     for i, v in enumerate(reversed(chain)):
-        ident = identifier.Ident(v)
-        content = render_item(ident, i < top, content)
+        print(v)
+        print(content)
+        if isinstance(v, (list)):
+            content += gen_loop(ident, data, v)
+        else:
+            print(v)
+            ident = identifier.Ident(v)
+            content = render_item(ident, i < top, content)
 
     return content
 
 
-def gen_loop(req, ident, chain, stream, data):
-    #config = req.server.config
-    print("Chain Loop")
+def gen_loop(ident, data, chain):
+    content = ""
     for v in chain:
+        content += "\n"
         if isinstance(v, (str)):
             ident = identifier.Ident(v)
             match ident.tag:
-                case "input" | "checkbox" | "button" | "option" | "radio": 
-                    print(render_item(ident))
-                case "content":
-                    print(ident.ident)
+                case "input" | "checkbox" | "button" | "option" | "radio" | "fieldset":
+                    content += render_item(ident)
         elif isinstance(v, (list)):
-            content = rev_gen_loop(ident, v)
-            print(content)
+            content += rev_gen_loop(ident, v, data)
+
+    return content
 
 
-def gen_html(req, ident, content, stream):
-    # compare form json with cached form html
-        # produce if mismatch
-    # generate fields.json
-        # produce if mismatch
-
-    data = {}
-
-    js = json.loads(content) 
-    gen_loop(req, ident, js["idents"], stream, data)
+def gen_html(req, ident, data, config_data):
+    req.content += "<form method=\"POST\" action=\"{}\">".format(config_data["action"])
+    req.content += gen_loop(ident, data, config_data["idents"])
+    req.content += "</form>"
 
 
 def process_form(req, ident, data):

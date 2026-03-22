@@ -33,9 +33,7 @@ def render_stache(req, ident, data):
     return renderer.render(prep, {"data": data, "role": req.role, "session": req.session})
 
 
-def templ_from(req, ident, data):
-    config = req.server.config
-
+def get_path_ext(config, ident):
     if ident.location:
         templ_dir = config["dirs"].get(ident.location);
     else:
@@ -44,10 +42,18 @@ def templ_from(req, ident, data):
     parts = ident.name.split(".")
     ext = parts[-1]
 
+    path = os.path.join(templ_dir, ident.name)
+    return path, ext
+
+
+def templ_from(req, ident, data):
+    config = req.server.config
+
+    path, ext = get_path_ext(config, ident)
+
     if ext == "stache":
         return render_stache(req, ident, data) 
     else:
-        path =os.path.join(templ_dir, ident.name)
         try:
             with open(path, "r") as f:
                 content = f.read()

@@ -1,4 +1,4 @@
-input::-webkit-outer-spin-button,
+put::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
@@ -26,14 +26,18 @@ label {
 }
 
 label span.label-text {
-    padding: 4px 8px 4px 0;
+    padding: 4px 8px 0 0;
     display: block;
 }
 
-label span.sub-label-text {
+label input + span.label-text {
     padding: 4px 8px 4px 0;
-    display: block;
-    font-size: 12px;
+    display: inline;
+}
+
+.optional span.label-text {
+    padding: 4px 8px 0 0;
+    font-size: 14px;
 }
 
 input[type=radio],
@@ -41,19 +45,16 @@ input[type=checkbox] {
     margin-left: 0;
 }
 
-input[type=checkbox] + input.optional,
-input[type=radio] + input.optional {
-    width: 178px;
-}
-
-input[type=checkbox] + .optional,
-input[type=radio] + .optional {
+.optional {
     margin: 8px 0 12px 22px;
-    display: block;
 }
 
-input[type=checkbox]:not(:checked) + .optional,
-input[type=radio]:not(:checked) + .optional {
+.optional input {
+    width: 120px;
+}
+
+input[type=checkbox]:not(:checked) + span + .optional,
+input[type=radio]:not(:checked) + span + .optional {
     display: none;
 }
 

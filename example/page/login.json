@@ -1,12 +1,15 @@
 {
     "idents":[
-        "content=errors.stache@inc",
         "input=Email@email",
-        ["radio=Use password@password/auth-method", "input=Password@password"],
-        "radio=Email a code/link@send-email/auth-method",
+        ["fieldset", [
+                ["radio=Use password@password/auth-method", "input=Password@password"],
+                "radio=Email a code/link@send-email/auth-method"
+            ] 
+        ],
         ["checkbox=Register new user@register", "input=Fullname@fullname"],
         "button=Submit@submit"
     ],
+    "action":"/auth/login",
     "fields": {
         "email": true,
         "auth-method": true,

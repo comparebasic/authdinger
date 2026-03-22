@@ -84,15 +84,18 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
             pass
         except PolyVinylNotFound as err:
             data["error"] = str(err.args)
+            self.content = ""
             self.resolve("/not-found", data)
             self.code = 404
         except PolyVinylError as err:
             self.server.logger.error(err, traceback.format_exception(err))
             data["error"] = str(err.args)
+            self.content = ""
             self.resolve("/error", data)
             self.code = 500
         except Exception as err:
             data["error"] = str(err.args)
+            self.content = ""
             self.resolve("/error", data)
             self.code = 500
             self.server.logger.error(err, traceback.format_exception(err))

@@ -1,10 +1,10 @@
 "These are the handlers for the Provider" 
-import bcrypt, sys
+import bcrypt, sys, json
 from ..utils.exception import \
      PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain
 from .. import chain, lin
 from ..auth import cli
-from ..utils import user, session, templ, form, token, api as api_d
+from ..utils import user, session, templ, form as form_d, token, api as api_d
 from ..utils.maps import mime_map
 from smtplib import SMTP
 
@@ -126,6 +126,15 @@ def content(req, ident, data):
     req.content += templ.templ_from(req, ident, data)
 
 
+def form(req, ident, data):
+    config = req.server.config
+    path, ext = templ.get_path_ext(config, ident)
+    if ext == "json":
+        with open(path, "r") as f:
+            config_data = json.loads(f.read())
+            form_d.gen_html(req, ident, data, config_data)
+
+
 def data_eq(req, ident, data):
     "Ensure a `data` key and value is present\n"
     "<name> is the value\n"
@@ -166,7 +175,7 @@ def redir(req, ident, data):
     elif req.query_data:
         location = "{}?{}".format(
             location,
-            form.toQuery(req.server.config, req.query_data))
+            form_d.toQuery(req.server.config, req.query_data))
         
     if not location.startswith("http"):
         location = "{}{}".format(config["url"], location)

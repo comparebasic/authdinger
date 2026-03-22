@@ -1,4 +1,4 @@
-import os
+import os, types
 from .utils import identifier, user
 from .utils.exception import \
     PolyVinylNotOk, PolyVinylKnockout, PolyVinylError, PolyVinylReChain, PolyVinylNoAuth
@@ -10,7 +10,11 @@ class Inst(object):
             raise ValueError("Missing function for {}".format(ident))
 
         self.ident = ident
-        self.func = getattr(mod, ident.tag)
+        func = getattr(mod, ident.tag)
+        if not isinstance(func, (types.FunctionType)):
+            raise ValueError("Handler function is not a function for {}".format(ident))
+
+        self.func = func
 
     def __str__(self):
         return "Inst<{}>".format(self.ident)
@@ -45,6 +49,7 @@ def do_chain(req, chain, data):
 
         elif isinstance(h, (Inst)):
             req.server.logger.log("Handle {}".format(h))
+            print(h.func)
             try:
                 h.func(req, h.ident, data)
             except PolyVinylReChain as re:
