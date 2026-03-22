@@ -108,12 +108,15 @@ Here is an example configuration for the routes of the login page:
 ```jsonc
 "routes": {
     "/auth/login": [
-        ["get", "map=action/path@req", "content=login-form.format@page", "end"],
-        ["post", "map=email,auth-method,password?,fullname?@form", 
-            ["data_eq=on@register", "register", "pw_set"],
-            ["data_neq=on@register", "pw_auth"],
-                "session_start", "redir=/auth/dashboard", "end"]
-        ["map=action/path@req", "content=login-form.format@page", "end"]
+        ["get", "idents=login.idents@page", "end"],
+        ["post", "injest=login.json@page", 
+            ["data_eq=password@auth-method", [
+                    ["data_eq=on@register", "register", "pw_set", "session_start", "redir=/auth/dashboard", "end"],
+                    ["data_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
+                ]
+            ]
+        ],
+        ["idents=login.idents@page", "end"]
     ]
 }
 ```

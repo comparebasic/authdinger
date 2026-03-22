@@ -18,7 +18,7 @@
         "/auth/": ["redir=/auth/login", "end"],
         "/auth/login": [
             ["get", "idents=login.idents@page", "end"],
-            ["post", "injest=login.json@page", "set_query",
+            ["post", "injest=login.json@page", 
                 ["data_eq=password@auth-method", [
                         ["data_eq=on@register", "register", "pw_set", "session_start", "redir=/auth/dashboard", "end"],
                         ["data_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
@@ -44,9 +44,9 @@
             ["get", "content=token.format@page", "end"]
         ],
         "/auth/email-sent": [
-                ["get", "map=email,six-code@query", "token_consume_code", "set_query", "session_start", "redir=/auth/dashboard","end"],
-                ["post", "map=email,six-code@form", "token_consume_code", "session_start", "redir=/auth/dashboard","end"],
-                ["content=email-sent.format@page", "end"]
+            ["get", "map=email,six-code@query", "token_consume_code", "set_query", "session_start", "redir=/auth/dashboard","end"],
+            ["post", "map=email,six-code@form", "token_consume_code", "session_start", "redir=/auth/dashboard","end"],
+            ["content=email-sent.format@page", "end"]
         ],
         "/static/style.css": ["content=style.css@static"],
         "/static/form.css": ["content=form.css@static"],

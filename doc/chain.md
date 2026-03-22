@@ -5,12 +5,17 @@ Here is an example configuration for the routes of the login page:
 ```json
 "routes": {
     "/auth/login": [
-        ["get", "map=action/path@req", "content=login-form.format@page", "end"],
-        ["post", "map=email,auth-method,password?,fullname?@form", 
-            ["data_eq=on@register", "register", "pw_set"],
-            ["data_neq=on@register", "pw_auth"],
-                "session_start", "redir=/auth/dashboard", "end"]
-        ["map=action/path@req", "content=login-form.format@page", "end"]
+        ["get", "idents=login.idents@page", "end"],
+        ["post", "injest=login.json@page", 
+            ["data_eq=password@auth-method", [
+                    ["data_eq=on@register", "register", "pw_set", 
+                        "session_start", "redir=/auth/dashboard", "end"],
+                    ["data_neq=on@register", "pw_auth", 
+                        "session_start", "redir=/auth/dashboard", "end"]
+                ]
+            ],
+            ["idents=login.idents@page", "end"]
+        ]
     ]
 }
 ```
@@ -39,12 +44,12 @@ Let's break down what this is doing:
 ```jsonc
 "routes": {
     "/auth/login": [
-        [   // Ensure this is a GET request
-            "get",  
-            // assign data["action"] = req.path
-            "map=action/path@req",  
-            // serve content for login-form
-            "content=login-form.format@page",  
+        [   
+            // Ensure this is a GET request
+            "get",
+            // Load and run a file of of identifiers from the page folder 
+            "idents=login.idents@page",
+            "end"
             // Finish and send request
             "end"
         ],
@@ -60,18 +65,23 @@ Let's break down what this is doing:
 ```jsonc
 "routes": {
     "/auth/login": [
-        ["get", "map=action/path@req", "content=login-form.format@page", "end"],
+        ["get", "idents=login.idents@page", "end"],
+        // If not GET the next branch will run
         [
             // Ensure the request method is POST
             "post",  
-            // Copy values from the form submission 
-            "map=email,auth-method,password?,fullname?@form", 
-        // ...
+            // Copy values from the form submission, using a definition in the
+            // forms json file
+            "injest=login.json@page",
+            [
+                // ...
+            ]
     ]
 }
 ```
 
-- Then, once the form data has been recieved, the form has two optional paths: register or login.
+- Then, once the form data has been recieved, the form has two optional paths:
+  register or login.
 
 ```jsonc
 "routes": {
@@ -85,15 +95,18 @@ Let's break down what this is doing:
                 "register",
                 // Set a password by running a functino 
                 "pw_set"
+                // Start the session and set a cookie in the headers
+                "session_start", 
+                // Set the http request redirect properties
+                "redir=/auth/dashboard", 
+                // Set the request as `done`
+                "end"
             ],
             [
                 // Proceed with this subchain if data["register"] != "on"
                 "data_neq=on@register", 
                 // Check that the password is valid 
                 "pw_auth"
-            ],
-                // If either sub-chain above has succeded this will now run
-
                 // Start the session and set a cookie in the headers
                 "session_start", 
                 // Set the http request redirect properties
@@ -111,20 +124,20 @@ Let's break down what this is doing:
     "/auth/login": [
         ["get", "map=action/path@req", "content=login-form.format@page", "end"],
         ["post", "map=email,auth-method,password?,fullname?@form", 
-            ["data_eq=on@register", "register", "pw_set"],
-            ["data_neq=on@register", "pw_auth"],
+            ["data_eq=on@register", "register", "pw_set", 
+                "session_start", "redir=/auth/dashboard", "end"],
+            ["data_neq=on@register", "pw_auth",
                 "session_start", "redir=/auth/dashboard", "end"]
 
-        // This runs if no "end" was reached above (meaning something failed)
-
-        [
-
-            // Set the value for data["action"] = req.path
-            "map=action/path@req", 
-            // Load the login form to show any errors
-            "content=login-form.format@page",
-            // Set the request as `done`
-            "end"
+            // This runs if an "end" was not reached above 
+            // (meaning something failed and raised a Knockout exception)
+            [
+                // Load the login page, this time it will have error
+                // values to display to the user
+                "idents=login.idents@page", 
+                // Set the request as `done`
+                "end"
+            ]
         ]
     ]
 }
