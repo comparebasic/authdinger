@@ -44,8 +44,9 @@ def injest(req, ident, data):
                         data[key] = value
                         data[k] = origin[k]
 
-            elif isinstance(v, (bool)) and k:
-                data[k] = origin[k]
+            elif isinstance(v, (bool)):
+                if v or origin.get(k):
+                    data[k] = origin[k]
 
         for dep,val in deps.items():
             k,v = dep

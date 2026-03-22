@@ -1,10 +1,11 @@
 "These are the handlers for the Provider" 
 import bcrypt, sys, json
 from ..utils.exception import \
-     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain
+     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain, PolyVinylNotOk
 from .. import chain, lin
 from ..auth import cli
-from ..utils import user, session, templ, form as form_d, token, api as api_d, config as config_d
+from ..utils import user, session, templ, form as form_d, token, \
+    maps, api as api_d, config as config_d
 from ..utils.maps import mime_map
 from smtplib import SMTP
 
@@ -57,7 +58,7 @@ def map(req, ident, data):
                     source = config 
 
     maps.map(kv, source, data)
-    req.server.logger.log("After Map {} {}".format(ident, dest))
+    req.server.logger.log("After Map {} {}".format(ident, data))
 
 
 def set_query(req, ident, data):
@@ -271,7 +272,7 @@ def register(req, ident, data):
 
     if config.get("auth-socket"): 
         email_token = lin.quote(data["email"]).decode("utf-8")
-        cli.query_path(config["auth-socket"], req.server.key (
+        cli.query_path(config["auth-socket"], req.server.key, (
             "ident", 
                 "register={}@email".format(email_token),
             ))
@@ -294,8 +295,12 @@ def email(req, ident, data):
         from_addr=config["system-email"],
         to_addrs=[data["email"]])
 
-    with SMTP(config["smtp"]) as smtp:
-        smtp.send_message(msg, from_addr=msg["From"], to_addrs=msg["To"])
+    try:
+        with SMTP(config["smtp"]) as smtp:
+            smtp.send_message(msg, from_addr=msg["From"], to_addrs=msg["To"])
+    except Exception as err:
+        req.server.logger.log(err, data)
+        raise PolyVinylNotOk(err)
 
 
 def set_token_url(req, ident, data):
@@ -317,10 +322,6 @@ def get_token(req, ident, data):
             "ident", 
                 "token_create={}@email".format(email_token),
         ))
-
-        data["token"] = tk.decode("utf-8")
-        data["six-code"] = token.get_six(data["token"])
-        sock.close()
-
+        data["six-code"] = token.get_six(tk)
     else:
         raise PolyVinylNotOk("No Auth Service Defined")

@@ -1,3 +1,5 @@
+from ..utils.exception import PolyVinylError, PolyVinylKnockout
+
 http_messages = {
     0: "Error",
     200: "Ok",
@@ -40,7 +42,7 @@ def map(kv, source, dest):
             dest[k] = source.get(v)
         else:
             if not source.get(v):
-                raise PolyVinylKnockout("Field not found for query {}".format(ident))
+                raise PolyVinylKnockout("Field not found for query {}".format(v))
             dest[k] = source[v]
 
 

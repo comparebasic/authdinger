@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from ..utils import identifier, config as config_d
 from ..utils.token import rfc822
-from ..utils.exception import PolyVinylError, PolyVinylReChain
+from ..utils.exception import PolyVinylError, PolyVinylReChain, PolyVinylNotOk
 
 renderer = pystache.Renderer()
 cache = {}
@@ -43,7 +43,7 @@ def templ_from(req, ident, data):
                 try:
                     return content.format(**data)
                 except KeyError as err:
-                    raise PolyVinylError("Key Error in templ", err) 
+                    raise PolyVinylNotOk("Key Error in templ", err) 
             elif ext == "form":
                 pass
             else:

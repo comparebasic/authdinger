@@ -14,6 +14,7 @@
         "email": "process=email-token@quote",
         "auth-method": true,
         "password": "depends=password@auth-method",
+        "register": false,
         "fullname": "depends=on@register"
     },
     "validation":{
