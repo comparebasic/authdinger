@@ -21,7 +21,13 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
         self.role = {} 
         self.content = ""
         self.code = 0 
+        self.unique_idx = 0
         return super().__init__(*args, **kwargs)
+
+
+    def get_unique(self):
+        self.unique_idx += 1
+        return self.unique_idx
 
 
     def parse_form(self):

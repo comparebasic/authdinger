@@ -50,23 +50,26 @@ def render_item(ident, optional=False, content=""):
             value = parts[0]
 
     if ident.tag == "button":
-        return "<button type=\"submit\" name=\"{}\" value=\"{}\">{}</button>".format(
+        return "<button type=\"submit\" name=\"{}\" value=\"{}\">{}</button><br />".format(
             " name={}".format(name) if name else "",
             " value={}".format(value) if value else "",
             ident.name)
 
     if ident.tag == "fieldset":
         return "\n<fieldset>{}</fieldset>".format(content)
-    elif ident.tag == "input":
-        return "<label{}><span class=\"label-text\">{}</span><input type=\"{}\" name=\"{}\"{} />{}</label>".format(
+    elif ident.tag == "input" or ident.tag == "password":
+        return "{}<label{}><span class=\"label-text\">{}</span><input type=\"{}\" name=\"{}\"{} /><span class=\"marker valid\">&check;</span><span class=\"marker invalid\">&#10005;</span>{}{}</label><br />".format(
+            "<br/>" if optional else "",
             " class=\"optional\"" if optional else "",
             ident.name,
             ident.tag,
             name,
             " value=\"{}\"".format(value) if value else "",
+            "<span class=\"marker eye\">&#128065;</span>" if ident.tag == "password" else "",
             content)
     else:
-        return "<label{}><input type=\"{}\" name=\"{}\"{} /><span class=\"label-text\">{}</span>{}</label>".format(
+        return "{}<label{}><input type=\"{}\" name=\"{}\"{} /><span class=\"label-text\">{}</span>{}</label><br />".format(
+            "<br/>" if optional else "",
             " class=\"optional\"" if optional else "",
             ident.tag,
             name,
@@ -97,17 +100,31 @@ def gen_loop(ident, data, chain):
         if isinstance(v, (str)):
             ident = identifier.Ident(v)
             match ident.tag:
-                case "input" | "checkbox" | "button" | "option" | "radio" | "fieldset":
+                case "input" | "checkbox" | "button" | "option" | \
+                        "radio" | "fieldset" | "password":
                     content += render_item(ident)
         elif isinstance(v, (list)):
             content += rev_gen_loop(ident, v, data)
 
     return content
 
+def gen_script(ident, form_jsid, validation):
+    content = "<script type=\"text/javascript\">"
+    content += "window._polyvinyl.form.register(\"{}\", {})".format(
+        form_jsid,
+        json.dumps(validation)
+    )
+    content += "</script>"
+    return content
+
 
 def gen_html(req, ident, data, config_data):
-    req.content += "<form method=\"POST\" action=\"{}\">".format(config_data["action"])
+    form_jsid = "form_jsid{}".format(req.get_unique())
+    req.content += "<form id=\"{}\" method=\"POST\" action=\"{}\">".format(
+        form_jsid,
+        config_data["action"])
     req.content += gen_loop(ident, data, config_data["idents"])
+    req.content += gen_script(ident, form_jsid, config_data["validation"])
     req.content += "</form>"
 
 

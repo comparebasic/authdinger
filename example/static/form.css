@@ -1,7 +1,11 @@
-put::-webkit-outer-spin-button,
+input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 form {
@@ -9,8 +13,69 @@ form {
     font-size: 16px;
 }
 
-input[type=number] {
-  -moz-appearance: textfield;
+input {
+    border-radius: 8px;
+    padding: 6px;
+    border: 1px solid #666;
+}
+
+input[type=radio],
+input[type=checkbox] {
+    margin-left: 0;
+}
+
+input[type=text] {
+    border-radius: 8px;
+    padding: 8px 8px;
+    box-sizing: border-box;
+    width: 200px;
+    border: 1px solid #666;
+}
+
+input[type=password],
+input.visible-password {
+    border-radius: 8px;
+    padding: 8px 8px 8px 28px;
+    box-sizing: border-box;
+    width: 200px;
+    border: 1px solid #666;
+}
+
+input[type=radio] {
+    display: inline-block;
+}
+
+.invalid input {
+    border-color: #F00;
+}
+
+.val-description {
+    display:none;
+    border: 1px solid #924;
+    margin: 0;
+    padding: 6px;
+    background: #F99;
+}
+
+.val-description .broken {
+   font-weight: bold; 
+}
+
+.invalid + .val-description {
+    display:inline-block;
+}
+
+input:focus {
+    outline: none;
+}
+
+input:disabled {
+    background: rgb(210,210,210);
+}
+
+input[type="checkbox"] {
+    display: inline;
+    width: auto;
 }
 
 fieldset {
@@ -22,7 +87,38 @@ fieldset {
 
 label {
     display: block;
-    margin: 8px 0;
+    margin: 0;
+    position: relative;
+    display:inline-block;
+}
+
+label .marker {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    bottom: 2px;
+    right: 8px;
+}
+
+label .marker.eye {
+    display: inline;
+    opacity: 0.6;
+    right: auto;
+    left: 8px;
+}
+
+label .marker.eye.active {
+    opacity: 1.0;
+}
+
+.valid .marker.valid {
+    display: inline;
+    color: #0a0;
+}
+
+.invalid .marker.invalid {
+    display: inline;
+    color: #f00;
 }
 
 label span.label-text {
@@ -40,11 +136,6 @@ label input + span.label-text {
     font-size: 14px;
 }
 
-input[type=radio],
-input[type=checkbox] {
-    margin-left: 0;
-}
-
 .optional {
     margin: 8px 0 12px 22px;
 }
@@ -56,19 +147,6 @@ input[type=checkbox] {
 input[type=checkbox]:not(:checked) + span + .optional,
 input[type=radio]:not(:checked) + span + .optional {
     display: none;
-}
-
-input[type=text],
-input[type=password] {
-    border-radius: 8px;
-    padding: 8px 8px;
-    box-sizing: border-box;
-    width: 200px;
-    border: 1px solid #666;
-}
-
-input[type=radio] {
-    display: inline-block;
 }
 
 label input.six-code {
@@ -112,10 +190,6 @@ label input.six-code {
     padding-left: 3px;
 }
 
-label input:disabled {
-    background: rgb(210,210,210);
-}
-
 button {
     border-radius: 8px;
     border: none;
@@ -131,9 +205,4 @@ button:hover {
 
 button:active {
     background: rgb(160,200,160);
-}
-
-input[type="checkbox"] {
-    display: inline;
-    width: auto;
 }

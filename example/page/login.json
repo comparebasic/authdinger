@@ -2,7 +2,7 @@
     "idents":[
         "input=Email@email",
         ["fieldset", [
-                ["radio=Use password@password/auth-method", "input=Password@password"],
+                ["radio=Use password@password/auth-method", "password=Password@password"],
                 "radio=Email a code/link@send-email/auth-method"
             ] 
         ],
@@ -10,10 +10,40 @@
         "button=Submit@submit"
     ],
     "action":"/auth/login",
-    "fields": {
-        "email": true,
+    "injest": {
+        "email": "quote=email-token",
         "auth-method": true,
         "password": "on@auth-method",
         "fullname": "on@register"
+    },
+    "validation":{
+        "password":{
+            "rules": [
+                ".{8,32}",
+                false,
+                "[A-Z]{1}",
+                false,
+                "[a-z]{1}",
+                false,
+                "[0-9]{1}",
+                false,
+                "[-,._$@!~+=/:;?#%^&*]{1}"
+            ],
+            "description":[
+                "8-32 characters long,",
+                " one of each: ",
+                "a capital",
+                ", ",
+                "a lower case letter",
+                ", ",
+                "a number",
+                ", and ",
+                "a special character - _ , . : ; # ? ^ & * $ @ ! ~ + = /."
+            ]
+        },
+        "email": {
+            "rules":[".+@.+\\.[a-zA-Z]{2,}"], 
+            "description": ["Enter a valid email"]
+        }
     }
 }
