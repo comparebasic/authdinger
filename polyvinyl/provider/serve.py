@@ -1,7 +1,7 @@
 import argparse, json, urllib, traceback
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from . import handlers
+from . import handlers, setup as setup_d
 from .. import chain, lin
 from ..utils.maps import http_messages
 from ..utils.log import GetLogger
@@ -22,6 +22,7 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
         self.content = ""
         self.code = 0 
         self.unique_idx = 0
+        self.nav = None
         return super().__init__(*args, **kwargs)
 
 
@@ -128,11 +129,16 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
 class PolyVinylProviderServer(HTTPServer):
     def __init__(self, config, logger, address):
         self.routes = chain.setup_config(config, "routes", handlers)
+
         self.config = config
         self.logger = logger
         self.handlers = handlers
         self.key = None
         if config.get("provider-key"):
             self.key = lin.load_key(config["provider-key"])
+
+        setup_chain = chain.setup_config(config, "setup", setup_d)
+        chain.linear(self, setup_chain)
+
         return super().__init__(address, PolyVinylHandler)
 

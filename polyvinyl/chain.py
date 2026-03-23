@@ -23,6 +23,15 @@ class Inst(object):
         return self.__str__()
 
 
+def linear(server, chain):
+    print("Setting Up Chain {}".format(chain))
+
+    for k, v in chain.items():
+        for h in v:
+            if isinstance(h, (Inst)):
+                h.func(server)
+        
+
 def do_chain(req, chain, data):
     "This function goes through the chain, and tries each branch until one"
     "completes or there are no more to try."
@@ -130,7 +139,7 @@ def _setup_chain(config, chain, mod):
                 sub_chain.append(Inst(ident, mod))
 
     return sub_chain
-            
+
 
 def setup_config(config, key, mod):
     route_insts = {}

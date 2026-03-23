@@ -190,7 +190,6 @@ bottom of this file.
          * validation is not run from this, but derives existing validity from
          * the field objects
          */
-         */
         let i = 0
         for(; i < this.inputs.length; i++){
             const field = this.inputs[i]

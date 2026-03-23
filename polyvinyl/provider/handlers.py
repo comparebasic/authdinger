@@ -12,6 +12,9 @@ from smtplib import SMTP
 
 from ..utils.form import injest
 
+def title(req, ident, data):
+    data["title"] = ident.name
+
 def api(req, ident, data):
     "Returns data about the handlers and the configuration"
     config = req.server.config

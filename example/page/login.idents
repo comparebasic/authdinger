@@ -1,3 +1,0 @@
-content=login-header.html@page
-content=errors.stache@inc
-form=login.json@page

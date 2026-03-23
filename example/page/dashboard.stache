@@ -1,5 +1,4 @@
-<h1>Dashboard</h1>
-<p>Hi, {{role.fullname}}/{{role.email}}</p>
+<p>Hi, {{role.fullname}} ({{role.email}})</p>
 <p>
     <a href="/auth/logout">logout</a>
 </p>

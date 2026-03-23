@@ -8,7 +8,6 @@ from .. import SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
 from ..utils.user import get_userfile
 from ..utils.token import get_token, rfc822, time_bytes
 
-
 def parse_cookie(cookie):
     data = {}
     for x in cookie.split(";"):

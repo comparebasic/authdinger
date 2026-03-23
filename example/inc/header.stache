@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>PolyVinyl Example</title>
+<title>PolyVinyl Example {{#data.title}} - {{.}}{{/data.title}}</title>
 <link rel="stylesheet" href="/static/style.css" />
 <link rel="stylesheet" href="/static/form.css" />
   <meta 
@@ -15,3 +15,9 @@
 <header>
 </header>
 <section>
+{{#data.title}}
+<h1>{{.}}</h1>
+{{#data.error}}
+<p class="errors">{{.}}</p>
+{{/data.error}}
+{{/data.title}}
