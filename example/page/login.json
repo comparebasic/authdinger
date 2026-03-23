@@ -45,6 +45,11 @@
         "email": {
             "rules":[".+@.+\\.[a-zA-Z]{2,}"], 
             "description": ["Enter a valid email"]
-        }
+        },
+        "fullname": {
+            "rules":[".{2,}"],
+            "description": ["Enter your full name"]
+        },
+        "auth-method":{"description": ["Select and authentication method"]}
     }
 }

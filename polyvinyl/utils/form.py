@@ -4,6 +4,27 @@ from .. import lin
 from ..utils import identifier, config as config_d
 from ..utils.exception import PolyVinylNotOk
 
+FORM_BUTTON_FORMAT = "<button type=\"submit\" {name} {value}>\n" \
+    "{label}" \
+    "</button>"
+
+FORM_FIELDSET = "<fieldset>{content}</fieldset>"
+
+FORM_INPUT_FORMAT = "<label>" \
+    "<span class=\"label-text\">{label}</span>" \
+    "<input type=\"{type}\" name=\"{name}\"{value} />" \
+    "<span class=\"marker valid\">&check;</span>" \
+    "<span class=\"marker invalid\">&#10005;</span>" \
+    "{control}{content}</label>"
+
+FORM_CB_RADIO_FORMAT = "<label>" \
+    "<input type=\"{type}\" name=\"{name}\"{value}/>" \
+    "<span class=\"label-text\">{label}</span>{content}" \
+    "</label>"
+
+FORM_OPTIONAL = "<div class=\"optional\">{}</div>"
+
+
 def injest(req, ident, data):
     config = req.server.config
 
@@ -106,33 +127,32 @@ def render_item(ident, optional=False, content=""):
             name = parts[1]
             value = parts[0]
 
-    if ident.tag == "button":
-        return "<button type=\"submit\" name=\"{}\" value=\"{}\">{}</button><br />".format(
-            " name={}".format(name) if name else "",
-            " value={}".format(value) if value else "",
-            ident.name)
+    vals = {
+        "label": ident.name,
+        "type": ident.tag,
+        "name": name,
+        "value": " value=\"{}\"".format(value) if value else "",
+        "control": "<span class=\"marker eye\">&#128065;</span>" \
+            if ident.tag == "password" else "",
+        "content": content
+    }
 
-    if ident.tag == "fieldset":
-        return "\n<fieldset>{}</fieldset>".format(content)
+    field = ""
+    if ident.tag == "button":
+        field = FORM_BUTTON_FORMAT.format(**vals)
+    elif ident.tag == "fieldset":
+        field = FORM_FIELDSET.format(**vals)
     elif ident.tag == "input" or ident.tag == "password":
-        return "{}<label{}><span class=\"label-text\">{}</span><input type=\"{}\" name=\"{}\"{} /><span class=\"marker valid\">&check;</span><span class=\"marker invalid\">&#10005;</span>{}{}</label><br />".format(
-            "<br/>" if optional else "",
-            " class=\"optional\"" if optional else "",
-            ident.name,
-            ident.tag,
-            name,
-            " value=\"{}\"".format(value) if value else "",
-            "<span class=\"marker eye\">&#128065;</span>" if ident.tag == "password" else "",
-            content)
+        field = FORM_INPUT_FORMAT.format(**vals)
+    elif ident.tag == "checkbox" or ident.tag == "radio":
+        field = FORM_CB_RADIO_FORMAT.format(**vals)
     else:
-        return "{}<label{}><input type=\"{}\" name=\"{}\"{} /><span class=\"label-text\">{}</span>{}</label><br />".format(
-            "<br/>" if optional else "",
-            " class=\"optional\"" if optional else "",
-            ident.tag,
-            name,
-            " value=\"{}\"".format(value) if value else "",
-            ident.name,
-            content)
+        raise PolyVinylNotOk("Unknown field type", ident)
+
+    if optional:
+        return FORM_OPTIONAL.format(field)
+    else:
+        return field
 
 
 def rev_gen_loop(ident, chain, data, content=""):

@@ -10,7 +10,6 @@ from ..utils.exception import PolyVinylError, PolyVinylReChain, PolyVinylNotOk
 renderer = pystache.Renderer()
 cache = {}
 
-
 def render_stache(req, ident, data):
     config = req.server.config
     prep = cache.get(ident.ident)

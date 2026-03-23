@@ -11,24 +11,29 @@ input[type=number] {
 form {
     font-family: sans-serif;
     font-size: 16px;
+    width: 360px;
 }
 
 input {
     border-radius: 8px;
-    padding: 6px;
+    padding: 8px;
+    box-sizing: border-box;
     border: 1px solid #666;
+    width: 100%;
+    display:block;
 }
 
 input[type=radio],
 input[type=checkbox] {
     margin-left: 0;
+    display: inline;
+    width: auto;
 }
 
 input[type=text] {
     border-radius: 8px;
     padding: 8px 8px;
     box-sizing: border-box;
-    width: 200px;
     border: 1px solid #666;
 }
 
@@ -37,12 +42,7 @@ input.visible-password {
     border-radius: 8px;
     padding: 8px 8px 8px 28px;
     box-sizing: border-box;
-    width: 200px;
     border: 1px solid #666;
-}
-
-input[type=radio] {
-    display: inline-block;
 }
 
 .invalid input {
@@ -51,10 +51,11 @@ input[type=radio] {
 
 .val-description {
     display:none;
-    border: 1px solid #924;
-    margin: 0;
+    border: 1px solid #999;
+    border-radius: 8px;
+    margin: 8px 0;
     padding: 6px;
-    background: #F99;
+    background: #eee;
 }
 
 .val-description .broken {
@@ -73,14 +74,8 @@ input:disabled {
     background: rgb(210,210,210);
 }
 
-input[type="checkbox"] {
-    display: inline;
-    width: auto;
-}
-
 fieldset {
     border: none;
-    border-collapse: collapse;
     margin: 12px 0;
     padding: 0;
 }
@@ -89,22 +84,33 @@ label {
     display: block;
     margin: 0;
     position: relative;
-    display:inline-block;
 }
 
 label .marker {
     display: none;
     position: absolute;
     z-index: 2;
-    bottom: 2px;
+    bottom: 5px;
     right: 8px;
+    font-size: 30px;
+    line-height: 20px;
+    font-weight: bold;
+    font-family: monospace;
+    padding: 0 0 0 6px;
+    margin: 0;
+    height: 20px;
+    width: 20px;
 }
 
 label .marker.eye {
+    height: 16px;
+    width: 16px;
+    font-size: 18px;
     display: inline;
     opacity: 0.6;
     right: auto;
-    left: 8px;
+    left: 0;
+    bottom: 8px;
 }
 
 label .marker.eye.active {
@@ -112,8 +118,8 @@ label .marker.eye.active {
 }
 
 .valid .marker.valid {
-    display: inline;
-    color: #0a0;
+    display: inline-block;
+    color: #0f0;
 }
 
 .invalid .marker.invalid {
@@ -137,15 +143,17 @@ label input + span.label-text {
 }
 
 .optional {
-    margin: 8px 0 12px 22px;
+    margin-bottom: 16px;
+    padding-left: 24px;
+    box-sizing: border-box;
 }
 
 .optional input {
-    width: 120px;
+
 }
 
-input[type=checkbox]:not(:checked) + span + br + .optional,
-input[type=radio]:not(:checked) + span + br + .optional {
+input[type=checkbox]:not(:checked) + span + .optional,
+input[type=radio]:not(:checked) + span + .optional {
     display: none;
 }
 
@@ -192,17 +200,23 @@ label input.six-code {
 
 button {
     border-radius: 8px;
-    border: none;
-    background: rgb(100,200,100);
     padding: 8px 12px;
-    font-size: 22px;
-    margin-top: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 12px 0 0 0;
+    width: 100%;
+    background: #c9c9c9;
+    border: 1px solid #aaa;
 }
 
-button:hover {
+button.valid {
+    background: rgb(100,200,100);
+}
+
+button.valid:hover {
     background: rgb(130,230,130);
 }
 
-button:active {
+button.valid:active {
     background: rgb(160,200,160);
 }
