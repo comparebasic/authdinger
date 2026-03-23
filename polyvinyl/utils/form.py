@@ -129,7 +129,7 @@ def render_item(ident, optional=False, content=""):
 
     vals = {
         "label": ident.name,
-        "type": ident.tag,
+        "type": "text" if ident.tag == "input" else ident.tag,
         "name": name,
         "value": " value=\"{}\"".format(value) if value else "",
         "control": "<span class=\"marker eye\">&#128065;</span>" \
