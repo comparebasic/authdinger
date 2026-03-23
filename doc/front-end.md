@@ -47,6 +47,41 @@ webpage.
 It is one large self-executing closer. The exposed objects are declared at the
 bottom of this file.
 
+
+#### Register (form)
+
+```JavaScript
+function register(jsid, config){
+```
+
+Using a configuration, setup the elements of an HTML Form element
+
+This assumes that the forms are present and loaded on the page.
+
+
+#### Make Field
+
+```JavaScript
+function makeField(el, config, form){
+```
+
+Create a field object that will be attached to the Element, and
+setup the events
+
+This function chooses which DOM events to connect to the element,
+and which validation function to connect to the element.
+
+These decisions are made by a combination of the Element type
+attribute and the configuration entries for the element
+
+Elements with type "radio" are treated in a special way, they do not
+get unique `_ui` objects, and the `el` property becomes an array of
+elements instead of a single one, so that they can be grouped
+together (which is what radio buttons are for).
+
+
+
+
 #### _validateRules
 
 ```JavaScript
@@ -144,35 +179,3 @@ or non-visible input is not valid that does not invalidate the form
 Note: all fields are responsible for tracking their validatio stat,
 validation is not run from this, but derives existing validity from
 the field objects
-
-
-#### Make Field
-
-```JavaScript
-function makeField(el, config, form){
-```
-
-Create a field object that will be attached to the Element, and
-setup the events
-
-This function chooses which DOM events to connect to the element,
-and which validation function to connect to the element.
-
-These decisions are made by a combination of the Element type
-attribute and the configuration entries for the element
-
-Elements with type "radio" are treated in a special way, they do not
-get unique `_ui` objects, and the `el` property becomes an array of
-elements instead of a single one, so that they can be grouped
-together (which is what radio buttons are for).
-
-
-#### Register (form)
-
-```JavaScript
-function register(jsid, config){
-```
-
-Using a configuration, setup the elements of an HTML Form element
-
-This assumes that the forms are present and loaded on the page.
