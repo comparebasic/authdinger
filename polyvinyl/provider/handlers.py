@@ -1,7 +1,8 @@
 "These are the handlers for the Provider" 
 import bcrypt, sys, json
+from . import perms as perms_d
 from ..utils.exception import \
-     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain, PolyVinylNotOk
+     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain, PolyVinylNotOk, PolyVinylNoAuth
 from .. import chain, lin
 from ..auth import cli
 from ..utils import user, session, templ, form as form_d, token, \
@@ -11,6 +12,21 @@ from smtplib import SMTP
 
 
 from ..utils.form import injest
+
+def auth(req, ident, data):
+    if not hasattr(perms_d, ident.name):
+        raise PolyVinylNoAuth(ident)
+    
+    func = getattr(perms_d, ident.name)
+    func(req, req.role, data)
+
+
+def try_auth(req, ident, data):
+    try:
+        auth(req, ident, data)
+    except PolyVinylNoAuth as no_auth:
+        raise PolyVinylKnockout(*no_auth.args)
+
 
 def title(req, ident, data):
     data["title"] = ident.name
@@ -141,26 +157,13 @@ inc = static = page = content
 
 def redir(req, ident, data):
     "Populate the Request headers for a redirect to another url\n"
-    config = req.server.config
 
     if ident.location == "data":
         location = data.get(ident.name)
     else:
         location = ident.name
 
-    if not location:
-        location = "/error"
-    elif req.query_data:
-        location = "{}?{}".format(
-            location,
-            form_d.toQuery(req.server.config, req.query_data))
-        
-    if not location.startswith("http"):
-        location = "{}{}".format(config["url"], location)
-
-    req.code = 302
-    req.header_stage["Location"] = location
-    req.server.logger.log("Redir {}".format(location))
+    session.redir(req, location)
     
 
 def pw_auth(req, ident, data):

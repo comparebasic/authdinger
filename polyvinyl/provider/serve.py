@@ -6,8 +6,9 @@ from .. import chain, lin
 from ..utils.maps import http_messages
 from ..utils.log import GetLogger
 from ..utils.exception import \
-     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain, PolyVinylNotFound
-from ..utils import templ, identifier, form, session
+     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain, \
+     PolyVinylNotFound, PolyVinylNoAuth
+from ..utils import templ, identifier, form, session, perms
 
 
 class PolyVinylHandler(BaseHTTPRequestHandler):
@@ -83,10 +84,27 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
         self.form_data = self.parse_form()
         if self.headers.get("Cookie"):
             self.cookie = session.parse_cookie(self.headers["Cookie"])
+            session.load(self)
 
         data = {"error": None}
+
         try:
+            if self.role:
+                s = "id={}@user".format(self.role["email-token"])
+            else:
+                s = "id=@anon"
+
+            self.role["ident"] = identifier.Ident(s)
+
+            self.nav = perms.make_nav(self, self.role, data, path)
+            self.server.logger.debug(self.nav)
+
             self.resolve(path, data)
+        except PolyVinylNoAuth as no_auth:
+            self.server.logger.warn("Auth Error {}".format(str(no_auth.args)))
+            data["error"] = str(no_auth.args)
+            self.resolve("/no-auth", data)
+            self.code = 403
         except PolyVinylKnockout as ko:
             pass
         except PolyVinylNotFound as err:
@@ -115,8 +133,6 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
 
         self.send_response(self.code, http_messages[self.code]) 
         for k,v in self.header_stage.items():
-            if k == "Cookie-Set":
-                print("Setting Cookie {}".format(v))
             self.send_header(k, v)
         self.end_headers()
 

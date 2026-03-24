@@ -15,14 +15,15 @@
         "/auth/": ["redir=/auth/login", "end"],
         "/auth/dashboard": [
             "title=Dashboard@Dashboard", 
-            ["get", "session_open", "idents=dashboard.idents@page", "end"],
+            ["get", "try_auth=session", "idents=dashboard.idents@page", "end"],
             ["redir=/auth/login", "end"]
         ],
-        "/auth/login": [ "title=Login or Register@Login/Register", 
+        "/auth/login": ["title=Login or Register@Login/Register", 
             ["get", "form=login.json@page", "end"],
             ["post", "injest=login.json@page", 
                 ["data_eq=password@auth-method", [
-                        ["data_eq=on@register", "register", "pw_set", "session_start", "redir=/auth/dashboard", "end"],
+                        ["data_eq=on@register", "register", "pw_set", "session_start",
+                            "redir=/auth/dashboard", "end"],
                         ["data_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
                     ]
                 ],
@@ -30,11 +31,11 @@
                     ["data_eq=on@register", "register"],
                         "get_token", "map=brand,url@config", "set_token_url=/auth/email-sent", "email=auth-token-email@emails",
                             "content=email-sent.stache@page", "end"],
-                ["idents=login.idents@page", "end"]
+                ["form=login.json@page", "end"]
             ]
         ],
         "/auth/logout": [ "title=Logout@Logout",
-            ["get", "session_close", "redir=/auth/", "end"],
+            ["get", "try_auth=session", "session_close", "redir=/auth/", "end"],
             ["redir=/auth/login", "end"]
         ],
         "/auth/token-login": [ "title=Token Login",
@@ -46,6 +47,8 @@
             ["post", "map=email,six-code@form", "token_consume_code", "session_start", "redir=/auth/dashboard","end"],
             ["content=email-sent.stache@page", "end"]
         ],
+        "/not-found": ["title=Not Found", "content=not-found.html@page"],
+        "/no-auth": ["title=Insufficient Access", "content=no-auth.html@page"],
         "/ui/api/handlers": ["api=handlers"],
         "/ui/ui.css": ["content=ui.css@ui"],
         "/ui/editor": ["content=editor.html@ui-page"],
@@ -53,20 +56,21 @@
         "/static/style.css": ["content=style.css@static"],
         "/static/form.css": ["content=form.css@static"],
         "/static/form.js": ["content=form.js@ui"],
-        "/not-found": ["title=Not Found", "content=not-found.html@page"],
         "/error": ["title=Error", "content=error.html@page"]
     },
     "setup": {
         "page": ["nav"]
     },
     "perms": {
-        "/auth/login": ["no-session"],
+        "/auth/login": ["no_session"],
         "/auth/dashboard": ["session"],
         "/auth/logout": ["session"] 
     },
     "templates": {
-        "page": ["content=header.stache@inc", true, "content=footer.html@inc"],
-        "ui-page": ["content=header.html@inc", true, "content=footer.html@inc"]
+        "content=@page": ["content=header.stache@inc", true, "content=footer.html@inc"],
+        "form=@page": ["content=header.stache@inc", true, "content=footer.html@inc"],
+        "idents=@page": ["content=header.stache@inc", true, "content=footer.html@inc"],
+        "content=@ui-page": ["content=header.html@inc", true, "content=footer.html@inc"]
     },
     "fields": {
         "session": {

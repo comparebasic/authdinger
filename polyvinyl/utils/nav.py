@@ -1,3 +1,6 @@
+from ..chain import Inst
+from ..utils import identifier
+
 class Nav(object):
     def __init__(self, nav, lookup):
         self.lookup = lookup
@@ -20,8 +23,7 @@ class NavItem(object):
         return self.__str__()
 
 
-def setup_nav(server):
-    print("Setup Nav")
+def setup_nav(server, perms_d):
     nav = []
     lookup = {}
     perms = server.config["perms"]
@@ -31,8 +33,11 @@ def setup_nav(server):
         first = h.ident
 
         if first.tag == "title" and first.location:
-            lookup[path] = NavItem(first.location, path, idx, perms.get(path))
+            if perms.get(path):
+                perm_list = [Inst(identifier.Ident(s), perms_d) for s in perms[path]]
+            else:
+                perm_list = None
+            lookup[path] = NavItem(first.location, path, idx, perm_list)
             idx += 1
 
     server.nav = Nav(nav, lookup)
-    print(server.nav)

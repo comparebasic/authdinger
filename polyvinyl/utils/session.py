@@ -8,6 +8,25 @@ from .. import SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
 from ..utils.user import get_userfile
 from ..utils.token import get_token, rfc822, time_bytes
 
+
+def redir(req, location):
+    config = req.server.config
+
+    if not location:
+        location = "/error"
+    elif req.query_data:
+        location = "{}?{}".format(
+            location,
+            form_d.toQuery(req.server.config, req.query_data))
+        
+    if not location.startswith("http"):
+        location = "{}{}".format(config["url"], location)
+
+    req.code = 302
+    req.header_stage["Location"] = location
+    req.server.logger.log("Redir {}".format(location))
+    
+
 def parse_cookie(cookie):
     data = {}
     for x in cookie.split(";"):
@@ -32,11 +51,11 @@ def close(req, ident):
     req.session = {}
 
 
-def load(req, ident):
+def load(req):
     data = {}
     config = req.server.config
     if not req.cookie.get("Ssid"):
-        raise PolyVinylNotOk("No Ssid from cookie", req.cookie)
+        return
 
     path = os.path.join(config["dirs"]["sessions"], req.cookie["Ssid"])
     keys = config["fields"]["session"]
@@ -46,7 +65,7 @@ def load(req, ident):
             f.seek(0, SEEK_END)
             data.update(lin.map_str_r(f, keys))
     except FileNotFoundError:
-        raise PolyVinylNotOk("Session not found")
+        return
         
     req.server.logger.log("Session Data {}".format(data))
 

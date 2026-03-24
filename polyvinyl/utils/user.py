@@ -1,6 +1,6 @@
 import os, urllib, random, bcrypt
 from .. import lin, SALT_BYTES, SEEK_END, SEEK_CUR, SEEK_START
-from ..utils.exception import PolyVinylNotOk 
+from ..utils.exception import PolyVinylNotOk, PolyVinylKnockout
 
 def get_userdir(config, email_token):
     return os.path.join(config["dirs"]["user-data"], email_token)
@@ -41,6 +41,10 @@ def create(req, config, data):
         
 def pw_hash(req, config, data):
     path = get_userfile(config, data["email-token"])
+
+    if not os.path.exists(path):
+        data["error"] = "User not found"
+        raise PolyVinylKnockout("User not found")
 
     with open(path, "rb") as f:
         f.seek(0, SEEK_END)

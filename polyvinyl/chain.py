@@ -7,6 +7,7 @@ class Inst(object):
     def __init__(self, ident, mod):
 
         if not hasattr(mod, ident.tag):
+            print(mod)
             raise ValueError("Missing function for {}".format(ident))
 
         self.ident = ident
@@ -24,8 +25,6 @@ class Inst(object):
 
 
 def linear(server, chain):
-    print("Setting Up Chain {}".format(chain))
-
     for k, v in chain.items():
         for h in v:
             if isinstance(h, (Inst)):
@@ -114,6 +113,11 @@ def idents(req, ident, data):
     
 
 def _setup_chain(config, chain, mod):
+    templates = {}
+    if config.get("templates"):
+        for k,v in config["templates"].items():
+            templates[identifier.Ident(k)] = v 
+
     sub_chain = []
     for i, v in enumerate(chain):
         if isinstance(v, (list)):
@@ -123,17 +127,18 @@ def _setup_chain(config, chain, mod):
             if not isinstance(v, (identifier.Ident)):
                 ident = identifier.Ident(v)
 
-            if config.get("templates") and config["templates"].get(ident.location): 
-                sub_sub_chain = []
-                # handle page stuff here
-                for sv in config["templates"][ident.location]:
-                    if isinstance(sv, (str)):
-                        inst = Inst(identifier.Ident(sv), mod)
-                    elif sv == True:
-                        # place original intent in place of the variable True
-                        inst = Inst(ident, mod)
-                    sub_sub_chain.append(inst)
+            sub_sub_chain = []
+            for t_ident, s_chain in templates.items():
+                if identifier.fuzzy_match(t_ident, ident):
+                    for sv in s_chain:
+                        if isinstance(sv, (str)):
+                            inst = Inst(identifier.Ident(sv), mod)
+                        elif sv == True:
+                            # place original intent in place of the variable True
+                            inst = Inst(ident, mod)
+                        sub_sub_chain.append(inst)
 
+            if sub_sub_chain:
                 sub_chain.extend(sub_sub_chain)
             else:
                 sub_chain.append(Inst(ident, mod))

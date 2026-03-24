@@ -9,7 +9,6 @@ class Ident(object):
 
 
     def __init__(self, ident_s):
-
         self.ident = ident_s
         self.tag = None
         self.name = None
@@ -46,3 +45,9 @@ class Ident(object):
     def __str__(self):
         return "Ident<{}={}@{}>".format(
             self.tag, self.name, self.location) 
+
+
+def fuzzy_match(a, b):
+    return (not a.tag or a.tag == b.tag) and \
+        (not a.name or a.name == b.name) and \
+        (not a.location or a.location == b.location)

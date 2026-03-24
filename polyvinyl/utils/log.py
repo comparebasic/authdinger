@@ -20,6 +20,9 @@ class Log(object):
                 print("{} {}: {}".format(level, datetime.now(), message))
 
 
+    def debug(self, message, obj=None):
+        self._log("Debug", message, obj, colors.PURPLE)
+
     def log(self, message, obj=None):
         self._log("Log", message, obj, colors.CYAN)
 
