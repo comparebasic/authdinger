@@ -18,7 +18,7 @@
             ["get", "try_auth=session", "idents=dashboard.idents@page", "end"],
             ["redir=/auth/login", "end"]
         ],
-        "/auth/login": ["title=Login or Register@Login/Register", 
+        "/auth/login": ["title=Login or Sign Up@Login/Create Account", 
             ["get", "form=login.json@page", "end"],
             ["post", "injest=login.json@page", 
                 ["data_eq=password@auth-method", [

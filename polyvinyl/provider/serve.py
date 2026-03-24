@@ -90,11 +90,10 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
 
         try:
             if self.role:
-                s = "id={}@user".format(self.role["email-token"])
+                self.role["ident"] = identifier.Ident(
+                    "id={}@user".format(self.role["email-token"]))
             else:
-                s = "id=@anon"
-
-            self.role["ident"] = identifier.Ident(s)
+                self.role["ident"] = identifier.Ident("id=@anon")
 
             self.nav = perms.make_nav(self, self.role, data, path)
             self.server.logger.debug(self.nav)

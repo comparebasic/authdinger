@@ -9,6 +9,7 @@ FORM_BUTTON_FORMAT = "<button type=\"submit\" {name} {value}>\n" \
     "</button>"
 
 FORM_FIELDSET = "<fieldset>{content}</fieldset>"
+FORM_LABELED_FIELDSET = "<fieldset class=\"labeled-fieldset\"><span class=\"label\">{label}</span>{content}</fieldset>"
 
 FORM_INPUT_FORMAT = "<label>" \
     "<span class=\"label-text\">{label}</span>" \
@@ -21,6 +22,8 @@ FORM_CB_RADIO_FORMAT = "<label>" \
     "<input type=\"{type}\" name=\"{name}\"{value}/>" \
     "<span class=\"label-text\">{label}</span>{content}" \
     "</label>"
+
+FORM_HTML_TAG = "<{tag}>{content}</{tag}>"
 
 FORM_OPTIONAL = "<div class=\"optional\">{}</div>"
 
@@ -141,11 +144,16 @@ def render_item(ident, optional=False, content=""):
     if ident.tag == "button":
         field = FORM_BUTTON_FORMAT.format(**vals)
     elif ident.tag == "fieldset":
-        field = FORM_FIELDSET.format(**vals)
+        if ident.name:
+            field = FORM_LABELED_FIELDSET.format(**vals)
+        else:
+            field = FORM_FIELDSET.format(**vals)
     elif ident.tag == "input" or ident.tag == "password":
         field = FORM_INPUT_FORMAT.format(**vals)
     elif ident.tag == "checkbox" or ident.tag == "radio":
         field = FORM_CB_RADIO_FORMAT.format(**vals)
+    elif ident.tag == "para":
+        field = FORM_HTML_TAG.format(**{"tag":"p", "content": ident.name})
     else:
         raise PolyVinylNotOk("Unknown field type", ident)
 
@@ -175,7 +183,7 @@ def gen_loop(ident, data, chain):
             ident = identifier.Ident(v)
             match ident.tag:
                 case "input" | "checkbox" | "button" | "option" | \
-                        "radio" | "fieldset" | "password":
+                        "radio" | "fieldset" | "password" | "para":
                     content += render_item(ident)
         elif isinstance(v, (list)):
             content += rev_gen_loop(ident, v, data)

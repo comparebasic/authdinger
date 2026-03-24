@@ -129,6 +129,7 @@ def read_next_r(stream):
 
     return b
 
+
 def latest_r(stream, key):
     value = None
     while stream.tell() > 0:
@@ -138,12 +139,15 @@ def latest_r(stream, key):
 
         value = item
 
+
 def map_r(stream, keys=None):
     key = None
     value = None
     data = {}
     while stream.tell() > 0:
         item  = read_next_r(stream)
+        if item is None:
+            break
         if value:
             key = item.decode("utf-8")
             if (not keys or keys.get(key) is not None) \
@@ -169,7 +173,7 @@ def arr_to_dict(arr):
         data[arr[-1]] = True
 
     return data
-
+    
 
 def load_key(path):
     with open(path, "rb") as f:

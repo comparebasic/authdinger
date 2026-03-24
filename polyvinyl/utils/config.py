@@ -39,6 +39,22 @@ def map_keys(keys, items, data):
             data[k] = value 
     return data
 
+def get_name_ext(s):
+    if not s:
+        return s, None, None
+
+    idx = -1
+    length = len(s)
+    for i in range(length-1, 0, -1):
+        c = s[i]
+        if c == '.' or c == b'.':
+            idx = i+1
+
+    if idx == -1:
+        return s, None, None
+
+    return s, s[:idx], s[idx:]
+
 
 def get_path_ext(config, ident):
     if ident.location:
@@ -46,11 +62,7 @@ def get_path_ext(config, ident):
     else:
         templ_dir = config["dirs"].get("page");
             
-    parts = ident.name.split(".")
-    if len(parts) > 1:
-        ext = parts[-1]
-    else:
-        ext = None
+    fname, name, ext = get_name_ext(ident.name)
 
-    path = os.path.join(templ_dir, ident.name)
+    path = os.path.join(templ_dir, fname)
     return path, ext

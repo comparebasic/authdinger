@@ -5,3 +5,6 @@ BLUE = 34
 PURPLE = 35
 CYAN = 36
 DARK = 37
+
+BOLD = 1
+NO_BOLD = 22

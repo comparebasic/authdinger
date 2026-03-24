@@ -1,12 +1,26 @@
 {
     "idents":[
         "input=Email@email",
-        ["fieldset", [
-                ["radio=Use password@password/auth-method", "password=Password@password"],
-                "radio=Email a code/link@send-email/auth-method"
-            ] 
+        ["fieldset",[ 
+            ["radio=Newsletter Only@newsletter/auth-method", "fieldset", [
+                "checkbox=Podcast (Mondays on Tuesday)@mot-podcast",
+                "checkbox=Products and features from Compare Basic@cb-products",
+                "checkbox=Fundraising updates for Compare Basic@cb-products"]]
+            ]
         ],
-        ["checkbox=Register new user@register", "input=Fullname@fullname"],
+        ["fieldset=Login or Create Account",
+            [
+                ["radio=Use password@password/auth-method", "password=Password@password"],
+                "radio=Email a code/link@send-email/auth-method",
+                ["para=An account gives you early access to our Labs free-tier, and information about how the project is run. Extra sections are available if you are a donor, investor, or contributor to Compare Basic."],
+                ["checkbox=Register new user@register", "input=Fullname@fullname", 
+                    "checkbox=Sign up for our Newsletter@newsletter-signup", "fieldset", [
+                        "checkbox=Podcast (Mondays on Tuesday)@mot-podcast",
+                        "checkbox=Products and features from us@cb-products",
+                        "checkbox=Fundraising updates from us@cb-funding"]
+                ]
+            ]
+        ],
         "button=Submit@submit"
     ],
     "action":"/auth/login",
@@ -50,6 +64,6 @@
             "rules":[".{2,}"],
             "description": ["Enter your full name"]
         },
-        "auth-method":{"description": ["Select and authentication method"]}
+        "auth-method":{"description": ["Select and authentication method or newsletter signup"]}
     }
 }

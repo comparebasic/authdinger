@@ -76,8 +76,25 @@ input:disabled {
 
 fieldset {
     border: none;
-    margin: 12px 0;
+    margin: 12px 0 24px 0;
     padding: 0;
+}
+
+fieldset.labeled-fieldset {
+    position: relative;
+    margin: 12px 0;
+    padding: 18px 12px 12px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+fieldset.labeled-fieldset .label {
+    position: absolute;
+    left: 6px;
+    top: -14px;
+    background: white;
+    display: inline-block;
+    padding: 2px 4px;
 }
 
 label {
@@ -146,6 +163,14 @@ label input + span.label-text {
     margin-bottom: 16px;
     padding-left: 24px;
     box-sizing: border-box;
+}
+
+.optional .optional {
+    padding-left: 0;
+}
+
+.optional .optional .optional {
+    padding-left: 12px;
 }
 
 .optional input {
