@@ -21,16 +21,22 @@
         "/auth/login": ["title=Login or Sign Up@Login/Create Account", 
             ["get", "form=login.json@page", "end"],
             ["post", "injest=login.json@page", 
-                ["data_eq=password@auth-method", [
-                        ["data_eq=on@register", "register", "pw_set", "session_start",
-                            "redir=/auth/dashboard", "end"],
-                        ["data_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
+                ["data_eq=newsletter@news-or-account", [
+                    "newsletter","redir=/auth/newsletter", "end"]
+                ],
+                ["data_eq=account@news-or-account", [
+                    ["data_eq=password@auth-method", [
+                            ["data_eq=on@register", "register", "pw_set", "session_start",
+                                "redir=/auth/dashboard", "end"],
+                            ["data_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
+                        ]
+                    ],
+                    ["data_eq=send-email@auth-method", 
+                        ["data_eq=on@register", "register"],
+                            "get_token", "map=brand,url@config", "set_token_url=/auth/email-sent", "email=auth-token-email@emails",
+                                "content=email-sent.stache@page", "end"]
                     ]
                 ],
-                ["data_eq=send-email@auth-method", 
-                    ["data_eq=on@register", "register"],
-                        "get_token", "map=brand,url@config", "set_token_url=/auth/email-sent", "email=auth-token-email@emails",
-                            "content=email-sent.stache@page", "end"],
                 ["form=login.json@page", "end"]
             ]
         ],
@@ -38,6 +44,7 @@
             ["get", "try_auth=session", "session_close", "redir=/auth/", "end"],
             ["redir=/auth/login", "end"]
         ],
+        "/auth/newsletter": [ "title=Newsletter", "content=newsletter.stache@page", "end"],
         "/auth/token-login": [ "title=Token Login",
             ["get", "map=redir,token,email@query", "set_query", "token_consume", "session_start", "redir=/auth/dashboard", "end"],
             ["get", "content=token-not-found.stache@page", "end"]

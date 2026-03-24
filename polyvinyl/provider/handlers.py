@@ -13,6 +13,9 @@ from smtplib import SMTP
 
 from ..utils.form import injest
 
+def newsletter(req, indent, data):
+    req.server.logger.debug("Newsletter signup {}".format(data))
+
 def auth(req, ident, data):
     if not hasattr(perms_d, ident.name):
         raise PolyVinylNoAuth(ident)

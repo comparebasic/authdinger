@@ -48,11 +48,11 @@ def do_chain(req, chain, data):
                 continue
             except PolyVinylNotOk as nok:
                 data["error"] = str(nok.args)
-                req.server.logger.log("NotOk {}".format(nok))
+                req.server.logger.error("NotOk {}".format(nok))
                 continue
             except PolyVinylError as err:
                 data["error"] = str(err.args)
-                req.server.logger.log("Error {}".format(err))
+                req.server.logger.error("Error {}".format(err))
                 raise 
 
         elif isinstance(h, (Inst)):

@@ -17,7 +17,7 @@
 <section>
 {{#data.title}}
 <h1>{{.}}</h1>
+{{/data.title}}
 {{#data.error}}
 <p class="errors">{{.}}</p>
 {{/data.error}}
-{{/data.title}}

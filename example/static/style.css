@@ -16,10 +16,9 @@ body {
 }
 
 .errors {
-    display:none;
-    border: 1px solid #F99;
+    border: 1px solid #F9c;
     border-radius: 8px;
     margin: 8px 0;
     padding: 6px;
-    background: #eee;
+    background: #fee;
 }
