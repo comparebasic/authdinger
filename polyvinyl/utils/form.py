@@ -70,7 +70,7 @@ def _trans_data(req, ident, data, origin, fields):
                 key, value = val
                 data[key] = value
 
-        req.server.logger.log("Data after injest {}".format(data))
+        req.server.logger.debug("Data after injest {}".format(data))
 
     except (KeyError, ValueError) as err:
         req.server.logger.warn(err)

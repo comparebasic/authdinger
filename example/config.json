@@ -99,7 +99,7 @@
     "port": 3000,
     "auth-socket": "example/authdigner.sock",
     "sasl-socket": "example/sasldinger.sock",
-    "system-email": "noreply@cb-local",
+    "system-email": "contact@cb.local",
     "brand": "Authdinger",
     "url": "http://localhost:3000",
     "smtp": "localhost",

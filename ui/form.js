@@ -256,7 +256,7 @@ bottom of this file.
 
         if(el.nodeName == "INPUT"){
             selectEvents.push("focus")
-            if({"password":true, "text":true, "textarea": true}[type]){
+            if({"password":true, "number":true, "text":true, "textarea": true}[type]){
                 events.push("keyup")
                 validate = validateValue
             }else if({"radio":true, "checkbox":true}[type]){

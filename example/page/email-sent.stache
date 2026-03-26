@@ -1,5 +1,5 @@
-<p>An email has been sent to <em>{email}</em></p>
-<form method="POST" action="/auth/email-sent">
+<p>An email has been sent to <em>{{data.email}}</em></p>
+<form id="six-code-form" method="POST" action="/auth/email-sent">
     <fieldset>
     <label name="code">
         <span>Enter Code:</span>
@@ -18,5 +18,14 @@
         </span>
     </label>
     </fieldset>
-    <input type="hidden" value="{email}" name="email"></input>
+    <input type="hidden" value="{{data.email}}" name="email"></input>
 </form>
+<script type="text/javascript">
+     window._polyvinyl.Form.register("six-code-form", {
+        "six-code": {
+            "rules": ["[0-9]{6}"], 
+            "description": ["Enter the six digit code from the email that was sent to you."] 
+         }
+     });
+     console.log(window._polyvinyl);
+</script>

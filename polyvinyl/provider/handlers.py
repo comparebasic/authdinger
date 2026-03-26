@@ -299,7 +299,7 @@ def email(req, ident, data):
     if not data.get('email-token'):
         data["email-token"] = lin.quote(data["email"]).encode("utf-8")
 
-    msg = templ.emailMsgFromIdent(req, 
+    msg = templ.email_msg_from_ident(req, 
         ident,
         data,
         from_addr=config["system-email"],
@@ -332,6 +332,6 @@ def get_token(req, ident, data):
             "ident", 
                 "token_create={}@email".format(email_token),
         ))
-        data["six-code"] = token.get_six(tk)
+        data["six-code"] = "{:06d}".format(token.get_six(tk))
     else:
         raise PolyVinylNotOk("No Auth Service Defined")

@@ -51,7 +51,7 @@ def templ_from(req, ident, data):
             raise PolyVinylError(err.args[0], path, err)
 
 
-def emailMsgFromIdent(req, ident, data, from_addr, to_addrs):
+def email_msg_from_ident(req, ident, data, from_addr, to_addrs):
     subject_ident = identifier.Ident(
         "content={}_subject.format@{}".format(ident.name, ident.location))
     subject = templ_from(req, subject_ident, data)
