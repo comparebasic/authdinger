@@ -1,32 +1,24 @@
 import urllib, json, os, time
 
 from .. import lin
-from ..utils import identifier, config as config_d, token as token_d, user
-from ..utils.exception import PolyVinylNotOk
+from ..utils import identifier, config as config_d, token as token_d, user, templ
+from ..utils.exception import PolyVinylNotOk, PolyVinylError
 
-FORM_BUTTON_FORMAT = "<button type=\"submit\" {name} {value}>\n" \
-    "{label}" \
-    "</button>"
+html_tag_templ_ident = identifier.Ident("content=form_html_tag.format@inc")
+button_templ_ident = identifier.Ident("content=form_button.format@inc")
+fieldset_templ_ident = identifier.Ident("content=form_fieldset.format@inc")
+labeled_templ_ident = identifier.Ident("content=form_fieldset_labeled.format@inc")
+input_templ_ident = identifier.Ident("content=form_input.format@inc")
+multi_templ_ident = identifier.Ident("content=form_multi.format@inc")
+optional_templ_ident = identifier.Ident("content=form_optional.format@inc")
 
-FORM_FIELDSET = "<fieldset>{content}</fieldset>"
-FORM_LABELED_FIELDSET = "<fieldset class=\"labeled-fieldset\"><span class=\"label\">{label}</span>{content}</fieldset>"
-
-FORM_INPUT_FORMAT = "<label>" \
-    "<span class=\"label-text\">{label}</span>" \
-    "<input type=\"{type}\" name=\"{name}\"{value} />" \
-    "<span class=\"marker valid\">&check;</span>" \
-    "<span class=\"marker invalid\">&#10005;</span>" \
-    "{control}{content}</label>"
-
-FORM_CB_RADIO_FORMAT = "<label>" \
-    "<input {input-extra} type=\"{type}\" name=\"{name}\"{value}/>" \
-    "<span class=\"label-text\">{label}</span>{content}" \
-    "</label>"
-
-FORM_HTML_TAG = "<{tag}>{content}</{tag}>"
+def _item_templ(req, ident, vals):
+    try:
+        return  templ.templ_from(req, ident, vals)
+    except PolyVinylError as err:
+        raise PolyVinylError("Unable to find field type", ident, err)
 
 FORM_OPTIONAL = "<div class=\"optional\">{}</div>"
-
 
 def _trans_data(req, ident, data, origin, fields):
 
@@ -159,7 +151,7 @@ def compare_digest(config, ident, form, html, fields):
     # compare to digets on disk
 
 
-def render_item(ident, optional=False, content=""):
+def render_item(req, ident, optional=False, content=""):
     name = ident.location
     value = None 
     if ident.tag == "radio" or ident.tag == "button":
@@ -173,59 +165,71 @@ def render_item(ident, optional=False, content=""):
         "type": "text" if ident.tag == "input" else ident.tag,
         "name": name,
         "value": " value=\"{}\"".format(value) if value else "",
-        "control": "<span class=\"marker eye\">&#128065;</span>" \
-            if ident.tag == "password" else "",
+        "control": "",
         "content": content,
         "input-extra":""
     }
 
-    field = ""
-    if ident.tag == "button":
-        field = FORM_BUTTON_FORMAT.format(**vals)
-    elif ident.tag == "fieldset":
-        if ident.name:
-            if ident.name == "_":
-                vals["label"] = ""
+    if ident.tag == "password":
+        vals["control"] = "<span class=\"marker eye\">&#128065;</span>"
 
-            field = FORM_LABELED_FIELDSET.format(**vals)
-        else:
-            field = FORM_FIELDSET.format(**vals)
-    elif ident.tag == "input" or ident.tag == "password":
-        field = FORM_INPUT_FORMAT.format(**vals)
-    elif ident.tag == "checkbox":
-        vals["value"] = "on"
-        field = FORM_CB_RADIO_FORMAT.format(**vals)
-    elif ident.tag == "checkbox:checked":
-        vals["value"] = "on"
-        vals["input-extra"] = " checked=\"checked\""
-        vals["type"] = "checkbox"
-        field = FORM_CB_RADIO_FORMAT.format(**vals)
-    elif ident.tag == "radio":
-        field = FORM_CB_RADIO_FORMAT.format(**vals)
-    elif ident.tag == "para":
-        field = FORM_HTML_TAG.format(**{"tag":"p", "content": ident.name})
-    else:
-        raise PolyVinylNotOk("Unknown field type", ident)
+
+    field = ""
+
+
+    match ident.tag:
+        case  "button":
+            templ_ident = button_templ_ident
+        case "fieldset":
+            if ident.name:
+                if ident.name == "_":
+                    vals["label"] = ""
+
+                templ_ident = labeled_templ_ident
+            else:
+                templ_ident = fieldset_templ_ident
+        case "password" | "password":
+            templ_ident = input_templ_ident
+        case "checkbox":
+            vals["value"] = "on"
+            templ_ident = multi_templ_ident
+        case "radio":
+            vals["value"] = "on"
+            templ_ident = multi_templ_ident
+        case "checkbox:checked":
+            vals["value"] = "on"
+            vals["input-extra"] = " checked=\"checked\""
+            vals["type"] = "checkbox"
+            templ_ident = multi_templ_ident
+        case "para":
+            vals = {"tag":"p", "content": ident.name}
+            templ_ident = html_tag_templ_ident
+        case "input":
+            templ_ident = input_templ_ident
+        case _:
+            raise PolyVinylError("Field type not found", ident)
+
+
+    field = _item_templ(req, templ_ident, vals)
 
     if optional:
         return FORM_OPTIONAL.format(field)
     else:
         return field
 
-
-def rev_gen_loop(ident, chain, data, content=""):
+def rev_gen_loop(req, ident, chain, data, content=""):
     top = len(chain)-1
     for i, v in enumerate(reversed(chain)):
         if isinstance(v, (list)):
-            content += gen_loop(ident, data, v)
+            content += gen_loop(req, ident, data, v)
         else:
             ident = identifier.Ident(v)
-            content = render_item(ident, i < top, content)
+            content = render_item(req, ident, i < top, content)
 
     return content
 
 
-def gen_loop(ident, data, chain):
+def gen_loop(req, ident, data, chain):
     content = ""
     for v in chain:
         content += "\n"
@@ -234,9 +238,9 @@ def gen_loop(ident, data, chain):
             match ident.tag:
                 case "input" | "checkbox" | "checkbox:checked" | "button" | "option" | \
                         "radio" | "fieldset" | "password" | "para":
-                    content += render_item(ident)
+                    content += render_item(req, ident)
         elif isinstance(v, (list)):
-            content += rev_gen_loop(ident, v, data)
+            content += rev_gen_loop(req, ident, v, data)
 
     return content
 
@@ -252,11 +256,12 @@ def gen_script(ident, form_jsid, validation):
 
 
 def gen_html(req, ident, data, config_data):
+    config = req.server.config
     form_jsid = "form_jsid{}".format(req.get_unique())
     req.content += "<form id=\"{}\" method=\"POST\" action=\"{}\">".format(
         form_jsid,
         config_data["action"])
-    req.content += gen_loop(ident, data, config_data["idents"])
+    req.content += gen_loop(req, ident, data, config_data["idents"])
     req.content += gen_script(ident, form_jsid, config_data["validation"])
     req.content += "</form>"
 

@@ -64,14 +64,14 @@ bottom of this file.
         let start = this._ui.is.valid
         const broke = _validateRules(this.value, this._ui.fieldConfig.rules)
         if(broke === -1){
-            this.parentNode.classList.add("valid")
-            this.parentNode.classList.remove("invalid")
+            this._ui.label_el.classList.add("valid")
+            this._ui.label_el.classList.remove("invalid")
             this._ui.is.valid = true
         }else{
-            this.parentNode.classList.remove("valid")
+            this._ui.label_el.classList.remove("valid")
             this._ui.is.valid = false 
             if(fully){
-                this.parentNode.classList.add("invalid")
+                this._ui.label_el.classList.add("invalid")
                 showDesc.call(this, broke)
             }else if(this.parentNode.classList.contains("invalid")){
                 showDesc.call(this, broke)
@@ -87,14 +87,14 @@ bottom of this file.
         /* Validate a form input that does not have pattern matching rules */
         let start = this._ui.is.valid
         if(this.value){
-            this.parentNode.classList.add("valid")
-            this.parentNode.classList.remove("invalid")
+            this._ui.label_el.classList.add("valid")
+            this._ui.label_el.classList.remove("invalid")
             this._ui.is.valid = true
         }else{
-            this.parentNode.classList.remove("valid")
+            this._ui.label_el.remove("valid")
             this._ui.is.valid = false 
             if(fully){
-                this.parentNode.classList.add("invalid")
+                this._ui.label_el.classList.add("invalid")
                 showDesc.call(this, 0)
             }
         }
@@ -253,6 +253,7 @@ bottom of this file.
         let events = []
         let selectEvents = []
         let desc_el = null
+        let label_el = null
 
         if(el.nodeName == "INPUT"){
             selectEvents.push("focus")
@@ -282,6 +283,17 @@ bottom of this file.
                     })(el)
                 }
             }
+
+
+             let par = el.parentNode;
+             for(let i = 0; par != null && i < 5; i++){
+                if(par.nodeName == "LABEL"){
+                    label_el = par                    
+                    break
+                }
+                par = par.parentNode;
+             }
+
         }else if(el.nodeName == "BUTTON"){
             events.push("click") 
             validate = validateButton
@@ -340,6 +352,7 @@ bottom of this file.
         el._ui = {
             el,
             desc_el,
+            label_el,
             is: {
                 valid,
                 required

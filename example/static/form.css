@@ -107,14 +107,19 @@ fieldset.labeled-fieldset .label {
 label {
     display: block;
     margin: 0;
+}
+
+label .icon-wrapper {
     position: relative;
+    display: inline-block;
+    width: 100%;
 }
 
 label .marker {
     display: none;
     position: absolute;
     z-index: 2;
-    bottom: 5px;
+    top: 12px;
     right: 8px;
     font-size: 30px;
     line-height: 20px;

@@ -63,7 +63,7 @@ def do_chain(req, chain, data):
                 req.server.logger.warn("ReChain {}", re.args[0])
                 do_chain(req, re.args[0], data)
             except (PolyVinylNotOk, PolyVinylError) as err:
-                data["error"] = err.args[0]
+                data["error"] = err.args
                 raise
         else:
             raise TypeError(h)

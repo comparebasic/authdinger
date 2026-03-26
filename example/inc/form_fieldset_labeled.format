@@ -1,0 +1,1 @@
+<fieldset class="labeled-fieldset"><span class="label">{label}</span>{content}</fieldset>

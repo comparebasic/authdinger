@@ -1,0 +1,10 @@
+<label>
+    <span class="label-text">{label}</span>
+    <span class="icon-wrapper">
+        <input type="{type}" name="{name}" {value}/>
+        <span class="marker valid">&check;</span>
+        <span class="marker invalid">&#10005;</span>
+        {control}
+    </span>
+    {content}
+</label>

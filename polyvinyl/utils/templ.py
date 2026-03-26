@@ -19,7 +19,7 @@ def render_stache(req, ident, data):
         try:
             with open(path, "r") as f:
                 prep = pystache.parse(f.read())
-                cache[ident] = prep
+                cache[ident.ident] = prep
         except FileNotFoundError as err:
             raise PolyVinylError(err.args[0], err)
 
@@ -35,16 +35,19 @@ def templ_from(req, ident, data):
         return render_stache(req, ident, data) 
     else:
         try:
-            with open(path, "r") as f:
-                content = f.read()
 
+            prep = cache.get(ident.ident)
+            if not prep:
+                with open(path, "r") as f:
+                    prep = f.read()
+                    cache[ident.ident] = prep
+
+            content = prep
             if ext == "format":
                 try:
                     return content.format(**data)
                 except KeyError as err:
-                    raise PolyVinylNotOk("Key Error in templ", err) 
-            elif ext == "form":
-                pass
+                    raise PolyVinylNotOk("Key Error in templ", err, ident) 
             else:
                 return content
         except FileNotFoundError as err:
