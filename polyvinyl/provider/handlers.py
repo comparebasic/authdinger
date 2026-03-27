@@ -11,7 +11,7 @@ from ..utils.maps import mime_map
 from smtplib import SMTP
 
 
-from ..utils.form import injest, query_set_form, save_form
+from ..utils.form import injest, query_set_form, save_form, load
 
 def save_amend(req, ident, data):
     return save_form(req, ident, data, amend=True)

@@ -250,18 +250,17 @@ button {
     border: 1px solid #aaa;
 }
 
-button.valid {
+button.valid, button.always-valid {
     background: rgb(100,200,100);
 }
 
-button.valid:hover {
+button.valid:hover, button.always-valid:hover {
     background: rgb(130,230,130);
 }
 
-button.valid:active {
+button.valid:active, button.always-valid:hover {
     background: rgb(160,200,160);
 }
-
 
 @media only screen and (max-width: 600px) {
     form {

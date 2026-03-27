@@ -43,7 +43,8 @@
         "/auth/subscriptions": [ "title=Newsletter Subscriptions@Subscriptions",
             ["get", 
                 ["query_eq=yes@un", 
-                    ["query_set_form=subscriptions.json@page", "map=email,email-token@form", "save_amend=subscriptions.json@page", "idents=subscriptions.idents@page", "end"]],
+                    ["query_set_form=subscriptions.json@page", "map=email,email-token@form", "save_amend=subscriptions.json@page",
+                        "load=subscriptions.json@page", "idents=subscriptions.idents@page", "end"]],
                 ["query_neq=yes@un", 
                     ["idents=subscriptions.idents@page", "end"]]
             ],

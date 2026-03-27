@@ -200,7 +200,7 @@ bottom of this file.
          * is ready
          */
         validateLatest.call(this, e)
-        if(!this._ui.is.valid){
+        if(!this._ui.is.valid && !this.classList.contains("always-valid")){
             e.stopPropagation()
             e.preventDefault()
             return false

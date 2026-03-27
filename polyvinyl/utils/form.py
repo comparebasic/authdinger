@@ -20,7 +20,7 @@ def _item_templ(req, ident, vals):
 
 FORM_OPTIONAL = "<div class=\"optional\">{}</div>"
 
-def _trans_data(req, ident, data, origin, fields):
+def _trans_data(req, data, origin, fields, unpack=False):
 
     kv = {}
     deps = {}
@@ -40,6 +40,9 @@ def _trans_data(req, ident, data, origin, fields):
                         else:
                             value = ident.name
 
+                        if unpack and isinstance(value, (bytes)):
+                            value = value.decode("utf-8")
+
                         data[k] = value
                     case "process":
                         match ident.location:
@@ -57,10 +60,15 @@ def _trans_data(req, ident, data, origin, fields):
                         else:
                             key = k
 
+                        if unpack and isinstance(value, (bytes)):
+                            value = value.decode("utf-8")
+
                         data[key] = value
                         data[k] = origin[k]
                     case "date":
-                        if ident.location == "now":
+                        if unpack:
+                            data[k] = token_d.time_from_bytes(origin[k])
+                        elif ident.location == "now":
                             data[k] = token_d.time_bytes(time.time()) 
 
             elif isinstance(v, (bool)):
@@ -71,6 +79,10 @@ def _trans_data(req, ident, data, origin, fields):
             k,v = dep
             if origin.get(k) and origin[k] == v:
                 key, value = val
+
+                if unpack and isinstance(value, (bytes)):
+                    value = value.decode("utf-8")
+
                 data[key] = value
 
         req.server.logger.debug("Data after injest {}".format(data))
@@ -107,7 +119,7 @@ def save_form(req, ident, data, amend=False):
                 fields[k] = v
 
     form_data = {}
-    _trans_data(req, ident, form_data, req.form_data, fields)
+    _trans_data(req, form_data, req.form_data, fields)
 
     name = "{}.linr".format(name)
 
@@ -120,15 +132,18 @@ def save_form(req, ident, data, amend=False):
         details.append(k)
         details.append(v)
 
-    if amend:
-       with open(path, "ab") as f:
-            f.seek(0, SEEK_END)
-            lin.send_r(f, details) 
-       req.data["update"] = "Updating {}".format(details) 
+    try:
+        if amend:
+           with open(path, "ab") as f:
+                f.seek(0, SEEK_END)
+                lin.send_r(f, details) 
+           req.data["update"] = "Updating {}".format(details) 
 
-    else:
-        with open(path, "wb+") as f:
-            lin.send_r(f, details) 
+        else:
+            with open(path, "wb+") as f:
+                lin.send_r(f, details) 
+    except FileNotFoundError as err:
+        raise PolyVinylNotOk("User or file not found", err)
 
 
 
@@ -141,7 +156,7 @@ def injest(req, ident, data):
             js = json.loads(f.read())
             fields.update(js["injest"])
     
-    _trans_data(req, ident, data, req.form_data, fields)
+    _trans_data(req, data, req.form_data, fields)
 
 
 def query_set_form(req, ident, data):
@@ -159,9 +174,52 @@ def query_set_form(req, ident, data):
         if req.query_data.get(k):
             fields[k] = v
     
-    _trans_data(req, ident, req.form_data, req.query_data, fields)
+    _trans_data(req, req.form_data, req.query_data, fields)
     req.server.logger.debug("Data after injest_query_set {} {}".format(req.form_data, req.query_data))
 
+
+def load(req, ident, data):
+    config = req.server.config
+
+    fields = {}
+    path, ext = config_d.get_path_ext(config, ident)
+    if ext == "json":
+        with open(path, "r") as f:
+            form_config = json.loads(f.read())
+            fields.update(form_config["persist"])
+            name = form_config.get("persist-name")
+            if not name:
+                name = ident.name
+
+    if not form_config:
+        raise PolyVinylError("File for config not found", err)
+
+    if req.role:
+        email_token = data["email-token"]
+    elif form_config.get("scope"):
+        scope = identifier.Ident(form_config["scope"])
+        if scope.tag == "public" and scope.name == "email-token" and \
+                tag.location == "data":
+            email_token = data["email-token"]
+
+    if not email_token:
+        raise PolyVinylError("User for file  to load not found", err)
+
+    name = "{}.linr".format(name)
+    user_dir = user.get_userdir(config, email_token) 
+    path = os.path.join(os.path.join(user_dir, "forms"), name)
+
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, SEEK_END)
+            rec = lin.map_r(f, None)
+            req.server.logger.debug("Rec {}".format(rec))
+
+            _trans_data(req, data, rec, fields, unpack=True) 
+    except FileNotFoundError as err:
+        print(path)
+        raise PolyVinylError("File for loading not found", err)
+    
 
 def parseFormData(s):
     data = {}
@@ -213,6 +271,7 @@ def render_item(req, ident, data, optional=False, content=""):
         value = data.get(name)
 
     vals = {
+        "class":"",
         "label": ident.name,
         "type": "text" if ident.tag == "input" else ident.tag,
         "name": name,
@@ -228,9 +287,12 @@ def render_item(req, ident, data, optional=False, content=""):
 
     field = ""
 
-
     match ident.tag:
         case  "button":
+            templ_ident = button_templ_ident
+        case  "always_button":
+            vals["type"] = "button"
+            vals["class"] = "class=\"always-valid\""
             templ_ident = button_templ_ident
         case "fieldset":
             if ident.name:
@@ -242,14 +304,17 @@ def render_item(req, ident, data, optional=False, content=""):
                 templ_ident = fieldset_templ_ident
         case "password" | "password":
             templ_ident = input_templ_ident
-        case "checkbox":
-            vals["value"] = "on"
-            templ_ident = multi_templ_ident
         case "radio":
             templ_ident = multi_templ_ident
+        case "checkbox":
+            vals["value"] = " value=\"on\""
+            if data.get(name) == "on":
+                vals["input-extra"] = " checked=\"checked\""
+            templ_ident = multi_templ_ident
         case "checkbox:checked":
-            vals["value"] = "on"
-            vals["input-extra"] = " checked=\"checked\""
+            vals["value"] = "value=\"on\""
+            if data.get(name) != "off":
+                vals["input-extra"] = " checked=\"checked\""
             vals["type"] = "checkbox"
             templ_ident = multi_templ_ident
         case "para":
@@ -287,8 +352,8 @@ def gen_loop(req, ident, data, chain):
         if isinstance(v, (str)):
             ident = identifier.Ident(v)
             match ident.tag:
-                case "input" | "checkbox" | "checkbox:checked" | "button" | "option" | \
-                        "radio" | "fieldset" | "password" | "para":
+                case "input" | "checkbox" | "checkbox:checked" | "button" | "always_button" | \
+                    "option" | "radio" | "fieldset" | "password" | "para":
                     content += render_item(req, ident, data)
         elif isinstance(v, (list)):
             content += rev_gen_loop(req, ident, v, data)

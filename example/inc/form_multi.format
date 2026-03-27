@@ -1,5 +1,5 @@
 <label>
-    <input {input-extra} type="{type}" name="{name}"{value}/>
+    <input {input-extra} type="{type}" name="{name}" {value}/>
     <span class="label-text">{label}</span>
     {content}
 </label>

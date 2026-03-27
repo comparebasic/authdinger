@@ -5,6 +5,12 @@ def time_bytes(t):
     return int(t*1000000).to_bytes(8)
 
 
+def time_from_bytes(v):
+    return time.strftime(
+        '%Y-%m-%d %H:%M:%S',
+        time.localtime(float(int.from_bytes(v, "big"))/1000000.0))
+
+
 def get_token(content):
     h = hashlib.sha256()
 
