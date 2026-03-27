@@ -23,3 +23,25 @@ body {
     padding: 6px;
     background: #fee;
 }
+
+nav {
+    font-family: sans-serif;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    list-style-type: none;
+    margin: 0 24px 0 0;
+    padding: 0;
+    display: inline-block;
+    font-weight: bold;
+}
+
+h1, h2, h2, h3, h4 {
+    font-family: sans-serif;
+}

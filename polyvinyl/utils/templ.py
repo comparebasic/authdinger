@@ -22,8 +22,25 @@ def render_stache(req, ident, data):
                 cache[ident.ident] = prep
         except FileNotFoundError as err:
             raise PolyVinylError(err.args[0], err)
+    
+    if len(req.nav):
+        nav = "<nav><ul>"
+        for k,v in req.nav.items():
+            if v is True:
+                nav += "<li><span class=\"active\">{}</span></li>\n".format(k)
+            else:
+                nav += "<li><a href=\"{}\">{}</a></li>\n".format(v, k)
+        nav += "</ul></nav>"
+            
+    else:
+        nav = ""
 
-    return renderer.render(prep, {"data": data, "role": req.role, "session": req.session})
+    return renderer.render(prep, {
+        "data": data,
+        "role": req.role,
+        "session": req.session,
+        "nav": nav
+    })
 
 
 def templ_from(req, ident, data):

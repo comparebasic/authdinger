@@ -78,6 +78,7 @@
         "page": ["nav"]
     },
     "perms": {
+        "/auth/subscriptions": ["no_session"],
         "/auth/login": ["no_session"],
         "/auth/dashboard": ["session"],
         "/auth/logout": ["session"] 
