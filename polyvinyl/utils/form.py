@@ -1,6 +1,6 @@
 import urllib, json, os, time
 
-from .. import lin
+from .. import lin, SEEK_END
 from ..utils import identifier, config as config_d, token as token_d, user, templ
 from ..utils.exception import PolyVinylNotOk, PolyVinylError
 
@@ -45,6 +45,8 @@ def _trans_data(req, ident, data, origin, fields):
                         match ident.location:
                             case "quote":
                                 value =lin.quote(origin[k]).decode("utf-8")
+                            case "unquote":
+                                value = lin.unquote(origin[k]).decode("utf-8")
                             case "lower":
                                 value = origin[k].lower()
                             case "upper":
@@ -94,6 +96,16 @@ def save_form(req, ident, data, amend=False):
             if not name:
                 name = ident.name
 
+    if amend:
+        orig = fields
+        fields = {}
+        for k,v in orig.items():
+            ident = identifier.Ident(v)
+            if ident.tag == "date":
+                fields[k] = v
+            elif req.form_data.get(k):
+                fields[k] = v
+
     form_data = {}
     _trans_data(req, ident, form_data, req.form_data, fields)
 
@@ -108,8 +120,15 @@ def save_form(req, ident, data, amend=False):
         details.append(k)
         details.append(v)
 
-    with open(path, "wb+") as f:
-        lin.send_r(f, details) 
+    if amend:
+       with open(path, "ab") as f:
+            f.seek(0, SEEK_END)
+            lin.send_r(f, details) 
+       req.data["update"] = "Updating {}".format(details) 
+
+    else:
+        with open(path, "wb+") as f:
+            lin.send_r(f, details) 
 
 
 
@@ -141,7 +160,7 @@ def query_set_form(req, ident, data):
             fields[k] = v
     
     _trans_data(req, ident, req.form_data, req.query_data, fields)
-    req.server.logger.debug("Data after injest_query_set {}".format(req.form_data))
+    req.server.logger.debug("Data after injest_query_set {} {}".format(req.form_data, req.query_data))
 
 
 def parseFormData(s):
@@ -153,6 +172,7 @@ def parseFormData(s):
             v = pairs[1]
             data[k] = urllib.parse.unquote_plus(v, encoding=None, errors=None)
     return data
+
 
 def toQuery(config, data):
     query = ""
@@ -180,7 +200,7 @@ def compare_digest(config, ident, form, html, fields):
     # compare to digets on disk
 
 
-def render_item(req, ident, optional=False, content=""):
+def render_item(req, ident, data, optional=False, content=""):
     name = ident.location
     value = None 
     if ident.tag == "radio" or ident.tag == "button":
@@ -188,6 +208,9 @@ def render_item(req, ident, optional=False, content=""):
         if len(parts) == 2:
             name = parts[1]
             value = parts[0]
+    
+    if not value:
+        value = data.get(name)
 
     vals = {
         "label": ident.name,
@@ -252,7 +275,7 @@ def rev_gen_loop(req, ident, chain, data, content=""):
             content += gen_loop(req, ident, data, v)
         else:
             ident = identifier.Ident(v)
-            content = render_item(req, ident, i < top, content)
+            content = render_item(req, ident, data, i < top, content)
 
     return content
 
@@ -266,7 +289,7 @@ def gen_loop(req, ident, data, chain):
             match ident.tag:
                 case "input" | "checkbox" | "checkbox:checked" | "button" | "option" | \
                         "radio" | "fieldset" | "password" | "para":
-                    content += render_item(req, ident)
+                    content += render_item(req, ident, data)
         elif isinstance(v, (list)):
             content += rev_gen_loop(req, ident, v, data)
 

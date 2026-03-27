@@ -47,6 +47,7 @@ def api(req, ident, data):
     if ident.name == "config":
         req.content  += api_d.config(req, sys.modules(__name__))
 
+
 def end(req, ident, data):
     "Set the request complete and ready to respond\n"
     req.done = True
@@ -82,6 +83,8 @@ def map(req, ident, data):
                     source = req.session
                 case "config":
                     source = config 
+                case _:
+                    raise PolyVinylError("Map source not defined", ident)
 
     maps.map(kv, source, data)
     req.server.logger.log("After Map {} {}".format(ident, data))

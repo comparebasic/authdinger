@@ -25,6 +25,36 @@ bottom of this file.
         return
     }
 
+    function Ident(s){
+        let idx = s.indexOf("=")
+        let tag = null
+        let name = null
+        let loc = null
+        if(idx == -1){
+            return {
+                tag: tag,
+                name: null,
+                loc: null
+            }
+        }
+        tag = s.substring(0, idx)
+        s = s.substring(idx+1, s.length)
+        idx = s.indexOf("@")
+        if(idx == -1){
+            return {
+                tag: tag,
+                name: s,
+                loc: null
+            }
+        }else{
+            return {
+                tag: tag,
+                name: s.substring(0, idx),
+                loc: s.substring(idx+1, s.length)
+            }
+        }
+    }
+
     const noop = function(){}
 
     function _validateRules(content, rules){
@@ -190,9 +220,9 @@ bottom of this file.
          * validation is not run from this, but derives existing validity from
          * the field objects
          */
-        let i = 0
-        for(; i < this.inputs.length; i++){
-            const field = this.inputs[i]
+        let valid = true
+        for(let k in this.inputs){
+            const field = this.inputs[k]
             let visible = true 
             let debugName = "";
             if(field.el instanceof Element){
@@ -204,16 +234,17 @@ bottom of this file.
                     debugName = el.getAttribute("name")
                     if(!el.checkVisible()){
                         visible = false
+                        valid = false;
                         break
                     }
                 }
             }
 
             if(field.is.required && visible && !field.is.valid){
+                valid = false;
                 break
             }
         }
-        const valid = i === this.inputs.length
         let cls = "invalid"
         let oldCls = "valid"
         if(valid){
@@ -381,7 +412,7 @@ bottom of this file.
                 jsid,
                 config,
                 buttons: [],
-                inputs: [],
+                inputs: {},
                 radios: {},
                 validate: noop,
                 is: {
@@ -403,10 +434,48 @@ bottom of this file.
              l = nodes.length
              for(let i = 0; i < l; i++){
                   const el = nodes[i]
-                  form.inputs.push(makeField(el, config, form))
+                  form.inputs[el.getAttribute("name")] = makeField(el, config, form)
                   if(typeof el.validate !== "undefined"){
                       el.validate()
                   }
+             }
+            
+             const deps = {}
+             for(let k in  form.inputs){
+                const ui = form.inputs[k]
+                if(!ui || !(ui.el instanceof Element)){
+                    continue
+                }
+                console.log(ui)
+                const name = ui.el.getAttribute("name");
+                const entry = config[name]
+                if(entry && entry.deps){
+                    for(let ii = 0; ii < entry.deps.length; ii++){
+                        const ident = Ident(entry.deps[ii])
+                        console.log(ident, ui.el) 
+                        if(!form.inputs[ident.loc]){
+                            throw Error("Dependent for item not found", ident)
+                        }
+                        if(ident.tag === "clear"){
+                            (function(inp, dep, ident){
+                                dep.addEventListener("change", function(){
+                                    const type = this.getAttribute("type")
+                                    if((type !== "checkbox" && type !== "radio") || this.checked){
+                                        if(ident.name == null || this.value == ident.name){
+                                            inp.checked = false
+                                        }
+                                    }
+                                })
+
+                                inp.addEventListener("change", function(){
+                                    if(this.checked){
+                                        dep.checked = false
+                                    }
+                                })
+                            })(ui.el, form.inputs[ident.loc].el, ident)
+                        }
+                    }
+                }
              }
              
              form.validate = validateForm

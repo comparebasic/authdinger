@@ -1,0 +1,61 @@
+{
+    "idents":[
+        "input=Email Address@email",
+        "checkbox=Unsubscribe from all emails@unsubscribe-all",["fieldset", [
+            "checkbox:checked=General newsletter@news-general",
+            "checkbox=Podcast episodes@news-mot-podcast",
+            "checkbox=Products and features@news-cb-products",
+            "checkbox=Fundraising updates@news-cb-funding",
+            "para=Select the emails you would like to receive."]]
+    ],
+    "action":"/auth/newsletter",
+    "injest": {
+        "email": "process=email-token@quote",
+        "news-general": "value=off@missing",
+        "news-mot-podcast": "value=off@missing",
+        "news-cb-products": "value=off@missing",
+        "news-cb-funding": "value=off@missing"
+    },
+    "persist": {
+        "date": "date=submission-date@now",
+        "news-general": "value=off@missing",
+        "news-mot-podcast": "value=off@missing",
+        "news-cb-products": "value=off@missing",
+        "news-cb-funding": "value=off@missing" 
+    },
+    "validation":{
+        "password":{
+            "rules": [
+                ".{8,32}",
+                false,
+                "[A-Z]{1}",
+                false,
+                "[a-z]{1}",
+                false,
+                "[0-9]{1}",
+                false,
+                "[-,._$@!~+=/:;?#%^&*]{1}"
+            ],
+            "description":[
+                "8-32 characters long,",
+                " one of each: ",
+                "a capital",
+                ", ",
+                "a lower case letter",
+                ", ",
+                "a number",
+                ", and ",
+                "a special character - _ , . : ; # ? ^ & * $ @ ! ~ + = /."
+            ]
+        },
+        "email": {
+            "rules":[".+@.+\\.[a-zA-Z]{2,}"], 
+            "description": ["Enter a valid email"]
+        },
+        "news-general": {"deps": ["clear=on@unsubscribe-all"]},
+        "news-mot-podcast": {"deps": ["clear=on@unsubscribe-all"]},
+        "news-cb-products": {"deps": ["clear=on@unsubscribe-all"]},
+        "news-cb-funding": {"deps": ["clear=on@unsubscribe-all"]}
+    },
+    "persist-name": "newsletter"
+}

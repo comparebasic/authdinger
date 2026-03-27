@@ -13,6 +13,7 @@ from ..utils import templ, identifier, form, session, perms
 
 class PolyVinylHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
+        self.data = {}
         self.header_stage = {}
         self.done = False
         self.form_data = {}
@@ -86,7 +87,7 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
             self.cookie = session.parse_cookie(self.headers["Cookie"])
             session.load(self)
 
-        data = {"error": None}
+        self.data = {"error": None}
 
         try:
             if self.role:
@@ -95,32 +96,32 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
             else:
                 self.role["ident"] = identifier.Ident("id=@anon")
 
-            self.nav = perms.make_nav(self, self.role, data, path)
+            self.nav = perms.make_nav(self, self.role, self.data, path)
             self.server.logger.debug(self.nav)
 
-            self.resolve(path, data)
+            self.resolve(path, self.data)
         except PolyVinylNoAuth as no_auth:
             self.server.logger.warn("Auth Error {}".format(str(no_auth.args)))
-            data["error"] = str(no_auth.args)
-            self.resolve("/no-auth", data)
+            self.data["error"] = str(no_auth.args)
+            self.resolve("/no-auth", self.data)
             self.code = 403
         except PolyVinylKnockout as ko:
             pass
         except PolyVinylNotFound as err:
-            data["error"] = str(err.args)
+            self.data["error"] = str(err.args)
             self.content = ""
-            self.resolve("/not-found", data)
+            self.resolve("/not-found", self.data)
             self.code = 404
         except PolyVinylError as err:
             self.server.logger.error(err, traceback.format_exception(err))
-            data["error"] = str(err.args)
+            self.data["error"] = str(err.args)
             self.content = ""
-            self.resolve("/error", data)
+            self.resolve("/error", self.data)
             self.code = 500
         except Exception as err:
-            data["error"] = str(err.args)
+            self.data["error"] = str(err.args)
             self.content = ""
-            self.resolve("/error", data)
+            self.resolve("/error", self.data)
             self.code = 500
             self.server.logger.error(err, traceback.format_exception(err))
 

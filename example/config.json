@@ -20,19 +20,19 @@
         ],
         "/auth/login": ["title=Login or Sign Up@Login/Create Account", 
             ["get", "form=login.json@page", "end"],
-            ["post", "injest=login.json@page", 
-                ["data_eq=newsletter@news-or-account", [
+            ["post", "map=email,fullname?@form",
+                ["form_eq=newsletter@news-or-account", [
                     "register", "save_form=login.json@page", "redir=/auth/newsletter", "end"]
                 ],
-                ["data_eq=account@news-or-account", [
-                    ["data_eq=password@auth-method", [
-                            ["data_eq=on@register", "register", "save_form=login.json@page", "pw_set", "session_start",
+                ["form_eq=account@news-or-account", [
+                    ["form_eq=password@auth-method", [
+                            ["form_eq=on@register", "register", "save_form=login.json@page", "pw_set", "session_start",
                                 "redir=/auth/dashboard", "end"],
-                            ["data_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
+                            ["form_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
                         ]
                     ],
-                    ["data_eq=send-email@auth-method", 
-                        ["data_eq=on@register", "register"],
+                    ["form_eq=send-email@auth-method", 
+                        ["form_eq=on@register", "register"],
                             "get_token", "map=brand,url@config", "set_token_url=/auth/email-sent", "email=auth-token-email@emails",
                                 "content=email-sent.stache@page", "end"]
                     ]
@@ -40,11 +40,19 @@
                 ["form=login.json@page", "end"]
             ]
         ],
+        "/auth/subscriptions": [ "title=Newsletter Subscriptions@Subscriptions",
+            ["get", 
+                ["query_eq=yes@un", 
+                    ["query_set_form=subscriptions.json@page", "map=email,email-token@form", "save_amend=subscriptions.json@page", "idents=subscriptions.idents@page", "end"]],
+                ["query_neq=yes@un", 
+                    ["idents=subscriptions.idents@page", "end"]]
+            ],
+            ["post", "save_amend=subscriptions.json@page", "idents=subscriptions.idents@page", "end"]
+        ],
         "/auth/logout": [ "title=Logout@Logout",
             ["get", "try_auth=session", "session_close", "redir=/auth/", "end"],
             ["redir=/auth/login", "end"]
         ],
-        "/auth/newsletter": [ "title=Newsletter", "content=newsletter.stache@page", "end"],
         "/auth/token-login": [ "title=Token Login",
             ["get", "map=redir,token,email@query", "set_query", "token_consume", "session_start", "redir=/auth/dashboard", "end"],
             ["get", "content=token-not-found.stache@page", "end"]
@@ -61,7 +69,7 @@
         "/ui/editor": ["content=editor.html@ui-page"],
         "/ui/ui.js": ["content=ui.js@ui"],
         "/static/style.css": ["content=style.css@static"],
-        "/static/form.css": ["content=form.css@static"],
+        "/static/form.css": ["content=form.css@ui"],
         "/static/form.js": ["content=form.js@ui"],
         "/error": ["title=Error", "content=error.html@page"]
     },
