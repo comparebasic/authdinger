@@ -175,6 +175,14 @@ See more about what these identifiers mean in the
 [Identifier](/doc/identifier.md) documentation.
 
 
+# Running the Tests
+
+Test run with `Playwright` for Python and can be run by the following command:
+
+```bash
+pytest ./test.py
+```
+
 # Python3 packages used
 
 - bcrypt
