@@ -34,7 +34,9 @@ def map_keys(keys, items, data):
                 if ident.name:
                     k = ident.name
 
-            if isinstance(value, (bytes)):
+                if isinstance(value, (bytes)) and ident.tag != "bin":
+                    value = value.decode("utf-8")
+            elif isinstance(value, (bytes)):
                 value = value.decode("utf-8")
             data[k] = value 
     return data

@@ -10,6 +10,23 @@ def get_userfile(config, email_token):
     return os.path.join(get_userdir(config, email_token),
                 "details.linr")
 
+def load_role(config, email_token, auth=True):
+    path = get_userfile(config, email_token)
+    keys = config["fields"]["user"]
+
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, SEEK_END)
+            keys = config["fields"]["user"]
+            if auth:
+                keys["salt"] = "bin"
+            role = lin.map_str_r(f, keys)
+            role["email-token"] = email_token
+            return role
+    except FileNotFoundError:
+        pass
+    
+
 def create(req, config, data):
     email_token = lin.quote(data["email"])
     path = get_userfile(config, email_token.decode("utf-8"))
@@ -38,22 +55,13 @@ def create(req, config, data):
     for v in ["forms", "idents"]:
         os.mkdir(os.path.join(dir_path, v))
 
-        
-def pw_hash(req, config, data):
-    path = get_userfile(config, data["email-token"])
 
-    if not os.path.exists(path):
-        data["error"] = "User not found"
-        raise PolyVinylKnockout("User not found")
-
-    with open(path, "rb") as f:
-        f.seek(0, SEEK_END)
-        
-        if f.tell() == 0:
-            raise PolyVinylNotOk("Empty User File")
-
-        value = lin.latest_r(f, b"salt")
-        password = data["password"].encode("utf-8")
-        del data["password"]
-
-        return bcrypt.hashpw(password, value)
+def pw_hash(req, email_token, password):
+    "Call the Auth service to validate a password\n"
+    config = req.server.config
+    role = load_role(config, email_token, auth=True)
+    print(role)
+    if isinstance(password, (str)):
+        password = password.encode("utf-8")
+    if role:
+        return bcrypt.hashpw(password, role["salt"])

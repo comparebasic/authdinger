@@ -16,6 +16,7 @@ from ..utils.form import injest, query_set_form, save_form, load
 def save_amend(req, ident, data):
     return save_form(req, ident, data, amend=True)
 
+
 def newsletter(req, indent, data):
     req.server.logger.debug("Newsletter signup {}".format(data))
 
@@ -214,12 +215,13 @@ def pw_auth(req, ident, data):
     "Call the Auth service to validate a password\n"
     config = req.server.config
     if config.get("auth-socket"): 
-        data["email-token"] = lin.quote(data["email"]).decode("utf-8")
-        password_hash = user.pw_hash(req, config, data)
+        email_token = lin.quote(data["email"]).decode("utf-8")
+        password_hash = user.pw_hash(req, email_token, req.form_data["password"])
+        del req.form_data["password"]
 
         cli.query_path(config["auth-socket"], req.server.key, (
             "ident",     
-                "pw_auth={}@email".format(data["email-token"]),
+                "pw_auth={}@email".format(email_token),
             "password-hash",
                 password_hash
         ))
@@ -295,19 +297,14 @@ def pw_set(req, ident, data):
     config = req.server.config
     if config.get("auth-socket"): 
         if req.form_data.get("password"):
-            data["password-hash"] = bcrypt.hashpw(
-                req.form_data["password"].encode("utf-8"), data["salt"])
-            del req.form_data["password"]
-
-        email_token = lin.quote(data["email"]).decode("utf-8")
-        cli.query_path(config["auth-socket"], req.server.key, (
-            "ident", 
-                "pw_set={}@email".format(email_token),
-            "password-hash",
-                data["password-hash"], 
-        ))
-
-        del data["password-hash"]
+            email_token = lin.quote(data["email"]).decode("utf-8")
+            password_hash = user.pw_hash(req, email_token, req.form_data["password"])
+            cli.query_path(config["auth-socket"], req.server.key, (
+                "ident", 
+                    "pw_set={}@email".format(email_token),
+                "password-hash",
+                    password_hash 
+            ))
     else:
         raise PolyVinylNotOk("No Auth Service Defined")
 

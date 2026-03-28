@@ -5,7 +5,7 @@ from .. import lin
 from ..utils.exception import \
      PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain
 from .. import SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
-from ..utils.user import get_userfile
+from ..utils import user 
 from ..utils.token import get_token, rfc822, time_bytes
 
 
@@ -77,19 +77,11 @@ def load(req):
         else:
             raise PolyVinylNotOk("User email-token not found")
 
-    path = get_userfile(config, email_token)
-    keys = config["fields"]["user"]
-
-    try:
-        with open(path, "rb") as f:
-            f.seek(0, SEEK_END)
-            keys = config["fields"]["user"]
-            req.role = lin.map_str_r(f, keys)
-            req.role["email-token"] = email_token
-    except FileNotFoundError:
+    req.role = user.load_role(config, email_token)
+    if req.role:
+        req.session = data
+    else:
         raise PolyVinylNotOk("User not found")
-
-    req.session = data
 
     req.server.logger.warn("Role {} Session {}".format(req.role, req.session))
 
