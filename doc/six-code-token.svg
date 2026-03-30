@@ -33,7 +33,7 @@
      <text x="20" y="20" class="note">// Sha512 of a few text bodies (64 bytes)</text>
      <text x="20" y="40" class="text">&quot;3cd15c23770c03e7efcf0eb1f...&quot;</text>
      
-     <text x="20" y="80" class="note">// Integers from a 3 byte at a time of the sha512 digest</text>
+     <text x="20" y="80" class="note">// Integer array from 3 byte at a time of the sha512 digest</text>
      <text x="20" y="100" class="text">[2324236, 255983, 13569713, ...]</text>
 
      <text x="20" y="140" class="note">// Modulus 9999 of each integer to make it 4 digits</text>
