@@ -2,13 +2,13 @@ import argparse, json, urllib, traceback
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from . import handlers, setup as setup_d
-from .. import chain, lin
-from ..utils.maps import http_messages
 from ..utils.log import GetLogger
 from ..utils.exception import \
      PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain, \
      PolyVinylNotFound, PolyVinylNoAuth
-from ..utils import templ, identifier, form, session, perms, config as config_d
+from ..utils import chain, lin, config as config_d, identifier
+from . import templ, form, session, perms
+from .maps import http_messages
 
 
 class PolyVinylHandler(BaseHTTPRequestHandler):

@@ -1,23 +1,23 @@
 from ..utils.exception import PolyVinylNoAuth
 
+def make_nav(req, ident, data, path):
+    nav_kv = {}
+    for _, nav in req.server.nav.lookup.items():
 
-def session(req, ident, data):
-    if not req.session:
-        raise PolyVinylNoAuth("session", req.session)
+        if nav.perms:
+            try:
+                for inst in nav.perms:
+                    # knockout if permission fails
+                    inst.func(req, ident, data) 
+            except PolyVinylNoAuth:
+                continue
 
+        if nav.path == path:
+            nav_kv[nav.name] = True
+        else:
+            nav_kv[nav.name] = nav.path
 
-def no_session(req, ident, data):
-    if req.session:
-        raise PolyVinylNoAuth("no session")
+    return nav_kv
 
-
-def user(req, ident, data):
-    if req.role.get("user") and req.role["user"] != ident.location:
-        raise PolyVinylNoAuth("Not user", ident)
-
-
-def member(req, ident, data):
-    if req.role.get("group") and req.role["group"].index(ident.location) == -1:
-        raise PolyVinylNoAuth("Not member", ident)
-
-    user(req, ident, data)
+def ident_perm(req, ident):
+    pass 

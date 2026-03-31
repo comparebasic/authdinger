@@ -7,13 +7,13 @@ SEEK_CUR = 1
 SEEK_END = 2
 SESSION_DAYS = 14
 
-from .utils.config import ParseConfig, ParseCli
 from .auth.serve import PolyVinylAuthServer
 from .provider.serve import PolyVinylProviderServer
-from . import chain, lin
+from .utils import chain, lin
+from .utils.config import ParseConfig, ParseCli
 
 __all__ = [
-    "http_messages", "ParseConfig", "ParseCli", \
+    "ParseConfig", "ParseCli", \
     "PolyVinylAuthServer", "PolyVinylProviderServer", \
     "ParseConfig", "ParseCli", "chain", "lin"
 ]

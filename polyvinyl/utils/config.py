@@ -1,6 +1,5 @@
 import argparse, json, os
-from ..utils import identifier
-from ..lin import unquote
+from . import identifier, lin
 
 def ParseConfig(path):
     with open(path, "r") as f:
@@ -30,7 +29,7 @@ def map_keys(keys, items, data):
             if isinstance(keys[k], (str)):
                 ident = identifier.Ident(keys[k])
                 if ident.tag == "unquote":
-                    value = unquote(value)
+                    value = lin.unquote(value)
                 if ident.name:
                     k = ident.name
 

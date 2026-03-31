@@ -1,8 +1,8 @@
 import base64, hmac, hashlib
-from . import BSTREAM_MAX, SEEK_END, SEEK_CUR, SEEK_START
-from .utils import identifier
-from .utils.exception import PolyVinylError, PolyVinylNotOk
-from .utils import config as config_d
+from .. import BSTREAM_MAX, SEEK_END, SEEK_CUR, SEEK_START
+from ..utils import identifier
+from ..utils.exception import PolyVinylError, PolyVinylNotOk
+from ..utils import config as config_d
 
 def quote(s):
     b = bytearray()

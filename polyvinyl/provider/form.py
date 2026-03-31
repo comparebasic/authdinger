@@ -1,8 +1,9 @@
 import urllib, json, os, time
 
-from .. import lin, SEEK_END
-from ..utils import identifier, config as config_d, token as token_d, user, templ
+from . import form, user, templ
+from ..utils import lin, identifier, config as config_d, token as token_d
 from ..utils.exception import PolyVinylNotOk, PolyVinylError
+from .. import  SEEK_END
 
 html_tag_templ_ident = identifier.Ident("content=form_html_tag.format@inc")
 button_templ_ident = identifier.Ident("content=form_button.format@inc")

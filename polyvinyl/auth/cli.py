@@ -1,5 +1,5 @@
 import socket
-from .. import lin
+from ..utils import lin
 from ..utils.exception import PolyVinylNotOk
 
 ENC = "hmac-concat"

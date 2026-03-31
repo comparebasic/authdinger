@@ -1,6 +1,7 @@
 import os, types
-from .utils import identifier, user
-from .utils.exception import \
+from . import identifier
+from ..provider import user
+from .exception import \
     PolyVinylNotOk, PolyVinylKnockout, PolyVinylError, PolyVinylReChain, PolyVinylNoAuth
 
 class Inst(object):

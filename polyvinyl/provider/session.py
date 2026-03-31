@@ -1,12 +1,11 @@
 import time, os
 from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
-from .. import lin
-from ..utils.exception import \
-     PolyVinylNotOk, PolyVinylError, PolyVinylKnockout, PolyVinylReChain
+from . import user
 from .. import SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
-from ..utils import user 
+from ..utils import lin
 from ..utils.token import get_text_token, rfc822, time_bytes
+from ..utils.exception import PolyVinylNotOk, PolyVinylError, PolyVinylKnockout
 
 
 def redir(req, location):

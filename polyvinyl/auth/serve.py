@@ -1,10 +1,9 @@
 import socketserver, argparse, json, os, select, stat
 
 from . import handlers, cli
-from .. import lin
 from ..utils.log import GetLogger
 from ..utils.exception import PolyVinylNotOk, PolyVinylError
-from ..utils import identifier
+from ..utils import identifier, lin
 
 class PolyVinylAuthHandler(socketserver.StreamRequestHandler):
 

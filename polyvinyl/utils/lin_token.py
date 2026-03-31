@@ -1,7 +1,7 @@
 import os, time
-from ..utils import token as token_d, config as config_d
-from ..utils.exception import PolyVinylError, PolyVinylNotOk
-from .. import lin, SEEK_END, SEEK_START
+from . import token as token_d, config as config_d, lin
+from .exception import PolyVinylError, PolyVinylNotOk
+from .. import SEEK_END, SEEK_START
 
 def make(path, content):
     if os.path.exists(path):

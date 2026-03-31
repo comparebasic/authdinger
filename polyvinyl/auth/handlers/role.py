@@ -1,7 +1,6 @@
 import os
-from ... import lin
+from ...utils import lin, lin_token
 from ...utils.exception import PolyVinylNotOk
-from ...utils import lin_token
 from . import dir as dir_d
 
 

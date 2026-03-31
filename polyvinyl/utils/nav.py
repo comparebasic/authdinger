@@ -1,5 +1,5 @@
-from ..chain import Inst
-from ..utils import identifier
+from . import identifier
+from .chain import Inst
 
 class Nav(object):
     def __init__(self, nav, lookup):

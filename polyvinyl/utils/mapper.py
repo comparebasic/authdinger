@@ -1,23 +1,5 @@
 from ..utils.exception import PolyVinylError, PolyVinylKnockout
 
-http_messages = {
-    0: "Error",
-    200: "Ok",
-    500: "Server error",
-    403: "Forbidden",
-    404: "Not found",
-    302: "Temporary redirect"
-}
-
-mime_map = {
-    "css": "text/css",
-    "js": "text/javascript",
-    "format": "text/html",
-    "html": "text/html",
-    "txt": "text/plain",
-    "json": "application/json"
-}
-
 def kv_from_ident(ident):
     kv = {}
     for field in ident.name.split(","):
@@ -45,5 +27,3 @@ def map(kv, source, dest):
             if not source.get(v):
                 raise PolyVinylKnockout("Field not found for query {}".format(v))
             dest[k] = source[v]
-
-

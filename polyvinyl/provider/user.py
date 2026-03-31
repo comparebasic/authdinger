@@ -1,8 +1,9 @@
 import os, urllib, random, bcrypt
-from .. import lin, SALT_BYTES, SEEK_END, SEEK_CUR, SEEK_START
+from . import form
 from ..utils.exception import PolyVinylNotOk, PolyVinylKnockout
-from ..utils import form, token as token_d
+from ..utils import token as token_d, lin
 from ..auth import cli
+from .. import SALT_BYTES, SEEK_END, SEEK_CUR, SEEK_START
 
 DETAILS_NAME = "details"
 ROLES_NAME = "roles"
@@ -78,7 +79,8 @@ def create(req, config, data):
     for v in ["forms", "idents"]:
         os.mkdir(os.path.join(dir_path, v))
 
-    add_role(req, identifier.Ident("role={}@{}".format("subscriptions", email_token))
+    role_ident = identifier.Ident("role={}@{}".format("subscriptions", email_token))
+    add_role(req, role_ident)
 
 
 def pw_hash(req, email_token, password):

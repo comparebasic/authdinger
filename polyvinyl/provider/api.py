@@ -1,5 +1,5 @@
 import json, types
-from ..utils.maps import mime_map
+from .maps import mime_map
 
 def handlers(req, mod):
     print(mod)
