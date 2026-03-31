@@ -8,8 +8,7 @@ class Inst(object):
     def __init__(self, ident, mod):
 
         if not hasattr(mod, ident.tag):
-            print(mod)
-            raise ValueError("Missing function for {}".format(ident))
+            raise ValueError("Missing function for {} {}".format(ident, mod))
 
         self.ident = ident
         func = getattr(mod, ident.tag)
@@ -65,6 +64,7 @@ def do_chain(req, chain, data):
                 do_chain(req, re.args[0], data)
             except (PolyVinylNotOk, PolyVinylError) as err:
                 data["error"] = err.args
+                req.server.logger.error("NotOk/Error {}".format(err))
                 raise
         else:
             raise TypeError(h)

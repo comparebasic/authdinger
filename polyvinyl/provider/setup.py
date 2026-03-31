@@ -1,5 +1,4 @@
-from ..utils import nav as nav_d
-from . import perms
+from . import perms, nav as nav_d
 
 def nav(server):
     nav_d.setup_nav(server, perms)

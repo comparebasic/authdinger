@@ -92,7 +92,7 @@ def start(req, data):
         email_token = data["email-token"]
     else:
         if data.get("email"):
-            email_token = lin.quote(data["email"])
+            email_token = lin.quote(data["email"]).decode("utf-8")
         else:
             raise PolyVinylNotOk("User email-token not found")
 

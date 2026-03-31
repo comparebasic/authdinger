@@ -47,7 +47,9 @@ class PolyVinylAuthHandler(socketserver.StreamRequestHandler):
                 raise PolyVinylNotOk("Handler not found {}".format(ident.tag))
 
             try:
-                resp = getattr(handlers, ident.tag)(self, ident, data)
+                func = getattr(handlers, ident.tag)
+                self.server.logger.debug("Func {} Ident {} Data {}".format(ident.tag, ident, data))
+                resp = func(self, ident, data)
             except PolyVinylNotOk:
                 raise
 

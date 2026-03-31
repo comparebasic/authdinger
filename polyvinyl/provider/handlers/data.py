@@ -1,5 +1,5 @@
 "Data minipulation, usually moving form or query string informaion to the data object"
-from .. import maps
+from ...utils import mapper
 from ...utils.exception import PolyVinylNotOk, PolyVinylError, PolyVinylKnockout
 
 def query_eq(req, ident, data):
@@ -64,7 +64,7 @@ def map(req, ident, data):
     "<location> is the object to pull from\n"
 
     config = req.server.config
-    kv = maps.kv_from_ident(ident) 
+    kv = mapper.kv_from_ident(ident) 
 
     match ident.location:
         case "req":
@@ -90,5 +90,5 @@ def map(req, ident, data):
                 case _:
                     raise PolyVinylError("Map source not defined", ident)
 
-    maps.map(kv, source, data)
+    mapper.map(kv, source, data)
     req.server.logger.log("After Map {} {}".format(ident, data))

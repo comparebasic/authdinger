@@ -20,7 +20,7 @@
         ],
         "/auth/login": ["title=Login or Sign Up@Login/Create Account", 
             ["get", "form=login.json@page", "end"],
-            ["post", "map=email,fullname?@form",
+            ["post", "injest=login.json@page",
                 ["form_eq=newsletter@news-or-account", [
                     "register", "save_form=login.json@page", "email=newsletter@emails", "redir=/auth/subscriptions", "end"]
                 ],
@@ -33,7 +33,7 @@
                     ],
                     ["form_eq=send-email@auth-method", 
                         ["form_eq=on@register", "register"],
-                            "get_token", "map=brand,url@config", "set_token_url=/auth/email-sent", "email=auth-token-email@emails",
+                            "get_token=signin", "map=brand,url@config", "set_token_url=/auth/email-sent", "email=auth-token-email@emails",
                                 "content=email-sent.stache@page", "end"]
                     ]
                 ],
@@ -50,13 +50,9 @@
             ["get", "try_auth=session", "session_close", "redir=/auth/", "end"],
             ["redir=/auth/login", "end"]
         ],
-        "/auth/token-login": [ "title=Token Login",
-            ["get", "map=redir,token,email@query", "set_query", "token_consume", "session_start", "redir=/auth/dashboard", "end"],
-            ["get", "content=token-not-found.stache@page", "end"]
-        ],
-        "/auth/email-sent": [ "title=Auth Email Sent",
-            ["get", "map=email,six-code@query", "token_consume_code", "set_query", "session_start", "redir=/auth/dashboard","end"],
-            ["post", "map=email,six-code@form", "token_consume_code", "session_start", "redir=/auth/dashboard","end"],
+        "/auth/code-login": [ "title=Token Login",
+            ["get", "map=code,email@query", "consume_code=signin", "session_start", "redir=/auth/dashboard", "end"],
+            ["post", "map=email,six-code@form", "consume_code=signin", "session_start", "redir=/auth/dashboard","end"],
             ["content=email-sent.stache@page", "end"]
         ],
         "/not-found": ["title=Not Found", "content=not-found.html@page"],

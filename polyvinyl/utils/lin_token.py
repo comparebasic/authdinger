@@ -14,7 +14,7 @@ def make(path, content):
     return token
 
 
-def next_nth(path):
+def next(path):
     with open(path, "rb") as f:
         f.seek(0, SEEK_END)
         latest = lin.next_rec(f, None)
@@ -36,10 +36,10 @@ def next_or_make(path, content):
     n = -1
     if not os.path.exists(path):
         make(path, content)
-        return next_nth(path)
+        return next(path)
 
     if os.path.exists(path):
-        n, six = next_nth(path)
+        n, six = next(path)
         if n >= 1:
             return n, six
         else:
@@ -48,7 +48,7 @@ def next_or_make(path, content):
             os.rename(path, prev)
 
             make(path, content)
-            return next_nth(path)
+            return next(path)
 
 
 def check(path, six: str, consume=False):

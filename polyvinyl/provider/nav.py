@@ -1,5 +1,6 @@
-from . import identifier
-from .chain import Inst
+from ..utils import identifier
+from ..utils.chain import Inst
+
 
 class Nav(object):
     def __init__(self, nav, lookup):
@@ -28,6 +29,7 @@ def setup_nav(server, perms_d):
     lookup = {}
     perms = server.config["perms"]
     idx = 0
+
     for path, chain in server.routes.items():
         h = chain[0]
         first = h.ident

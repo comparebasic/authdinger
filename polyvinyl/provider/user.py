@@ -1,7 +1,7 @@
 import os, urllib, random, bcrypt
 from . import form
 from ..utils.exception import PolyVinylNotOk, PolyVinylKnockout
-from ..utils import token as token_d, lin
+from ..utils import token as token_d, lin, identifier
 from ..auth import cli
 from .. import SALT_BYTES, SEEK_END, SEEK_CUR, SEEK_START
 
@@ -34,11 +34,12 @@ def load_role(config, email_token, auth=True):
     
 
 def add_role(req, ident, data={}):
+    config = req.server.config
     email_token = ident.location
     role_name = ident.name
 
     date = token_d.now()
-    path = get_userfile(config, email_token.decode("utf-8"), ROLES_NAME)
+    path = get_userfile(config, email_token, ROLES_NAME)
     with open(path, "wb+") as f:
 
         six = cli.query_path(config["auth-socket"], req.server.key, (
@@ -51,8 +52,8 @@ def add_role(req, ident, data={}):
 
 
 def create(req, config, data):
-    email_token = lin.quote(data["email"])
-    path = get_userfile(config, email_token.decode("utf-8"), DETAILS_NAME)
+    email_token = lin.quote(data["email"]).decode("utf-8")
+    path = get_userfile(config, email_token, DETAILS_NAME)
 
     req.server.logger.log("Email Token Value {}".format(
         lin.unquote(email_token)))
@@ -70,7 +71,7 @@ def create(req, config, data):
         "salt", data["salt"]]
 
     req.server.logger.log("Create User {}".format(details))
-    dir_path = get_userdir(config, email_token.decode("utf-8")) 
+    dir_path = get_userdir(config, email_token) 
     os.mkdir(dir_path)
 
     with open(path, "wb+") as f:
@@ -79,8 +80,19 @@ def create(req, config, data):
     for v in ["forms", "idents"]:
         os.mkdir(os.path.join(dir_path, v))
 
+    if config.get("auth-socket"): 
+        cli.query_path(config["auth-socket"], req.server.key, (
+            "ident", 
+                "register={}".format(email_token),
+            ))
+
+    else:
+        raise PolyVinylNotOk("No Auth Service Defined")
+
     role_ident = identifier.Ident("role={}@{}".format("subscriptions", email_token))
     add_role(req, role_ident)
+
+    data["email-token"] = email_token
 
 
 def pw_hash(req, email_token, password):
@@ -99,18 +111,18 @@ def get_subscription_urls(req, email_token):
 
     six = cli.query_path(config["auth-socket"], req.server.key, (
         "ident",     
-            "subscription_code={}@email".format(email_token),
+            "get_code=subscriptions@{}".format(email_token),
     ))
 
     manage = "{}/{}?{}".format(
         config["url"], "auth/subscriptions", form.to_query(config, {
-        "email": email_token.encode("utf-8"),
+        "email": email_token,
         "code":six
     }));
 
     unsubscribe = "{}/{}?{}".format(
         config["url"], "auth/subscriptions", form.to_query(config, {
-        "email": email_token.encode("utf-8"),
+        "email": email_token,
         "code": six,
         "unsub": "all"
     }));

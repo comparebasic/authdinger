@@ -9,6 +9,10 @@ class Ident(object):
 
 
     def __init__(self, ident_s):
+
+        if isinstance(ident_s, (bytes)):
+            ident_s = ident_s.decode("utf-8")
+
         self.ident = ident_s
         self.tag = None
         self.name = None

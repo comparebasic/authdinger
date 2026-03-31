@@ -32,7 +32,7 @@ def pw_set(req, ident, data):
         lin.unquote(ident.name)))
 
 
-    dir_path = get_authdir(config, ident.name)
+    dir_path = dir_d.get_authdir(config, ident.name)
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
         os.mkdir(os.path.join(dir_path, "tokens"))

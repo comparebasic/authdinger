@@ -2,23 +2,51 @@
 from .. import user, session, templ, form as form_d, api as api_d
 from ..maps import mime_map
 from ...auth import cli
-from ...utils import chain, lin, token, mapper as map_d,  config as config_d
+from ...utils import chain, lin, token, mapper as map_d, config as config_d
 from ...utils.exception import PolyVinylNotOk, PolyVinylError, PolyVinylKnockout
 
 
 def get_token(req, ident, data):
     "Call the Auth service to create a new token\n"
     config = req.server.config
+    role_name = ident.name
+
+    if not data.get("email-token"):
+        email_token = lin.quote(data["email"]).decode("utf-8")
+    else:
+        email_token = data["email-token"]
 
     if config.get("auth-socket"): 
-        email_token = lin.quote(data["email"]).decode("utf-8")
         six_code = cli.query_path(config["auth-socket"], req.server.key, (
             "ident", 
-                "get_signin_code={}@email".format(email_token),
+                "get_code={}@{}".format(role_name, email_token),
         ))
         data["six-code"] = six_code.decode("utf-8")
     else:
         raise PolyVinylNotOk("No Auth Service Defined")
+
+
+def consume_code(req, ident, data):
+    "Call the Auth service to consume a token code\n"
+    config = req.server.config
+    role_name = ident.name
+
+    if not data.get("email-token"):
+        email_token = lin.quote(data["email"]).decode("utf-8")
+    else:
+        email_token = data["email-token"]
+
+    if config.get("auth-socket"): 
+        cli.query_path(config["auth-socket"], req.server.key, (
+            "ident", 
+                "consume_code={}@{}".format(role_name, email_token),
+            "code",
+                data["code"]
+        ))
+        del data["code"]
+    else:
+        raise PolyVinylNotOk("No Auth Service Defined")
+
 
 def pw_set(req, ident, data):
     "Call the Auth service to set a users password\n"
@@ -43,18 +71,7 @@ def register(req, ident, data):
     try:
         user.create(req, config, data)
     except PolyVinylNotOk as err:
-        raise PolyVinylNotOk("Unable to register", err.args[0])
-
-    if config.get("auth-socket"): 
-        email_token = lin.quote(data["email"]).decode("utf-8")
-        cli.query_path(config["auth-socket"], req.server.key, (
-            "ident", 
-                "register={}@email".format(email_token),
-            ))
-
-        data["email-token"] = email_token
-    else:
-        raise PolyVinylNotOk("No Auth Service Defined")
+        raise PolyVinylNotOk("Unable to register", err)
 
 
 def unsubscribe(req, ident, data):
@@ -77,7 +94,6 @@ def pw_auth(req, ident, data):
         ))
     else:
         raise PolyVinylNotOk("No Auth Service Defined")
-
 
 
 def role(req, ident, data):
@@ -104,23 +120,3 @@ def role(req, ident, data):
         req.role.update(up)
 
         raise PolyVinylNotOk("No Auth Service Defined")
-
-
-def token_consume(req, ident, data):
-    "Call the Auth service to validate and consume a login token\n"
-    config = req.server.config
-    if config.get("auth-socket"): 
-        email_token = lin.quote(data["email"]).decode("utf-8")
-
-        cli.query_path(config["auth-socket"], req.server.key, (
-            "ident",     
-                "token_consume={}@email".format(email_token),
-            "token",
-                data["code"],
-            ))
-
-        del data["token"]
-    else:
-        raise PolyVinylNotOk("No Auth Service Defined")
-
-

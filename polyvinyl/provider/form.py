@@ -48,7 +48,7 @@ def _trans_data(req, data, origin, fields, unpack=False):
                     case "process":
                         match ident.location:
                             case "quote":
-                                value =lin.quote(origin[k]).decode("utf-8")
+                                value = lin.quote(origin[k]).decode("utf-8")
                             case "unquote":
                                 value = lin.unquote(origin[k]).decode("utf-8")
                             case "lower":

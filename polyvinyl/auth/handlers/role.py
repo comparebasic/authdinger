@@ -4,28 +4,51 @@ from ...utils.exception import PolyVinylNotOk
 from . import dir as dir_d
 
 
-def _code(req, ident, data, consume=False):
+def get_code(req, ident, data):
     config = req.server.config
-    req.server.logger.log("Consuming Token {}".format(
-        lin.unquote(ident.location)))
-
     email_token = ident.location
+    role_name = ident.name
+
+    req.server.logger.log("Consuming Token {}".format(
+        lin.unquote(email_token)))
+
     dir_path = dir_d.get_authdir(config, email_token)
     if not os.path.exists(dir_path):
         raise PolyVinylNotOk("User dir not found", dir_path)
 
-    path = dir_d.get_tokenfile(config, email_token, "{}.linr".format(ident.name))
+    path = dir_d.get_tokenfile(config, email_token, "{}.linr".format(role_name))
+    n, code = lin_token.next(path)
+
+    if not code:
+        raise PolyVinylNotOk("Invalid", path)
+
+    return code
+    
+
+def _code(req, ident, data, consume=False):
+    config = req.server.config
+    email_token = ident.location
+    role_name = ident.name
+
+    req.server.logger.log("Consuming Token {}".format(
+        lin.unquote(email_token)))
+
+    dir_path = dir_d.get_authdir(config, email_token)
+    if not os.path.exists(dir_path):
+        raise PolyVinylNotOk("User dir not found", dir_path)
+
+    path = dir_d.get_tokenfile(config, email_token, "{}.linr".format(role_name))
     if not lin_token.check(path, data["six-code"], consume):
         raise PolyVinylNotOk("Invalid", path)
 
     req.server.logger.log("Token Consumed {}".format(path))
 
 
-def role_consume(req, ident, data):
+def consume_code(req, ident, data):
     _code(req, ident, data, consume=True)
 
 
-def role_check(req, ident, data):
+def check_code(req, ident, data):
     _code(req, ident, data, consume=False)
 
 

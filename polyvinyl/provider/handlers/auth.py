@@ -1,6 +1,8 @@
 "Page or asset level permission gates"
 from ...utils.exception import PolyVinylKnockout, PolyVinylNoAuth
-     
+from .. import perms as perms_d
+ 
+
 def auth(req, ident, data):
     if not hasattr(perms_d, ident.name):
         raise PolyVinylNoAuth(ident)
