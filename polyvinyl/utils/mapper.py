@@ -1,5 +1,17 @@
 from ..utils.exception import PolyVinylError, PolyVinylKnockout
 
+
+def arr_to_dict(arr):
+    data = {}
+    for i in range(0, len(arr), 2):
+        data[arr[i]] = arr[i+1]
+
+    if len(arr) % 2:
+        data[arr[-1]] = True
+
+    return data
+
+
 def kv_from_ident(ident):
     kv = {}
     for field in ident.name.split(","):

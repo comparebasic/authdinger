@@ -16,7 +16,7 @@ def get_userfile(config, email_token, name):
     return os.path.join(get_userdir(config, email_token),
                 "{}.linr".format(name))
 
-def load_role(config, email_token, auth=True):
+def load_user(config, email_token, auth=True):
     path = get_userfile(config, email_token, DETAILS_NAME)
     keys = config["fields"]["user"]
 
@@ -31,11 +31,31 @@ def load_role(config, email_token, auth=True):
             return role
     except FileNotFoundError:
         pass
+
+
+def load_roles(config, email_token):
+    path = get_userfile(config, email_token, ROLES_NAME)
+    keys = config["fields"]["user"]
+
+    roles = {} 
+    try:
+        with open(path, "rb") as f:
+            f.seek(0, SEEK_END)
+            while True:
+                rec = lin.next_rec(f, None)
+                if not rec:
+                    break
+
+                roles[rec["role"].decode("utf-8")] = rec["date"]
+
+            return roles
+    except FileNotFoundError:
+        pass
     
 
 def add_role(req, ident, data={}):
     config = req.server.config
-    email_token = data["email-token"] 
+    email_token = req.role["email-token"] 
     role_name = ident.name
 
     date = token_d.now()
@@ -99,12 +119,12 @@ def create(req, config, data):
 def pw_hash(req, email_token, password):
     "Call the Auth service to validate a password\n"
     config = req.server.config
-    role = load_role(config, email_token, auth=True)
-    print(role)
+    user = load_user(config, email_token, auth=True)
     if isinstance(password, (str)):
         password = password.encode("utf-8")
-    if role:
-        return bcrypt.hashpw(password, role["salt"])
+
+    if user:
+        return bcrypt.hashpw(password, user["salt"])
 
 
 def get_subscription_urls(req, email_token):

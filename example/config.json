@@ -26,9 +26,9 @@
                 ],
                 ["form_eq=account@news-or-account", [
                     ["form_eq=password@auth-method", [
-                            ["form_eq=on@register", "register", "email=registration@emails", "save_form=login.json@page", "pw_set", "session_start",
+                            ["form_eq=on@register", "register", "add_role=signin", "email=registration@emails", "save_form=login.json@page", "pw_set", "session_start",
                                 "redir=/auth/dashboard", "end"],
-                            ["form_neq=on@register", "pw_auth", "session_start", "redir=/auth/dashboard", "end"]
+                            ["form_neq=on@register", "pw_auth", "add_role=signin", "session_start", "redir=/auth/dashboard", "end"]
                         ]
                     ],
                     ["form_eq=send-email@auth-method", 
@@ -84,7 +84,7 @@
     },
     "fields": {
         "session": {
-            "email-token": "unquote=email",
+            "email-token": true,
             "start-time": false,
             "session-token": true,
             "fullname": true

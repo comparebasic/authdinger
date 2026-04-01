@@ -36,6 +36,7 @@ if __name__ == "__main__":
     config = ParseConfig(cli.config)
     config["log-color"] = cli.log_color
     config["type"] = cli.type 
+    config["verbose"] = cli.verbose
 
     logger = GetLogger(config)
     if cli.type == "auth" or cli.type == "sasl":

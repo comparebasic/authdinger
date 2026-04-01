@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from dateutil.tz import tzlocal
 from . import user
 from .. import SESSION_DAYS, SEEK_END, SEEK_CUR, SEEK_START
-from ..utils import lin
+from ..utils import lin, mapper
 from ..utils.token import get_text_token, rfc822, time_bytes
 from ..utils.exception import PolyVinylNotOk, PolyVinylError, PolyVinylKnockout
 
@@ -37,6 +37,7 @@ def parse_cookie(cookie):
 
     return data
 
+
 def close(req, ident):
     config = req.server.config
     if not req.cookie.get("Ssid"):
@@ -51,7 +52,6 @@ def close(req, ident):
 
 
 def load(req):
-    data = {}
     config = req.server.config
     if not req.cookie.get("Ssid"):
         return
@@ -62,44 +62,39 @@ def load(req):
     try:
         with open(path, "rb") as f:
             f.seek(0, SEEK_END)
-            data.update(lin.map_str_r(f, keys))
+            req.session.update(lin.map_str_r(f, keys))
     except FileNotFoundError:
         return
-        
-    req.server.logger.log("Session Data {}".format(data))
 
-    if data.get("email-token"):
-        email_token = data["email-token"]
-    else:
-        if data.get("email"):
-            email_token = lin.quote(data["email"]).decode("utf-8")
-        else:
-            raise PolyVinylNotOk("User email-token not found")
+    if not req.session.get("email-token"):
+        req.server.logger.debug("Session {}".format(req.session))
+        raise PolyVinylNotOk("User email-token not found")
 
-    req.role = user.load_role(config, email_token)
-    if req.role:
-        req.session = data
-    else:
+    email_token = req.session["email-token"]
+    req.role = user.load_user(config, email_token)
+    req.role.update(user.load_roles(config, email_token))
+
+    req.server.logger.warn("Loaded User/Role {}".format(req.role))
+
+    if not req.role:
+        req.session = {} 
         raise PolyVinylNotOk("User not found")
 
-    del data["email-token"]
 
-
-def start(req, data):
+def start(req):
     config = req.server.config
 
     email_token = req.role["email-token"]
-
     token = get_text_token(email_token)
     path = os.path.join(config["dirs"]["sessions"],token)
 
-    req.role["start-time"] = time_bytes(time.time())
-    req.role["session-token"] = token
-    req.role["session-expires"] = rfc822(
-            datetime.now(tzlocal())+timedelta(days=SESSION_DAYS))
+    details = ["email-token", email_token,
+        "start-time", time_bytes(time.time()),
+        "session-token", token,
+        "session-expires", rfc822(
+                datetime.now(tzlocal())+timedelta(days=SESSION_DAYS))]
 
     with open(path, "wb+") as f:
-        details = ["email-token", email_token, 
-            "session-token", req.role["session-token"],
-            "start-time", req.role["start-time"]]
         lin.send_rec(f, details) 
+
+    req.session = mapper.arr_to_dict(details)

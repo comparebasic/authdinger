@@ -84,6 +84,7 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
         if self.headers.get("Cookie"):
             self.cookie = session.parse_cookie(self.headers["Cookie"])
             session.load(self)
+            self.server.logger.warn("Cookie {} Session {}".format(self.cookie, self.session))
 
         self.data = {"error": None}
 

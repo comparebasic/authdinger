@@ -77,6 +77,19 @@ def send_rec(stream, arr):
     else:
         stream.write(s)
 
+def ammend_rec(stream, arr):
+    s = bytearray() 
+    for seg in arr:
+        if isinstance(seg, str):
+            seg = bytes(seg, "utf-8")
+        s += seg
+        s += len(seg).to_bytes(2, "big")
+
+    if hasattr(stream, 'send'):
+        stream.send(s)
+    else:
+        stream.write(s)
+
 
 def read_next(stream):
     if hasattr(stream, 'recv'):

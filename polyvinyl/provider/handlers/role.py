@@ -99,7 +99,9 @@ def pw_auth(req, ident, data):
 def add_role(req, ident, data):
     "Call the Auth service to validate and consume a login six-code\n"
     config = req.server.config
-    if req.role.get(ident.name):
+    role_name = ident.name
+    email_token = req.role["email-token"]
+    if req.role.get(role_name):
         return
 
     req.server.logger.debug("Add Role Data {}".format(data))
