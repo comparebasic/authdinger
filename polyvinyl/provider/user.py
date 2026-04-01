@@ -35,13 +35,12 @@ def load_role(config, email_token, auth=True):
 
 def add_role(req, ident, data={}):
     config = req.server.config
-    email_token = ident.location
+    email_token = data["email-token"] 
     role_name = ident.name
 
     date = token_d.now()
     path = get_userfile(config, email_token, ROLES_NAME)
     with open(path, "wb+") as f:
-
         six = cli.query_path(config["auth-socket"], req.server.key, (
             "ident",     
                 "role_make={}@{}".format(role_name, email_token),
@@ -77,6 +76,8 @@ def create(req, config, data):
     with open(path, "wb+") as f:
         lin.send_rec(f, details) 
 
+    req.role["email-token"] = email_token
+
     for v in ["forms", "idents"]:
         os.mkdir(os.path.join(dir_path, v))
 
@@ -86,13 +87,13 @@ def create(req, config, data):
                 "register={}".format(email_token),
             ))
 
+
     else:
         raise PolyVinylNotOk("No Auth Service Defined")
 
     role_ident = identifier.Ident("role={}@{}".format("subscriptions", email_token))
     add_role(req, role_ident)
 
-    data["email-token"] = email_token
 
 
 def pw_hash(req, email_token, password):

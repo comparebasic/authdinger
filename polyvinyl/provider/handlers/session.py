@@ -7,15 +7,13 @@ from ...utils.exception import PolyVinylNotOk, PolyVinylError, PolyVinylKnockout
 
 def session_start(req, ident, data):
     "Start a new session, assuming previous functions have validated the user\n"
-    session.start(req, data)
+    session.start(req)
 
     cookie = "Ssid={}; Expires={}; HttpOnly; Secure; SameSite=Lax;".format(
         data["session-token"], data["session-expires"])
     del data["session-token"]
     del data["session-expires"]
     req.header_stage["Set-Cookie"] = cookie
-
-    req.server.logger.warn("Login Cookie {}".format(cookie))
 
 
 def session_open(req, ident, data):

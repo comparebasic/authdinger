@@ -51,6 +51,7 @@ def redir(req, ident, data):
     else:
         location = ident.name
 
+    req.server.logger.warn("Redir 304 {}".format(location))
     session.redir(req, location)
 
 

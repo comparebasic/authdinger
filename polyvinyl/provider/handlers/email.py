@@ -13,12 +13,10 @@ def email(req, ident, data):
     "Send an email\n"
     config = req.server.config
 
-    if not data.get('email-token'):
-        data["email-token"] = lin.quote(data["email"]).encode("utf-8")
+    if not req.role.get('email-token'):
+        raise PolyVinylNotOk("user not found")
 
-    data.update(user.get_subscription_urls(req, data["email-token"]))
-
-    req.server.logger.debug("Data for email {} {}".format(ident, data))
+    data.update(user.get_subscription_urls(req, req.role["email-token"]))
 
     msg = templ.email_msg_from_ident(req, 
         ident,
@@ -37,7 +35,7 @@ def email(req, ident, data):
 def set_token_url(req, ident, data):
     "Create the token url, usually for inclusion in an email\n"
     if not data.get('email-token'):
-        data["email-token"] = lin.quote(data["email"]).decode("utf-8")
+        raise PolyVinylNotOk("user not found")
     
     data["login-url"] = "{}{}?email={}&six-code={}".format(
-        data["url"], ident.name, data["email-token"], data["six-code"])
+        data["url"], ident.name, req.role["email-token"], data["six-code"])

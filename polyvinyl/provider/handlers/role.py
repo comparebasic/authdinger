@@ -12,9 +12,9 @@ def get_token(req, ident, data):
     role_name = ident.name
 
     if not data.get("email-token"):
-        email_token = lin.quote(data["email"]).decode("utf-8")
-    else:
-        email_token = data["email-token"]
+        raise PolyVinylNotOk("User email-token not found")
+
+    email_token = req.role["email-token"]
 
     if config.get("auth-socket"): 
         six_code = cli.query_path(config["auth-socket"], req.server.key, (
@@ -32,9 +32,9 @@ def consume_code(req, ident, data):
     role_name = ident.name
 
     if not data.get("email-token"):
-        email_token = lin.quote(data["email"]).decode("utf-8")
-    else:
-        email_token = data["email-token"]
+        raise PolyVinylNotOk("User email-token not found")
+
+    email_token = req.role["email-token"]
 
     if config.get("auth-socket"): 
         cli.query_path(config["auth-socket"], req.server.key, (
@@ -94,6 +94,16 @@ def pw_auth(req, ident, data):
         ))
     else:
         raise PolyVinylNotOk("No Auth Service Defined")
+
+
+def add_role(req, ident, data):
+    "Call the Auth service to validate and consume a login six-code\n"
+    config = req.server.config
+    if req.role.get(ident.name):
+        return
+
+    req.server.logger.debug("Add Role Data {}".format(data))
+    user.add_role(req, ident, data)
 
 
 def role(req, ident, data):

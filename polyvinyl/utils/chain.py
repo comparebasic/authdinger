@@ -56,11 +56,11 @@ def do_chain(req, chain, data):
                 raise 
 
         elif isinstance(h, (Inst)):
-            req.server.logger.log("Handle {}".format(h))
+            if req.server.config.get("verbose"):
+                req.server.logger.log("Handle {}".format(h))
             try:
                 h.func(req, h.ident, data)
             except PolyVinylReChain as re:
-                req.server.logger.warn("ReChain {}", re.args[0])
                 do_chain(req, re.args[0], data)
             except (PolyVinylNotOk, PolyVinylError) as err:
                 data["error"] = err.args
@@ -90,7 +90,6 @@ def idents(req, ident, data):
     config = req.server.config
 
     if ident.location == "user":
-        req.server.logger.log(" -> Users Ident {}".format(ident))
         if not req.role.get("email-token"):
             raise PolyVinylNoAuth(ident)
 

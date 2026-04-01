@@ -15,4 +15,4 @@ def try_auth(req, ident, data):
     try:
         auth(req, ident, data)
     except PolyVinylNoAuth as no_auth:
-        raise PolyVinylKnockout(*no_auth.args)
+        raise PolyVinylKnockout(ident, *no_auth.args)

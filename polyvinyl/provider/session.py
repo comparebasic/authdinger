@@ -82,30 +82,24 @@ def load(req):
     else:
         raise PolyVinylNotOk("User not found")
 
-    req.server.logger.warn("Role {} Session {}".format(req.role, req.session))
+    del data["email-token"]
 
 
 def start(req, data):
     config = req.server.config
 
-    if data.get("email-token"):
-        email_token = data["email-token"]
-    else:
-        if data.get("email"):
-            email_token = lin.quote(data["email"]).decode("utf-8")
-        else:
-            raise PolyVinylNotOk("User email-token not found")
+    email_token = req.role["email-token"]
 
     token = get_text_token(email_token)
     path = os.path.join(config["dirs"]["sessions"],token)
 
-    data["start-time"] = time_bytes(time.time())
-    data["session-token"] = token
-    data["session-expires"] = rfc822(
+    req.role["start-time"] = time_bytes(time.time())
+    req.role["session-token"] = token
+    req.role["session-expires"] = rfc822(
             datetime.now(tzlocal())+timedelta(days=SESSION_DAYS))
 
     with open(path, "wb+") as f:
         details = ["email-token", email_token, 
-            "session-token", data["session-token"],
-            "start-time", data["start-time"]]
+            "session-token", req.role["session-token"],
+            "start-time", req.role["start-time"]]
         lin.send_rec(f, details) 

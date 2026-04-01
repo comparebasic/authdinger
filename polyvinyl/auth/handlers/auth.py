@@ -7,11 +7,8 @@ from ...utils import token, lin, lin_token
 
 def pw_auth(req, ident, data):
     config = req.server.config
-    req.server.logger.log("Auth Password {}".format(
-        lin.unquote(ident.name)))
 
     path = dir_d.get_authfile(config, ident.name)
-
     with open(path, "rb") as f:
         f.seek(0, SEEK_END)
         
@@ -20,17 +17,12 @@ def pw_auth(req, ident, data):
 
         value = lin.latest_r(f, b"password-hash")
 
-    req.server.logger.log("Auth Password data {} vs pw {}".format(data, value))
-
     if value != data["password-hash"]:
         raise PolyVinylNotOk("password mismatch")
 
 
 def pw_set(req, ident, data):
     config = req.server.config
-    req.server.logger.log("Setting Password {}".format(
-        lin.unquote(ident.name)))
-
 
     dir_path = dir_d.get_authdir(config, ident.name)
     if not os.path.exists(dir_path):
@@ -46,8 +38,6 @@ def pw_set(req, ident, data):
 
 def register(req, ident, data):
     config = req.server.config
-    req.server.logger.log("Register {}".format(
-        lin.unquote(ident.name)))
 
     dir_path = dir_d.get_authdir(config, ident.name)
     if os.path.exists(dir_path):

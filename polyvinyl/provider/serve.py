@@ -76,10 +76,8 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
 
 
     def _do_STUFF(self):
-        path, _ = form.parseUrl(self.path)
-        self.server.logger.warn("Processing {}".format(path))
-
         config = self.server.config
+        path, _ = form.parseUrl(self.path)
 
         self.query_data = self.parse_query()
         self.form_data = self.parse_form()
@@ -142,8 +140,6 @@ class PolyVinylHandler(BaseHTTPRequestHandler):
 
         if len(self.content) > 0:
             self.wfile.write(bytes(self.content, "utf-8"))
-
-        self.server.logger.warn("Served {}".format(path))
             
 
 class PolyVinylProviderServer(HTTPServer):

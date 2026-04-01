@@ -11,8 +11,6 @@ def query_path(path, key, details):
     except FileNotFoundError as err:
         raise PolyVinylError(err.args[0], err)
 
-    print("Cli {}".format(details))
-
     sig = lin.get_sig(key, details)
     details = [b"aim", ENC] + list(details) + ["end-sig", sig, ""] 
     lin.send(sock, details)

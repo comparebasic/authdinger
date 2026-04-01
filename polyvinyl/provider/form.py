@@ -86,10 +86,8 @@ def _trans_data(req, data, origin, fields, unpack=False):
 
                 data[key] = value
 
-        req.server.logger.debug("Data after injest {}".format(data))
-
     except (KeyError, ValueError) as err:
-        req.server.logger.warn(err)
+        req.server.logger.error(err)
         raise PolyVinylNotOk(err)
         
 
@@ -124,7 +122,7 @@ def save_form(req, ident, data, amend=False):
 
     name = "{}.linr".format(name)
 
-    email_token = data["email-token"]
+    email_token = req.role["email-token"]
     user_dir = user.get_userdir(config, email_token) 
     path = os.path.join(os.path.join(user_dir, "forms"), name)
 
@@ -176,7 +174,6 @@ def query_set_form(req, ident, data):
             fields[k] = v
     
     _trans_data(req, req.form_data, req.query_data, fields)
-    req.server.logger.debug("Data after injest_query_set {} {}".format(req.form_data, req.query_data))
 
 
 def load(req, ident, data):
@@ -197,14 +194,10 @@ def load(req, ident, data):
 
     email_token = None
     if req.role and req.session:
-        email_token = data["email-token"]
+        email_token = req.role["email-token"]
     elif req.role and form_config.get("scope"):
         scope = identifier.Ident(form_config["scope"])
         if scope.location == "role":
-            req.server.logger.debug("Form load scope {} role {}".format(
-                scope,
-                req.role
-            ))
             if req.role.get(scope.tag) and not scope.name or req.role.get(scope.name):
                 email_token = req.role["email-token"]
 
@@ -219,7 +212,6 @@ def load(req, ident, data):
         with open(path, "rb") as f:
             f.seek(0, SEEK_END)
             rec = lin.next_rec(f, None)
-            req.server.logger.debug("Rec {}".format(rec))
 
             _trans_data(req, data, rec, fields, unpack=True) 
     except FileNotFoundError as err:
